@@ -224,46 +224,46 @@ export default class Dress extends BaseCommand {
       const installedSkills: string[] = [];
       const installedPlugins: string[] = [];
 
+      // Phase 1: install plugins and restart gateway
+      if (pluginsToInstall.length > 0) {
+        const pluginTasks = new Listr([
+          {
+            title: 'Installing plugins',
+            task: async () => {
+              for (const plugin of pluginsToInstall) {
+                await this.openclawDriver.pluginInstall(plugin.spec);
+                installedPlugins.push(plugin.id);
+              }
+            },
+          },
+          {
+            title: 'Restarting gateway',
+            task: async () => {
+              await this.openclawDriver.gatewayRestart();
+            },
+          },
+        ], { concurrent: false });
+        await pluginTasks.run();
+
+        // Run interactive setup commands outside Listr so stdio works
+        for (const plugin of pluginsToInstall) {
+          if (!plugin.setupCommand) continue;
+          this.log(`\n${chalk.bold(`Setting up ${plugin.id}...`)}\n`);
+          const [cmd, ...args] = plugin.setupCommand.split(' ');
+          await new Promise<void>((resolve, reject) => {
+            const child = spawn(cmd, args, { stdio: 'inherit' });
+            child.on('close', (code: number) => {
+              if (code === 0) resolve();
+              else reject(new Error(`Plugin setup "${plugin.setupCommand}" exited with code ${code}`));
+            });
+            child.on('error', reject);
+          });
+        }
+        this.log('');
+      }
+
+      // Phase 2: skills, crons, config files
       const tasks = new Listr([
-        {
-          title: 'Installing plugins',
-          skip: () => pluginsToInstall.length === 0,
-          task: async () => {
-            for (const plugin of pluginsToInstall) {
-              await this.openclawDriver.pluginInstall(plugin.spec);
-              installedPlugins.push(plugin.id);
-            }
-          },
-        },
-        {
-          title: 'Restarting gateway',
-          skip: () => pluginsToInstall.length === 0,
-          task: async () => {
-            await this.openclawDriver.gatewayRestart();
-          },
-        },
-        {
-          title: 'Setting up plugins',
-          skip: () => pluginsToInstall.filter((p) => p.setupCommand).length === 0,
-          task: async (_ctx, task) => {
-            for (const plugin of pluginsToInstall) {
-              if (!plugin.setupCommand) continue;
-              task.output = `Running: ${plugin.setupCommand}`;
-              // Run setup command interactively so user can provide input
-              const [cmd, ...args] = plugin.setupCommand.split(' ');
-              await new Promise<void>((resolve, reject) => {
-                const child = spawn(cmd, args, {
-                  stdio: 'inherit',
-                });
-                child.on('close', (code: number) => {
-                  if (code === 0) resolve();
-                  else reject(new Error(`Plugin setup "${plugin.setupCommand}" exited with code ${code}`));
-                });
-                child.on('error', reject);
-              });
-            }
-          },
-        },
         {
           title: 'Installing skills',
           skip: () => resolved.requires.skills.length === 0,
