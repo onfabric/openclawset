@@ -240,7 +240,14 @@ export default class Dress extends BaseCommand {
         // Run interactive setup commands outside Listr so stdio works
         for (const plugin of pluginsToInstall) {
           if (!plugin.setupCommand) continue;
-          this.log(`\n${chalk.bold(`Setting up ${plugin.id}...`)}\n`);
+          this.log(`\n${chalk.bold(`Setting up ${plugin.id}...`)}`);
+          if (plugin.setupNotes.length > 0) {
+            this.log('');
+            for (const note of plugin.setupNotes) {
+              this.log(`  ${chalk.cyan('→')} ${note}`);
+            }
+          }
+          this.log('');
           const [cmd, ...args] = plugin.setupCommand.split(' ');
           await new Promise<void>((resolve, reject) => {
             const child = spawn(cmd, args, { stdio: 'inherit' });
@@ -475,7 +482,7 @@ export default class Dress extends BaseCommand {
       version: entry.version,
       description: '',
       requires: {
-        plugins: entry.applied.plugins.map((p) => ({ id: p, spec: p })),
+        plugins: entry.applied.plugins.map((p) => ({ id: p, spec: p, setupNotes: [] })),
         skills: entry.applied.skills,
         dresses: {},
         optionalDresses: {},

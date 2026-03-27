@@ -12,6 +12,9 @@ export default defineDress({
         id: 'openclaw-fabric',
         spec: '@onfabric/openclaw-fabric',
         setupCommand: 'openclaw fabric setup',
+        setupNotes: [
+          'Get your API key and user ID from https://developer.onfabric.io',
+        ],
       },
     ],
     skills: ['user-check-in', 'deep-user-profile'],

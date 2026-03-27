@@ -67,6 +67,7 @@ export const pluginDefSchema = z.object({
   id: z.string(),
   spec: z.string(),
   setupCommand: z.string().optional(),
+  setupNotes: z.array(z.string()).default([]),
 });
 
 // ---------------------------------------------------------------------------
