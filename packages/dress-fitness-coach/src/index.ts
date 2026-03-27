@@ -3,7 +3,7 @@ import { defineDress, z, cronFromTime, addHours } from '@clawset/core';
 export default defineDress({
   id: 'fitness-coach',
   name: 'Fitness Coach',
-  version: '1.0.0',
+  version: '2.0.0',
   description: 'Sends workout schedule and collects post-training feedback.',
 
   params: {
@@ -30,7 +30,7 @@ export default defineDress({
   },
 
   requires: {
-    skills: ['workout-planner'],
+    skills: ['workout-schedule', 'workout-feedback'],
   },
 
   secrets: {},
@@ -40,14 +40,7 @@ export default defineDress({
       id: 'workout-schedule',
       name: 'Daily workout schedule',
       schedule: cronFromTime(p.workoutTime, p.workDays, p.timezone),
-      prompt: [
-        'You are helping the user with their fitness routine.',
-        'Consult ~/.openclaw/dresses/fitness-coach/GUIDE.md for full context.',
-        '',
-        "Today's task: send the user their workout plan for today via Telegram.",
-        'Keep it concise, motivating, and practical.',
-        'Write a brief summary in today\'s daily memory under the "## Fitness" section.',
-      ].join('\n'),
+      skill: 'workout-schedule',
     },
     {
       id: 'workout-feedback',
@@ -57,19 +50,7 @@ export default defineDress({
         p.workDays,
         p.timezone,
       ),
-      prompt: [
-        'You are helping the user with their fitness routine.',
-        'Consult ~/.openclaw/dresses/fitness-coach/GUIDE.md for full context.',
-        'Read today\'s "## Fitness" section from daily memory for context.',
-        '',
-        'Ask the user via Telegram:',
-        '- Did they complete the workout?',
-        '- How did it feel? (energy, difficulty, any pain)',
-        '- Any notes for next time?',
-        '',
-        'Update the "## Fitness" section in today\'s daily memory with their feedback.',
-        'Be encouraging regardless of outcome.',
-      ].join('\n'),
+      skill: 'workout-feedback',
     },
   ],
 
@@ -83,6 +64,9 @@ export default defineDress({
   ],
 
   files: {
-    guide: './GUIDE.md',
+    skills: {
+      'workout-schedule': './skills/workout-schedule.md',
+      'workout-feedback': './skills/workout-feedback.md',
+    },
   },
 });

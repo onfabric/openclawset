@@ -27,12 +27,12 @@ describe('driver: dress → undress round-trip', () => {
     const fitnessBefore = before.filter((c) => c.name.includes('fitness-coach'));
     expect(fitnessBefore).toHaveLength(0);
 
-    // add two crons
+    // add two crons — skill field auto-generates the --message
     await driver.cronAdd({
       id: 'workout-schedule',
       name: 'Daily workout schedule',
       schedule: '30 21 * * 1,2,3,4,5',
-      prompt: 'Test workout prompt',
+      skill: 'workout-schedule',
       dressId: 'fitness-coach',
     });
 
@@ -40,7 +40,7 @@ describe('driver: dress → undress round-trip', () => {
       id: 'workout-feedback',
       name: 'Post-workout check-in',
       schedule: '30 22 * * 1,2,3,4,5',
-      prompt: 'Test feedback prompt',
+      skill: 'workout-feedback',
       dressId: 'fitness-coach',
     });
 
@@ -65,19 +65,18 @@ describe('driver: dress → undress round-trip', () => {
       id: 'workout-schedule',
       name: 'Daily workout schedule',
       schedule: '30 21 * * 1,2,3,4,5',
-      prompt: 'Test workout prompt',
+      skill: 'workout-schedule',
       dressId: 'fitness-coach',
     });
     await driver.cronAdd({
       id: 'workout-feedback',
       name: 'Post-workout check-in',
       schedule: '30 22 * * 1,2,3,4,5',
-      prompt: 'Test feedback prompt',
+      skill: 'workout-feedback',
       dressId: 'fitness-coach',
     });
 
     // --- undress phase ---
-    // cronRemove internally calls cron list + cron rm for each cron
     const cron1: AppliedCron = {
       qualifiedId: 'fitness-coach:workout-schedule',
       displayName: '[fitness-coach] Daily workout schedule',

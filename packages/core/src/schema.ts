@@ -47,7 +47,7 @@ export const cronDefSchema = z.object({
   id: dressIdSchema,
   name: z.string(),
   schedule: z.string(), // validated after param resolution
-  prompt: z.string(),
+  skill: z.string(), // skill this cron triggers — must exist in requires.skills
 });
 
 // ---------------------------------------------------------------------------
@@ -75,7 +75,7 @@ export const requiresSchema = z.object({
 // ---------------------------------------------------------------------------
 
 export const dressFilesSchema = z.object({
-  guide: z.string().optional(),
+  skills: z.record(z.string(), z.string()).default({}), // skill-name → path to SKILL.md
   templates: z.array(z.string()).default([]),
 });
 

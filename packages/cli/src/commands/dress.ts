@@ -1,6 +1,6 @@
 import { Args, Flags } from '@oclif/core';
 import { existsSync } from 'node:fs';
-import { writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import chalk from 'chalk';
 import { input, number, confirm, checkbox } from '@inquirer/prompts';
@@ -10,6 +10,7 @@ import {
   mergeDresses,
   diffState,
   buildMemoryScaffold,
+  generateDresscode,
   type ResolvedDress,
   type DressEntry,
   type StateFile,
@@ -109,8 +110,6 @@ export default class Dress extends BaseCommand {
     // Merge all dresses including the new one
     const allDresses = new Map<string, ResolvedDress>();
     for (const [id, entry] of Object.entries(state.dresses)) {
-      // Re-resolve existing dresses from their stored params
-      // For now, store the resolved version in the applied state
       allDresses.set(id, this.reconstructResolved(id, entry));
     }
     allDresses.set(dressId, resolved);
@@ -130,17 +129,32 @@ export default class Dress extends BaseCommand {
     const current = this.stateManager.currentApplied(state);
     const diff = diffState(current, desired);
 
+    // Resolve bundled skill files (read content now for later copy)
+    const dressPackageDir = join(this.clawsetPaths.dresses, dressId);
+    const bundledSkills = new Map<string, string>();
+    for (const [skillName, skillPath] of Object.entries(resolved.files.skills)) {
+      const fullPath = join(dressPackageDir, skillPath);
+      if (existsSync(fullPath)) {
+        bundledSkills.set(skillName, await readFile(fullPath, 'utf-8'));
+      } else {
+        this.error(`Bundled skill file not found: ${skillPath} (for skill "${skillName}")`);
+      }
+    }
+
+    // Determine which skills are bundled vs need ClawHub install
+    const clawHubSkills = resolved.requires.skills.filter((s) => !bundledSkills.has(s));
+
     // Show what will happen
     this.log(chalk.bold('Changes:'));
-    if (diff.pluginsToAdd.length > 0) {
-      for (const p of diff.pluginsToAdd) this.log(`  ${chalk.green('+')} plugin: ${p}`);
-    }
     if (diff.skillsToAdd.length > 0) {
-      for (const s of diff.skillsToAdd) this.log(`  ${chalk.green('+')} skill: ${s}`);
+      for (const s of diff.skillsToAdd) {
+        const source = bundledSkills.has(s) ? 'bundled' : 'ClawHub';
+        this.log(`  ${chalk.green('+')} skill: ${s} ${chalk.dim(`(${source})`)}`);
+      }
     }
     if (diff.cronsToAdd.length > 0) {
       for (const c of diff.cronsToAdd) {
-        this.log(`  ${chalk.green('+')} cron: ${c.name} ${chalk.dim(`(${c.schedule})`)}`);
+        this.log(`  ${chalk.green('+')} cron: ${c.name} ${chalk.dim(`(${c.schedule})`)} → skill: ${chalk.cyan(c.skill)}`);
       }
     }
     if (resolved.memory.dailySections.length > 0) {
@@ -148,9 +162,10 @@ export default class Dress extends BaseCommand {
         this.log(`  ${chalk.green('+')} memory section: ${s}`);
       }
     }
-    if (resolved.files.guide) {
-      this.log(`  ${chalk.green('+')} guide: ~/.openclaw/dresses/${dressId}/GUIDE.md`);
+    if (resolved.heartbeat.length > 0) {
+      this.log(`  ${chalk.green('+')} heartbeat: ${resolved.heartbeat.length} rule(s)`);
     }
+    this.log(`  ${chalk.green('+')} dresscode: ~/.openclaw/dresses/${dressId}/DRESSCODE.md`);
     this.log('');
 
     // Dry run exits here
@@ -188,6 +203,20 @@ export default class Dress extends BaseCommand {
 
       const tasks = new Listr([
         {
+          title: 'Installing skills',
+          skip: () => resolved.requires.skills.length === 0,
+          task: async () => {
+            // Copy bundled skills
+            for (const [skillName, content] of bundledSkills) {
+              await this.openclawDriver.skillCopyBundled(skillName, content);
+            }
+            // Install ClawHub skills
+            for (const slug of clawHubSkills) {
+              await this.openclawDriver.skillInstall(slug);
+            }
+          },
+        },
+        {
           title: 'Adding crons',
           skip: () => diff.cronsToAdd.length === 0,
           task: async () => {
@@ -201,18 +230,14 @@ export default class Dress extends BaseCommand {
           },
         },
         {
-          title: 'Copying guide file',
-          skip: () => !resolved.files.guide,
+          title: 'Writing DRESSCODE.md',
           task: async () => {
-            const guideDest = join(this.openclawPaths.dresses, dressId, 'GUIDE.md');
-            const guideSrc = join(this.clawsetPaths.dresses, dressId, 'GUIDE.md');
-            if (existsSync(guideSrc)) {
-              await mkdir(join(this.openclawPaths.dresses, dressId), { recursive: true });
-              const { readFile: rf, copyFile } = await import('node:fs/promises');
-              const content = await rf(guideSrc, 'utf-8');
-              await writeFile(guideDest, content);
-              appliedFiles.push(guideDest);
-            }
+            const dressDir = join(this.openclawPaths.dresses, dressId);
+            await mkdir(dressDir, { recursive: true });
+            const dresscode = generateDresscode(resolved);
+            const dresscodePath = join(dressDir, 'DRESSCODE.md');
+            await writeFile(dresscodePath, dresscode);
+            appliedFiles.push(dresscodePath);
           },
         },
         {
@@ -252,7 +277,7 @@ export default class Dress extends BaseCommand {
         .join('\n');
       const body = [
         resolved.requires.skills.length > 0 ? `skills: ${resolved.requires.skills.join(', ')}` : '',
-        resolved.crons.length > 0 ? `crons: ${resolved.crons.map((c) => c.name).join(', ')}` : '',
+        resolved.crons.length > 0 ? `crons: ${resolved.crons.map((c) => `${c.name} → ${c.skill}`).join(', ')}` : '',
         resolved.memory.dailySections.length > 0 ? `memory: ${resolved.memory.dailySections.join(', ')}` : '',
         paramSummary ? `\nparams:\n${paramSummary}` : '',
       ].filter(Boolean).join('\n');
@@ -282,8 +307,7 @@ export default class Dress extends BaseCommand {
 
     // Load from file if provided
     if (flags['params-file']) {
-      const { readFile: rf } = await import('node:fs/promises');
-      const raw = await rf(flags['params-file'], 'utf-8');
+      const raw = await readFile(flags['params-file'], 'utf-8');
       Object.assign(params, JSON.parse(raw));
     }
 
@@ -312,7 +336,6 @@ export default class Dress extends BaseCommand {
       const schema = def.schema as z.ZodTypeAny;
 
       if (schema instanceof z.ZodArray) {
-        // Array param — use text input with comma separation
         const raw = await input({
           message: def.description,
           default: Array.isArray(def.default) ? (def.default as string[]).join(', ') : String(def.default),
@@ -367,7 +390,7 @@ export default class Dress extends BaseCommand {
           id: cronId,
           name: c.displayName.replace(/^\[.*?\]\s*/, ''),
           schedule: '',
-          prompt: '',
+          skill: '', // not available from stored state, but not needed for merge of existing dresses
         };
       }),
       memory: {
@@ -375,7 +398,7 @@ export default class Dress extends BaseCommand {
         reads: [],
       },
       heartbeat: entry.applied.heartbeatEntries,
-      files: { templates: [] },
+      files: { skills: {}, templates: [] },
     };
   }
 
@@ -384,18 +407,19 @@ export default class Dress extends BaseCommand {
     newDressId: string,
     newDress: ResolvedDress,
   ): Promise<void> {
-    const lines = ['# Active Capabilities\n'];
+    const lines = ['# Active Dresses\n'];
+    lines.push('Read each DRESSCODE.md for details on skills, crons, and memory conventions.\n');
 
     // Existing dresses
-    for (const [id, entry] of Object.entries(state.dresses)) {
+    for (const [id] of Object.entries(state.dresses)) {
       lines.push(`## ${id}`);
-      lines.push(`Guide: ~/.openclaw/dresses/${id}/GUIDE.md\n`);
+      lines.push(`DRESSCODE: ~/.openclaw/dresses/${id}/DRESSCODE.md\n`);
     }
 
     // New dress
     lines.push(`## ${newDressId}`);
     lines.push(newDress.description || newDress.name);
-    lines.push(`Guide: ~/.openclaw/dresses/${newDressId}/GUIDE.md\n`);
+    lines.push(`DRESSCODE: ~/.openclaw/dresses/${newDressId}/DRESSCODE.md\n`);
 
     await writeFile(this.openclawPaths.dressesIndex, lines.join('\n'));
   }

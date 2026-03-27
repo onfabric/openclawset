@@ -92,11 +92,11 @@ export async function installDress(
   const dressDir = join(targetDir, dressId);
   await mkdir(dressDir, { recursive: true });
 
-  // Copy guide file if specified
-  if (dress._input.files?.guide) {
-    const guideSrc = join(sourceDir, dress._input.files.guide);
-    if (existsSync(guideSrc)) {
-      await cp(guideSrc, join(dressDir, 'GUIDE.md'));
+  // Copy bundled skill files
+  for (const [skillName, skillPath] of Object.entries(dress._input.files?.skills ?? {})) {
+    const skillSrc = join(sourceDir, skillPath);
+    if (existsSync(skillSrc)) {
+      await cp(skillSrc, join(dressDir, `${skillName}.md`));
     }
   }
 

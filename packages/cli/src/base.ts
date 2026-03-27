@@ -38,7 +38,9 @@ export abstract class BaseCommand extends Command {
     this.openclawPaths = getOpenClawPaths(config.openclawDir);
     this.stateManager = new StateManager(this.clawsetPaths);
     this.gitManager = new GitManager(this.clawsetPaths.root);
-    this.openclawDriver = new LocalOpenClawDriver();
+    this.openclawDriver = new LocalOpenClawDriver({
+      skillsDir: this.openclawPaths.skills,
+    });
 
     return config;
   }

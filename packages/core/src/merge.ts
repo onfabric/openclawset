@@ -6,7 +6,7 @@ import { DependencyGraph } from './graph.js';
 // ---------------------------------------------------------------------------
 
 export interface MergeConflict {
-  type: 'memory-section' | 'cron-id' | 'secret-key';
+  type: 'memory-section' | 'cron-id' | 'secret-key' | 'cron-missing-skill';
   key: string;
   dresses: [string, string];
   message: string;
@@ -71,7 +71,18 @@ export function mergeDresses(
     }
 
     // Crons — namespaced by dress id, fail on duplicate
+    const dressSkills = new Set(dress.requires.skills);
     for (const cron of dress.crons) {
+      // Every cron must reference a skill declared in requires.skills
+      if (!dressSkills.has(cron.skill)) {
+        conflicts.push({
+          type: 'cron-missing-skill',
+          key: `${dressId}:${cron.id}`,
+          dresses: [dressId, dressId],
+          message: `Cron "${cron.id}" in "${dressId}" references skill "${cron.skill}" which is not in requires.skills`,
+        });
+      }
+
       const qualifiedId = `${dressId}:${cron.id}`;
       if (state.crons.has(qualifiedId)) {
         conflicts.push({

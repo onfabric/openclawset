@@ -1,5 +1,7 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import { mkdir, writeFile, rm } from 'node:fs/promises';
+import { join } from 'node:path';
 import type { OpenClawDriver, CronListEntry, CronDef, AppliedCron } from '@clawset/core';
 import type { ExecFn } from './exec-recorder.js';
 
@@ -14,11 +16,18 @@ export class LocalOpenClawDriver implements OpenClawDriver {
   private bin: string;
   private env: Record<string, string>;
   private execOverride?: ExecFn;
+  private skillsDir?: string;
 
-  constructor(options?: { bin?: string; pathPrefix?: string; execFn?: ExecFn }) {
+  constructor(options?: {
+    bin?: string;
+    pathPrefix?: string;
+    execFn?: ExecFn;
+    skillsDir?: string;
+  }) {
     this.bin = options?.bin ?? 'openclaw';
     this.env = {};
     this.execOverride = options?.execFn;
+    this.skillsDir = options?.skillsDir;
     if (options?.pathPrefix) {
       this.env['PATH'] = `${options.pathPrefix}:${process.env['PATH'] ?? ''}`;
     }
@@ -64,11 +73,12 @@ export class LocalOpenClawDriver implements OpenClawDriver {
 
   async cronAdd(cron: CronDef & { dressId: string }): Promise<void> {
     const name = `[${cron.dressId}] ${cron.name}`;
+    const message = `Follow the instructions in ~/.openclaw/skills/${cron.skill}/SKILL.md`;
     const { exitCode, stderr } = await this.exec([
       'cron', 'add',
       '--name', name,
       '--cron', cron.schedule,
-      '--message', cron.prompt,
+      '--message', message,
       '--session', 'isolated',
       '--announce',
       '--channel', 'last',
@@ -98,6 +108,30 @@ export class LocalOpenClawDriver implements OpenClawDriver {
     if (exitCode !== 0) {
       throw new Error(`Failed to remove cron "${cron.displayName}": ${stderr}`);
     }
+  }
+
+  async skillInstall(slug: string): Promise<void> {
+    const { exitCode, stderr } = await this.exec(['skills', 'install', slug]);
+    if (exitCode !== 0) {
+      throw new Error(`Failed to install skill "${slug}": ${stderr}`);
+    }
+  }
+
+  async skillRemove(name: string): Promise<void> {
+    if (!this.skillsDir) {
+      throw new Error('skillsDir not configured — cannot remove skills');
+    }
+    const skillDir = join(this.skillsDir, name);
+    await rm(skillDir, { recursive: true, force: true });
+  }
+
+  async skillCopyBundled(name: string, content: string): Promise<void> {
+    if (!this.skillsDir) {
+      throw new Error('skillsDir not configured — cannot copy bundled skills');
+    }
+    const skillDir = join(this.skillsDir, name);
+    await mkdir(skillDir, { recursive: true });
+    await writeFile(join(skillDir, 'SKILL.md'), content);
   }
 
   async configGet(key: string): Promise<unknown> {

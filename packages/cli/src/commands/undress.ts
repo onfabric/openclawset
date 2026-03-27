@@ -68,6 +68,7 @@ export default class Undress extends BaseCommand {
     const cronsToRemove = entry.applied.crons;
     const pluginsToRemove = entry.applied.plugins.filter((p) => !othersNeed.plugins.has(p));
     const skillsToRemove = entry.applied.skills.filter((s) => !othersNeed.skills.has(s));
+    const skillsRetained = entry.applied.skills.filter((s) => othersNeed.skills.has(s));
     const pluginsRetained = entry.applied.plugins.filter((p) => othersNeed.plugins.has(p));
 
     // Show what will happen
@@ -78,6 +79,9 @@ export default class Undress extends BaseCommand {
     }
     for (const s of skillsToRemove) {
       this.log(`  ${chalk.red('-')} skill: ${s}`);
+    }
+    for (const s of skillsRetained) {
+      this.log(`  ${chalk.dim('~')} skill: ${s} ${chalk.dim('(retained — used by another dress)')}`);
     }
     for (const p of pluginsToRemove) {
       this.log(`  ${chalk.red('-')} plugin: ${p}`);
@@ -137,6 +141,19 @@ export default class Undress extends BaseCommand {
           },
         },
         {
+          title: 'Removing skills',
+          skip: () => skillsToRemove.length === 0,
+          task: async () => {
+            for (const skill of skillsToRemove) {
+              try {
+                await this.openclawDriver.skillRemove(skill);
+              } catch {
+                // Skill may have been manually removed
+              }
+            }
+          },
+        },
+        {
           title: 'Stripping memory markers',
           skip: () => entry.applied.memorySections.length === 0,
           task: async () => {
@@ -182,9 +199,10 @@ export default class Undress extends BaseCommand {
 
       const body = [
         cronsToRemove.length > 0 ? `removed crons: ${cronsToRemove.map((c) => c.qualifiedId).join(', ')}` : '',
+        skillsToRemove.length > 0 ? `removed skills: ${skillsToRemove.join(', ')}` : '',
+        skillsRetained.length > 0 ? `retained skills: ${skillsRetained.join(', ')}` : '',
         pluginsToRemove.length > 0 ? `removed plugins: ${pluginsToRemove.join(', ')}` : '',
         pluginsRetained.length > 0 ? `retained plugins: ${pluginsRetained.join(', ')}` : '',
-        skillsToRemove.length > 0 ? `removed skills: ${skillsToRemove.join(', ')}` : '',
       ].filter(Boolean).join('\n');
 
       await this.gitManager.commit('revert', args.id, 'undress', body);
@@ -199,8 +217,6 @@ export default class Undress extends BaseCommand {
   }
 
   private findDependants(state: StateFile, dressId: string): string[] {
-    // For now, we don't store dependency info in state entries.
-    // This would be enhanced when dress-to-dress dependencies are tracked.
     return [];
   }
 
@@ -233,14 +249,16 @@ export default class Undress extends BaseCommand {
   }
 
   private async rebuildDressesIndex(state: StateFile, excludeId: string): Promise<void> {
-    const lines = ['# Active Capabilities\n'];
-    for (const [id, entry] of Object.entries(state.dresses)) {
+    const lines = ['# Active Dresses\n'];
+    lines.push('Read each DRESSCODE.md for details on skills, crons, and memory conventions.\n');
+
+    for (const [id] of Object.entries(state.dresses)) {
       if (id === excludeId) continue;
       lines.push(`## ${id}`);
-      lines.push(`Guide: ~/.openclaw/dresses/${id}/GUIDE.md\n`);
+      lines.push(`DRESSCODE: ~/.openclaw/dresses/${id}/DRESSCODE.md\n`);
     }
 
-    if (lines.length === 1) {
+    if (lines.length === 2) {
       lines.push('No dresses active.\n');
     }
 

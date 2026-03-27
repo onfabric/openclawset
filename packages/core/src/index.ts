@@ -32,6 +32,9 @@ export type {
   ClawsetConfig,
 } from './schema.js';
 
+// DRESSCODE generation
+export { generateDresscode } from './dresscode.js';
+
 // Dress definition
 export { defineDress } from './define-dress.js';
 export type { ParamDef, InferParams, DressInput, Dress } from './define-dress.js';

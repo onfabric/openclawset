@@ -32,7 +32,7 @@ export default class Doctor extends BaseCommand {
     for (const [id, entry] of entries) {
       this.log(`  ${chalk.cyan(id)}:`);
 
-      // Check guide file exists
+      // Check applied files exist (DRESSCODE.md, etc.)
       for (const f of entry.applied.files) {
         if (existsSync(f)) {
           this.log(`    ${chalk.green('✓')} ${f}`);

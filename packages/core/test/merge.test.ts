@@ -12,7 +12,7 @@ function makeDress(overrides: Partial<ResolvedDress> & { id: string }): Resolved
     crons: [],
     memory: { dailySections: [], reads: [] },
     heartbeat: [],
-    files: { templates: [] },
+    files: { skills: {}, templates: [] },
     ...overrides,
   };
 }
@@ -22,7 +22,7 @@ describe('mergeDresses', () => {
     const dresses = new Map<string, ResolvedDress>();
     dresses.set('fitness', makeDress({
       id: 'fitness',
-      crons: [{ id: 'workout', name: 'Workout', schedule: '0 8 * * *', prompt: 'Go' }],
+      crons: [{ id: 'workout', name: 'Workout', schedule: '0 8 * * *', skill: 'workout-planner' }],
       memory: { dailySections: ['Fitness'], reads: [] },
       requires: { plugins: [], skills: ['workout-planner'], dresses: {}, optionalDresses: {} },
     }));
@@ -82,13 +82,38 @@ describe('mergeDresses', () => {
     expect(state.plugins.size).toBe(1); // telegram deduplicated
     expect(state.skills.size).toBe(2);
   });
+
+  test('cron referencing undeclared skill produces conflict', () => {
+    const dresses = new Map<string, ResolvedDress>();
+    dresses.set('broken', makeDress({
+      id: 'broken',
+      crons: [{ id: 'task', name: 'Task', schedule: '0 8 * * *', skill: 'nonexistent' }],
+      requires: { plugins: [], skills: [], dresses: {}, optionalDresses: {} },
+    }));
+
+    const { conflicts } = mergeDresses(dresses);
+    expect(conflicts).toHaveLength(1);
+    expect(conflicts[0].type).toBe('cron-missing-skill');
+  });
+
+  test('cron referencing declared skill passes', () => {
+    const dresses = new Map<string, ResolvedDress>();
+    dresses.set('valid', makeDress({
+      id: 'valid',
+      crons: [{ id: 'task', name: 'Task', schedule: '0 8 * * *', skill: 'my-skill' }],
+      requires: { plugins: [], skills: ['my-skill'], dresses: {}, optionalDresses: {} },
+    }));
+
+    const { conflicts } = mergeDresses(dresses);
+    expect(conflicts).toHaveLength(0);
+  });
 });
 
 describe('diffState', () => {
   test('detects new crons to add', () => {
     const current = { crons: new Set<string>(), plugins: new Set<string>(), skills: new Set<string>() };
     const desired: DesiredState = {
-      crons: new Map([['fitness:workout', { id: 'workout', name: 'Workout', schedule: '0 8 * * *', prompt: 'Go', dressId: 'fitness' }]]),
+      crons: new Map([['fitness:workout', { id: 'workout', name: 'Workout', schedule: '0 8 * * *', skill: 'workout-planner', dressId: 'fitness' }]]),
       plugins: new Set(),
       skills: new Set(['workout-planner']),
       memorySections: new Map(),
