@@ -1,0 +1,29 @@
+{
+  "name": "@clawset/dress-fitness-coach",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Sends workout schedule and collects feedback after training",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "files": ["dist", "GUIDE.md"],
+  "keywords": ["clawset", "clawset-dress", "fitness"],
+  "clawset": {
+    "type": "dress",
+    "openclaw": ">=2026.3"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@clawset/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
