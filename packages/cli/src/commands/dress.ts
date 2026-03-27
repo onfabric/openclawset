@@ -287,6 +287,7 @@ export default class Dress extends BaseCommand {
               appliedCrons.push({
                 qualifiedId: `${cron.dressId}:${cron.id}`,
                 displayName: `[${cron.dressId}] ${cron.name}`,
+                skill: cron.skill,
               });
             }
           },
@@ -504,7 +505,7 @@ export default class Dress extends BaseCommand {
           id: cronId,
           name: c.displayName.replace(/^\[.*?\]\s*/, ''),
           schedule: '',
-          skill: '', // not available from stored state, but not needed for merge of existing dresses
+          skill: c.skill ?? '',
         };
       }),
       memory: {

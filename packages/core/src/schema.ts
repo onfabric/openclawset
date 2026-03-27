@@ -125,6 +125,7 @@ export const resolvedDressSchema = z.object({
 export const appliedCronSchema = z.object({
   qualifiedId: z.string(),
   displayName: z.string(),
+  skill: z.string().default(''),
 });
 
 export const appliedStateSchema = z.object({
