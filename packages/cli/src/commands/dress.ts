@@ -659,8 +659,7 @@ export default class Dress extends BaseCommand {
 
   private async discoverDresses(): Promise<Array<{ id: string; name: string; description: string; path: string }>> {
     const results: Array<{ id: string; name: string; description: string; path: string }> = [];
-    // Look for dress-* packages in the packages directory (sibling to cli)
-    const packagesDir = join(this.clawsetPaths.root, 'packages');
+    const packagesDir = join(process.cwd(), 'packages');
     if (!existsSync(packagesDir)) return results;
 
     const { readdir: readdirAsync } = await import('node:fs/promises');
@@ -673,9 +672,9 @@ export default class Dress extends BaseCommand {
 
       try {
         const pkg = JSON.parse(await readFile(pkgJsonPath, 'utf-8'));
-        const dressPath = `./packages/${entry}`;
+        if (pkg.clawset?.type !== 'dress') continue;
 
-        // Try to load the dress to get its ID and name
+        const dressPath = join(packagesDir, entry);
         const { dress } = await installDress(dressPath, this.clawsetPaths.dresses);
         results.push({
           id: dress._input.id,
