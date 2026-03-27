@@ -255,6 +255,13 @@ export default class Dress extends BaseCommand {
           },
         },
         {
+          title: 'Restarting gateway',
+          skip: () => diff.pluginsToAdd.length === 0,
+          task: async () => {
+            await this.openclawDriver.gatewayRestart();
+          },
+        },
+        {
           title: 'Installing skills',
           skip: () => resolved.requires.skills.length === 0,
           task: async () => {
@@ -321,13 +328,6 @@ export default class Dress extends BaseCommand {
           skip: () => this.agentsHasClawsetHook(),
           task: async () => {
             await this.injectAgentsHook();
-          },
-        },
-        {
-          title: 'Restarting gateway',
-          skip: () => diff.pluginsToAdd.length === 0,
-          task: async () => {
-            await this.openclawDriver.gatewayRestart();
           },
         },
         {
