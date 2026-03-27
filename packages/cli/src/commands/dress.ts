@@ -186,6 +186,9 @@ export default class Dress extends BaseCommand {
     if (resolved.heartbeat.length > 0) {
       this.log(`  ${chalk.green('+')} heartbeat: ${resolved.heartbeat.length} rule(s)`);
     }
+    for (const wp of Object.keys(resolved.workspace)) {
+      this.log(`  ${chalk.green('+')} workspace: ~/.openclaw/workspace/${wp}`);
+    }
     this.log(`  ${chalk.green('+')} dresscode: ~/.openclaw/dresses/${dressId}/DRESSCODE.md`);
     this.log('');
 
@@ -303,6 +306,19 @@ export default class Dress extends BaseCommand {
           },
         },
         {
+          title: 'Setting up workspace files',
+          skip: () => Object.keys(resolved.workspace).length === 0,
+          task: async () => {
+            const workspaceDir = join(this.openclawPaths.root, 'workspace');
+            for (const [filePath, initialContent] of Object.entries(resolved.workspace)) {
+              const fullPath = join(workspaceDir, filePath);
+              if (existsSync(fullPath)) continue; // don't overwrite existing files
+              await mkdir(join(fullPath, '..'), { recursive: true });
+              await writeFile(fullPath, initialContent);
+            }
+          },
+        },
+        {
           title: 'Adding crons',
           skip: () => diff.cronsToAdd.length === 0,
           task: async () => {
@@ -364,6 +380,7 @@ export default class Dress extends BaseCommand {
                 memorySections: [...resolved.memory.dailySections],
                 files: appliedFiles,
                 heartbeatEntries: [...resolved.heartbeat],
+                workspaceFiles: Object.keys(resolved.workspace),
               },
             };
             state.dresses[dressId] = entry;
@@ -503,6 +520,7 @@ export default class Dress extends BaseCommand {
       },
       heartbeat: entry.applied.heartbeatEntries,
       files: { skills: {}, templates: [] },
+      workspace: {},
     };
   }
 

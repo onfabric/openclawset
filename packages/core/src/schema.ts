@@ -105,6 +105,9 @@ export const resolvedDressSchema = z.object({
   memory: memoryContractSchema.default({}),
   heartbeat: z.array(z.string()).default([]),
   files: dressFilesSchema.default({}),
+  // Workspace files: path (relative to workspace dir) → initial content
+  // Created on dress if missing, preserved on undress (user data)
+  workspace: z.record(z.string(), z.string()).default({}),
 });
 
 // ---------------------------------------------------------------------------
@@ -120,12 +123,13 @@ export const appliedCronSchema = z.object({
 export const appliedStateSchema = z.object({
   crons: z.array(appliedCronSchema).default([]),
   skills: z.array(z.string()).default([]),
-  installedSkills: z.array(z.string()).default([]), // skills clawset actually installed (vs pre-existing)
+  installedSkills: z.array(z.string()).default([]),
   plugins: z.array(z.string()).default([]),
-  installedPlugins: z.array(z.string()).default([]), // plugins clawset actually installed (vs pre-existing)
+  installedPlugins: z.array(z.string()).default([]),
   memorySections: z.array(z.string()).default([]),
   files: z.array(z.string()).default([]),
   heartbeatEntries: z.array(z.string()).default([]),
+  workspaceFiles: z.array(z.string()).default([]), // workspace paths created by dress (preserved on undress)
 });
 
 export const dressEntrySchema = z.object({

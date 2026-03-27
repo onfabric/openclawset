@@ -70,5 +70,16 @@ export function generateDresscode(dress: ResolvedDress): string {
     lines.push('');
   }
 
+  // Workspace files
+  const workspacePaths = Object.keys(dress.workspace);
+  if (workspacePaths.length > 0) {
+    lines.push('## Workspace');
+    lines.push('');
+    for (const path of workspacePaths) {
+      lines.push(`- \`~/.openclaw/workspace/${path}\``);
+    }
+    lines.push('');
+  }
+
   return lines.join('\n');
 }

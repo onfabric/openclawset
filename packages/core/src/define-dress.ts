@@ -40,6 +40,7 @@ export interface DressInput<P extends Record<string, ParamDef> = Record<string, 
   memory?: Partial<MemoryContract>;
   heartbeat?: string[];
   files?: Partial<DressFiles>;
+  workspace?: Record<string, string>;
 }
 
 // ---------------------------------------------------------------------------
@@ -97,6 +98,7 @@ export function defineDress<P extends Record<string, ParamDef> = Record<string, 
         memory: input.memory ?? {},
         heartbeat: input.heartbeat ?? [],
         files: input.files ?? {},
+        workspace: input.workspace ?? {},
       };
 
       return resolvedDressSchema.parse(raw);

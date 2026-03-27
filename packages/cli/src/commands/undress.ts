@@ -106,6 +106,11 @@ export default class Undress extends BaseCommand {
     for (const f of entry.applied.files) {
       this.log(`  ${chalk.red('-')} file: ${f}`);
     }
+    if ((entry.applied.workspaceFiles ?? []).length > 0) {
+      for (const w of entry.applied.workspaceFiles!) {
+        this.log(`  ${chalk.dim('~')} workspace: ${w} ${chalk.dim('(preserved — user data)')}`);
+      }
+    }
     this.log('');
 
     if (flags['dry-run']) {
@@ -129,6 +134,15 @@ export default class Undress extends BaseCommand {
         this.log('Aborted.');
         return;
       }
+    }
+
+    const workspaceFiles = entry.applied.workspaceFiles ?? [];
+    let deleteWorkspace = false;
+    if (workspaceFiles.length > 0 && !flags.yes) {
+      deleteWorkspace = await confirm({
+        message: 'Delete workspace files? (user data will be lost)',
+        default: false,
+      });
     }
 
     await this.stateManager.lock();
@@ -206,6 +220,20 @@ export default class Undress extends BaseCommand {
                 const items = await readdir(dressDir);
                 if (items.length === 0) await rm(dressDir, { recursive: true });
               } catch { /* ignore */ }
+            }
+          },
+        },
+        {
+          title: 'Removing workspace files',
+          skip: () => !deleteWorkspace || workspaceFiles.length === 0,
+          task: async () => {
+            const { rm } = await import('node:fs/promises');
+            const workspaceDir = join(this.openclawPaths.root, 'workspace');
+            for (const w of workspaceFiles) {
+              const fullPath = join(workspaceDir, w);
+              if (existsSync(fullPath)) {
+                await rm(fullPath, { recursive: true });
+              }
             }
           },
         },

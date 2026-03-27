@@ -13,6 +13,7 @@ function makeDress(overrides: Partial<ResolvedDress> & { id: string }): Resolved
     memory: { dailySections: [], reads: [] },
     heartbeat: [],
     files: { skills: {}, templates: [] },
+    workspace: {},
     ...overrides,
   };
 }

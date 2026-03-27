@@ -23,6 +23,7 @@ describe('generateDresscode', () => {
       memory: { dailySections: ['Fitness'], reads: [] },
       heartbeat: ['If near workout time and no schedule sent, nudge via Telegram.'],
       files: { skills: {}, templates: [] },
+      workspace: {},
     };
 
     const result = generateDresscode(dress);
@@ -52,6 +53,7 @@ describe('generateDresscode', () => {
       memory: { dailySections: [], reads: [] },
       heartbeat: [],
       files: { skills: {}, templates: [] },
+      workspace: {},
     };
 
     const result = generateDresscode(dress);
