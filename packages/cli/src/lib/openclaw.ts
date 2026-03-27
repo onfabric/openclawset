@@ -41,15 +41,16 @@ export class LocalOpenClawDriver implements OpenClawDriver {
     if (exitCode !== 0) return [];
     try {
       const data = JSON.parse(stdout);
-      if (Array.isArray(data)) {
-        return data.map((entry: Record<string, unknown>) => ({
-          name: String(entry['name'] ?? ''),
-          schedule: String(entry['schedule'] ?? ''),
-          enabled: Boolean(entry['enabled']),
-          status: String(entry['status'] ?? 'unknown'),
-        }));
-      }
-      return [];
+      const jobs: Record<string, unknown>[] = Array.isArray(data) ? data : (data.jobs ?? []);
+      return jobs.map((entry) => ({
+        id: String(entry['id'] ?? ''),
+        name: String(entry['name'] ?? ''),
+        schedule: typeof entry['schedule'] === 'object' && entry['schedule']
+          ? String((entry['schedule'] as Record<string, unknown>)['expr'] ?? '')
+          : String(entry['schedule'] ?? ''),
+        enabled: Boolean(entry['enabled']),
+        status: String(entry['status'] ?? 'unknown'),
+      }));
     } catch {
       return [];
     }
@@ -60,8 +61,14 @@ export class LocalOpenClawDriver implements OpenClawDriver {
     const { exitCode, stderr } = await this.exec([
       'cron', 'add',
       '--name', name,
-      '--schedule', cron.schedule,
-      '--prompt', cron.prompt,
+      '--cron', cron.schedule,
+      '--message', cron.prompt,
+      '--session', 'isolated',
+      '--announce',
+      '--channel', 'last',
+      '--thinking', 'low',
+      '--timeout-seconds', '240',
+      '--exact',
     ]);
     if (exitCode !== 0) {
       throw new Error(`Failed to add cron "${name}": ${stderr}`);
@@ -69,7 +76,19 @@ export class LocalOpenClawDriver implements OpenClawDriver {
   }
 
   async cronRemove(name: string): Promise<void> {
-    const { exitCode, stderr } = await this.exec(['cron', 'rm', '--name', name]);
+    // openclaw cron rm requires the job UUID, so look it up by name first
+    const { stdout } = await this.exec(['cron', 'list', '--json']);
+    let id: string | undefined;
+    try {
+      const data = JSON.parse(stdout);
+      const jobs: Record<string, unknown>[] = Array.isArray(data) ? data : (data.jobs ?? []);
+      const job = jobs.find((j) => String(j['name'] ?? '') === name);
+      if (job) id = String(job['id']);
+    } catch { /* ignore parse errors */ }
+    if (!id) {
+      throw new Error(`Cron "${name}" not found`);
+    }
+    const { exitCode, stderr } = await this.exec(['cron', 'rm', id]);
     if (exitCode !== 0) {
       throw new Error(`Failed to remove cron "${name}": ${stderr}`);
     }
