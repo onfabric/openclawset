@@ -48,7 +48,7 @@ export function getOpenClawPaths(root: string): OpenClawPaths {
     dresses: join(root, 'dresses'),
     skills: join(root, 'skills'),
     memory: join(root, 'memory'),
-    heartbeat: join(root, 'HEARTBEAT.md'),
+    heartbeat: join(root, 'workspace', 'HEARTBEAT.md'),
     dressesIndex: join(root, 'DRESSES.md'),
   };
 }
