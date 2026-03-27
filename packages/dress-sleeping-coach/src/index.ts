@@ -29,13 +29,7 @@ export default defineDress({
       {
         id: 'ouraclaw',
         spec: '@rickybloomfield/ouraclaw',
-        config: {},
-        secrets: {
-          accessToken: {
-            description: 'Oura personal access token',
-            url: 'https://cloud.ouraring.com/personal-access-tokens',
-          },
-        },
+        setupCommand: 'openclaw ouraclaw setup',
       },
     ],
     skills: ['sleep-report'],

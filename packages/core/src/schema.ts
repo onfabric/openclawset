@@ -63,22 +63,10 @@ export const memoryContractSchema = z.object({
 // Plugin definition — a required openclaw plugin
 // ---------------------------------------------------------------------------
 
-export const pluginConfigValueSchema = z.union([
-  z.string(),
-  z.number(),
-  z.boolean(),
-]);
-
-export const pluginSecretSchema = z.object({
-  description: z.string(),
-  url: z.string().url().optional(),
-});
-
 export const pluginDefSchema = z.object({
   id: z.string(),
   spec: z.string(),
-  config: z.record(z.string(), pluginConfigValueSchema).default({}),
-  secrets: z.record(z.string(), pluginSecretSchema).default({}),
+  setupCommand: z.string().optional(),
 });
 
 // ---------------------------------------------------------------------------
@@ -171,7 +159,6 @@ export type DressId = z.infer<typeof dressIdSchema>;
 export type AppliedCron = z.infer<typeof appliedCronSchema>;
 export type CronDef = z.infer<typeof cronDefSchema>;
 export type PluginDef = z.infer<typeof pluginDefSchema>;
-export type PluginSecret = z.infer<typeof pluginSecretSchema>;
 export type MemoryContract = z.infer<typeof memoryContractSchema>;
 export type Requires = z.infer<typeof requiresSchema>;
 export type SecretDef = z.infer<typeof secretDefSchema>;

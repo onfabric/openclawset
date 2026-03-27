@@ -10,7 +10,7 @@ describe('generateDresscode', () => {
       version: '2.0.0',
       description: 'Sends workout schedule and collects post-training feedback.',
       requires: {
-        plugins: [{ id: 'telegram', spec: 'telegram', config: {}, secrets: {} }],
+        plugins: [{ id: 'telegram', spec: 'telegram' }],
         skills: ['workout-schedule', 'workout-feedback'],
         dresses: {},
         optionalDresses: {},

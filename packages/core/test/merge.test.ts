@@ -70,11 +70,11 @@ describe('mergeDresses', () => {
     const dresses = new Map<string, ResolvedDress>();
     dresses.set('a', makeDress({
       id: 'a',
-      requires: { plugins: [{ id: 'telegram', spec: 'telegram', config: {}, secrets: {} }], skills: ['oura'], dresses: {}, optionalDresses: {} },
+      requires: { plugins: [{ id: 'telegram', spec: 'telegram' }], skills: ['oura'], dresses: {}, optionalDresses: {} },
     }));
     dresses.set('b', makeDress({
       id: 'b',
-      requires: { plugins: [{ id: 'telegram', spec: 'telegram', config: {}, secrets: {} }], skills: ['reading-list'], dresses: {}, optionalDresses: {} },
+      requires: { plugins: [{ id: 'telegram', spec: 'telegram' }], skills: ['reading-list'], dresses: {}, optionalDresses: {} },
     }));
 
     const { state, conflicts } = mergeDresses(dresses);
