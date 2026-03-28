@@ -159,41 +159,44 @@ export class LocalOpenClawDriver implements OpenClawDriver {
     }
   }
 
+  private parseJsonOutput(raw: string): unknown | undefined {
+    const start = raw.indexOf('{');
+    if (start === -1) return undefined;
+    try {
+      return JSON.parse(raw.slice(start));
+    } catch {
+      return undefined;
+    }
+  }
+
   async pluginIsInstalled(id: string): Promise<boolean> {
     const { stdout, exitCode } = await this.exec(['plugins', 'inspect', id, '--json']);
     if (exitCode !== 0) return false;
-    try {
-      const info = JSON.parse(stdout);
-      // Check the plugin is fully installed (has install record), not just a config entry
-      return !!info.plugin && !!info.install && !info.error;
-    } catch {
-      return false;
-    }
+    const info = this.parseJsonOutput(stdout) as Record<string, unknown> | undefined;
+    if (!info) return false;
+    return !!info.plugin && !!info.install && !info.error;
   }
 
   async pluginConfigSchema(id: string): Promise<PluginConfigSchema | undefined> {
     const { stdout, exitCode } = await this.exec(['plugins', 'inspect', id, '--json']);
     if (exitCode !== 0) return undefined;
-    try {
-      const info = JSON.parse(stdout);
-      const schema = info.plugin?.configJsonSchema;
-      if (!schema?.properties) return undefined;
+    const info = this.parseJsonOutput(stdout) as Record<string, any> | undefined;
+    if (!info) return undefined;
 
-      const kind: string = info.plugin?.kind ?? 'plugin';
-      // Channel plugins store config under channels.<id>, regular plugins under plugins.entries.<id>.config
-      const configPrefix = kind === 'channel'
-        ? `channels.${id}`
-        : `plugins.entries.${id}.config`;
+    const schema = info.plugin?.configJsonSchema;
+    if (!schema?.properties) return undefined;
 
-      return {
-        kind,
-        configPrefix,
-        properties: schema.properties,
-        required: schema.required ?? [],
-      };
-    } catch {
-      return undefined;
-    }
+    const kind: string = info.plugin?.kind ?? 'plugin';
+    const configPrefix = kind === 'channel'
+      ? `channels.${id}`
+      : `plugins.entries.${id}.config`;
+
+    return {
+      kind,
+      configPrefix,
+      properties: schema.properties,
+      required: schema.required ?? [],
+    };
   }
 
   async configSet(key: string, value: string): Promise<void> {
