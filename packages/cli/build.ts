@@ -11,10 +11,12 @@ import pkg from './package.json';
 
 const CURRENT_DIR = import.meta.dir;
 const ROOT_LICENSE_PATH = join(CURRENT_DIR, '../..', 'LICENSE');
+const ROOT_README_PATH = join(CURRENT_DIR, '../..', 'README.md');
 
 const PKG_DIR = join(CURRENT_DIR, 'pkg');
 const DIST_DIR = join(PKG_DIR, 'dist');
 const LICENSE_DESTINATION_PATH = join(PKG_DIR, 'LICENSE');
+const README_DESTINATION_PATH = join(PKG_DIR, 'README.md');
 
 const PACKAGE_ENTRYPOINTS = ['./src/index.ts'];
 
@@ -35,8 +37,9 @@ const buildResult = await Bun.build({
 assertBuildSuccess({ buildResult });
 printBuildOutput({ buildResult });
 
-console.log('📄 Copying license...');
+console.log('📄 Copying license and readme...');
 await copyFile(ROOT_LICENSE_PATH, LICENSE_DESTINATION_PATH);
+await copyFile(ROOT_README_PATH, README_DESTINATION_PATH);
 
 console.log('🔄 Updating package.json...');
 const internalPackageJsonPath = join(CURRENT_DIR, 'package.json');

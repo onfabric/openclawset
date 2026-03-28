@@ -3,7 +3,12 @@
   "tasks": {
     "build": {
       "inputs": ["$TURBO_DEFAULT$", "../../LICENSE"],
-      "outputs": ["pkg/dist/**", "pkg/LICENSE", "pkg/package.json"]
+      "outputs": [
+        "pkg/dist/**",
+        "pkg/LICENSE",
+        "pkg/package.json",
+        "pkg/README.md"
+      ]
     }
   }
 }
