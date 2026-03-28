@@ -1,6 +1,6 @@
 {
   "name": "@onfabric/clawtique",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Goal-oriented wardrobe for your OpenClaw agent",
   "repository": {
     "type": "git",
