@@ -21,7 +21,7 @@ const ROOT_DIR = join(import.meta.dir, '../..');
 
 const REGISTRY_DIR = join(ROOT_DIR, 'registry');
 const DRESSES_DIR = join(REGISTRY_DIR, 'dresses');
-const LINGERIE_DIR = join(REGISTRY_DIR, 'lingerie');
+const LINGERIE_DIR = join(REGISTRY_DIR, 'lingeries');
 
 // Auto-vars injected by the CLI — not declared as params
 const AUTO_VARS = new Set([
