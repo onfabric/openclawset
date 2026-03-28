@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import chalk from 'chalk';
-import { BaseCommand } from '../base.js';
+import { BaseCommand } from '#base.ts';
 
 export default class Doctor extends BaseCommand {
   static override summary = 'Verify all active dresses are healthy';

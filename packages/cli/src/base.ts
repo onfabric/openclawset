@@ -1,17 +1,17 @@
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { Command, Flags } from '@oclif/core';
-import type { ClawtiqueConfig } from './core/index.js';
-import { clawtiqueConfigSchema } from './core/schemas/state.js';
-import { GitManager } from './lib/git.js';
-import { LocalOpenClawDriver } from './lib/openclaw.js';
+import type { ClawtiqueConfig } from '#core/index.ts';
+import { clawtiqueConfigSchema } from '#core/schemas/state.ts';
+import { GitManager } from '#lib/git.ts';
+import { LocalOpenClawDriver } from '#lib/openclaw.ts';
 import {
   type ClawtiquePaths,
   getClawtiquePaths,
   getOpenClawPaths,
   type OpenClawPaths,
-} from './lib/paths.js';
-import { StateManager } from './lib/state.js';
+} from '#lib/paths.ts';
+import { StateManager } from '#lib/state.ts';
 
 export abstract class BaseCommand extends Command {
   static override baseFlags = {

@@ -1,6 +1,6 @@
 import { Args, Flags } from '@oclif/core';
 import chalk from 'chalk';
-import { BaseCommand } from '../base.js';
+import { BaseCommand } from '#base.ts';
 
 export default class Params extends BaseCommand {
   static override summary = 'View or update params for an active dress';

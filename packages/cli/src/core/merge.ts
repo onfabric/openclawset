@@ -1,5 +1,5 @@
-import { DependencyGraph } from './graph.js';
-import type { CronDef, PluginDef, ResolvedDress } from './schema.js';
+import { DependencyGraph } from '#core/graph.ts';
+import type { CronDef, PluginDef, ResolvedDress } from '#core/schema.ts';
 
 // ---------------------------------------------------------------------------
 // Conflict types

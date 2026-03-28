@@ -6,8 +6,8 @@ import { checkbox, confirm, input, select } from '@inquirer/prompts';
 import { Args, Flags } from '@oclif/core';
 import chalk from 'chalk';
 import { Listr } from 'listr2';
-import { BaseCommand } from '../base.js';
-import type { DressJson, LingerieJson, Weekday } from '../core/index.js';
+import { BaseCommand } from '#base.ts';
+import type { DressJson, LingerieJson, Weekday } from '#core/index.ts';
 import {
   type AppliedCron,
   type DressEntry,
@@ -18,14 +18,14 @@ import {
   type ResolvedDress,
   type StateFile,
   wrapSection,
-} from '../core/index.js';
+} from '#core/index.ts';
 import {
   type CompiledDress,
   type CronScheduleChoice,
   compileDress,
   validateDress,
-} from '../lib/compile.js';
-import { createRegistryProvider, type RegistryProvider } from '../lib/registry.js';
+} from '#lib/compile.ts';
+import { createRegistryProvider, type RegistryProvider } from '#lib/registry.ts';
 
 const ALL_DAYS: Weekday[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 

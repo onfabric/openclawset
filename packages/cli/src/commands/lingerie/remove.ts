@@ -2,8 +2,8 @@ import { confirm, select } from '@inquirer/prompts';
 import { Args, Flags } from '@oclif/core';
 import chalk from 'chalk';
 import { Listr } from 'listr2';
-import { BaseCommand } from '../../base.js';
-import type { StateFile } from '../../core/index.js';
+import { BaseCommand } from '#base.ts';
+import type { StateFile } from '#core/index.ts';
 
 export default class LingerieRemove extends BaseCommand {
   static override summary = 'Remove shared lingerie (uninstalls plugins if no dress depends on it)';

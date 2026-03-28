@@ -5,8 +5,8 @@ import { confirm, select } from '@inquirer/prompts';
 import { Args, Flags } from '@oclif/core';
 import chalk from 'chalk';
 import { Listr } from 'listr2';
-import { BaseCommand } from '../base.js';
-import { removeSection, type StateFile, stripMarkers } from '../core/index.js';
+import { BaseCommand } from '#base.ts';
+import { removeSection, type StateFile, stripMarkers } from '#core/index.ts';
 
 export default class Undress extends BaseCommand {
   static override summary = 'Deactivate a dress and remove its config (data persists)';

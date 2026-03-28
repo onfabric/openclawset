@@ -8,7 +8,7 @@ export type {
   SkillJson,
   SkillParam,
   Weekday,
-} from './dress-json.js';
+} from '#core/schemas/dress-json.ts';
 export {
   cronJsonSchema,
   dressIdSchema,
@@ -20,11 +20,15 @@ export {
   semverSchema,
   skillJsonSchema,
   skillParamSchema,
-} from './dress-json.js';
-export type { LingerieJson } from './lingerie-json.js';
-export { lingerieJsonSchema } from './lingerie-json.js';
-export type { RegistryDressEntry, RegistryIndex, RegistryLingerieEntry } from './registry.js';
-export { registryIndexSchema } from './registry.js';
+} from '#core/schemas/dress-json.ts';
+export type { LingerieJson } from '#core/schemas/lingerie-json.ts';
+export { lingerieJsonSchema } from '#core/schemas/lingerie-json.ts';
+export type {
+  RegistryDressEntry,
+  RegistryIndex,
+  RegistryLingerieEntry,
+} from '#core/schemas/registry.ts';
+export { registryIndexSchema } from '#core/schemas/registry.ts';
 export type {
   AppliedCron,
   AppliedState,
@@ -33,7 +37,7 @@ export type {
   LingerieApplied,
   LingerieEntry,
   StateFile,
-} from './state.js';
+} from '#core/schemas/state.ts';
 export {
   appliedCronSchema,
   appliedStateSchema,
@@ -42,4 +46,4 @@ export {
   lingerieAppliedSchema,
   lingerieEntrySchema,
   stateFileSchema,
-} from './state.js';
+} from '#core/schemas/state.ts';

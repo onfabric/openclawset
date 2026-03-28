@@ -1,6 +1,6 @@
 import { Flags } from '@oclif/core';
 import chalk from 'chalk';
-import { BaseCommand } from '../../base.js';
+import { BaseCommand } from '#base.ts';
 
 export default class LingerieList extends BaseCommand {
   static override summary = 'List active lingerie';

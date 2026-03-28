@@ -4,9 +4,9 @@ import { join } from 'node:path';
 import { confirm, input } from '@inquirer/prompts';
 import { Command, Flags } from '@oclif/core';
 import chalk from 'chalk';
-import type { ClawtiqueConfig, StateFile } from '../core/index.js';
-import { GitManager } from '../lib/git.js';
-import { getClawtiquePaths, getOpenClawPaths } from '../lib/paths.js';
+import type { ClawtiqueConfig, StateFile } from '#core/index.ts';
+import { GitManager } from '#lib/git.ts';
+import { getClawtiquePaths, getOpenClawPaths } from '#lib/paths.ts';
 
 export default class Init extends Command {
   static override summary = 'Initialize clawtique for an OpenClaw instance';

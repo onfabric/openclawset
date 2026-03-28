@@ -1,17 +1,17 @@
 import { execute } from '@oclif/core';
 
-import DiffCommand from './commands/diff.js';
-import DoctorCommand from './commands/doctor.js';
-import DressCommand from './commands/dress.js';
-import InitCommand from './commands/init.js';
-import LingerieListCommand from './commands/lingerie/list.js';
-import LingerieRemoveCommand from './commands/lingerie/remove.js';
-import LogCommand from './commands/log.js';
-import ParamsCommand from './commands/params.js';
-import RollbackCommand from './commands/rollback.js';
-import StatusCommand from './commands/status.js';
-import UndressCommand from './commands/undress.js';
-import WardrobeCommand from './commands/wardrobe.js';
+import DiffCommand from '#commands/diff.ts';
+import DoctorCommand from '#commands/doctor.ts';
+import DressCommand from '#commands/dress.ts';
+import InitCommand from '#commands/init.ts';
+import LingerieListCommand from '#commands/lingerie/list.ts';
+import LingerieRemoveCommand from '#commands/lingerie/remove.ts';
+import LogCommand from '#commands/log.ts';
+import ParamsCommand from '#commands/params.ts';
+import RollbackCommand from '#commands/rollback.ts';
+import StatusCommand from '#commands/status.ts';
+import UndressCommand from '#commands/undress.ts';
+import WardrobeCommand from '#commands/wardrobe.ts';
 
 // Exported for oclif's explicit command-loading strategy.
 // Set synchronously so the export is live before the first await,

@@ -34,7 +34,7 @@ export const requiresSchema = z
     dresses: z.record(z.string(), z.string()).default({}),
     optionalDresses: z.record(z.string(), z.string()).default({}),
   })
-  .default({});
+  .default({ lingerie: [], plugins: [], dresses: {}, optionalDresses: {} });
 
 // ---------------------------------------------------------------------------
 // Cron defaults — scheduling hints, not actual cron expressions
@@ -108,7 +108,7 @@ export const memoryContractSchema = z
     dailySections: z.array(z.string()).default([]),
     reads: z.array(z.string()).default([]),
   })
-  .default({});
+  .default({ dailySections: [], reads: [] });
 
 // ---------------------------------------------------------------------------
 // Secret definition

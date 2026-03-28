@@ -8,7 +8,7 @@ import {
   lingerieJsonSchema,
   type RegistryIndex,
   registryIndexSchema,
-} from '../core/index.js';
+} from '#core/index.ts';
 
 // ---------------------------------------------------------------------------
 // RegistryProvider interface

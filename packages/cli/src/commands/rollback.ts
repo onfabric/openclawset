@@ -1,7 +1,7 @@
 import { confirm } from '@inquirer/prompts';
 import { Flags } from '@oclif/core';
 import chalk from 'chalk';
-import { BaseCommand } from '../base.js';
+import { BaseCommand } from '#base.ts';
 
 export default class Rollback extends BaseCommand {
   static override summary = 'Undo the last dress/undress operation';

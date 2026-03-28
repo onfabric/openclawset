@@ -1,6 +1,6 @@
 import { Flags } from '@oclif/core';
 import chalk from 'chalk';
-import { BaseCommand } from '../base.js';
+import { BaseCommand } from '#base.ts';
 
 export default class Log extends BaseCommand {
   static override summary = 'Show the history of dress/undress operations';

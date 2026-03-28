@@ -1,5 +1,5 @@
-import type { DressJson, Weekday } from '../core/index.js';
-import { cronFromTime } from '../core/index.js';
+import type { DressJson, Weekday } from '#core/index.ts';
+import { cronFromTime } from '#core/index.ts';
 
 // ---------------------------------------------------------------------------
 // Types for user choices collected during prompting

@@ -12,7 +12,7 @@ const registryDressEntrySchema = z.object({
     .object({
       lingerie: z.array(z.string()).default([]),
     })
-    .default({}),
+    .default({ lingerie: [] }),
   path: z.string(),
 });
 

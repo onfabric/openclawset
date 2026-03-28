@@ -8,8 +8,8 @@ import type {
   CronListEntry,
   OpenClawDriver,
   PluginConfigSchema,
-} from '../core/index.js';
-import type { ExecFn } from './exec-recorder.js';
+} from '#core/index.ts';
+import type { ExecFn } from '#lib/exec-recorder.ts';
 
 const execFileAsync = promisify(execFile);
 

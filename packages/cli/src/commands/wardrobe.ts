@@ -1,7 +1,7 @@
 import { Flags } from '@oclif/core';
 import chalk from 'chalk';
-import { BaseCommand } from '../base.js';
-import { createRegistryProvider } from '../lib/registry.js';
+import { BaseCommand } from '#base.ts';
+import { createRegistryProvider } from '#lib/registry.ts';
 
 export default class Wardrobe extends BaseCommand {
   static override summary = 'List available dresses and their status';

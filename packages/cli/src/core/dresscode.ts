@@ -1,4 +1,4 @@
-import type { ResolvedDress } from './schema.js';
+import type { ResolvedDress } from '#core/schema.ts';
 
 /**
  * Generate a DRESSCODE.md from a resolved dress definition.

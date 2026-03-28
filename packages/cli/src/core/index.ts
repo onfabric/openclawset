@@ -1,13 +1,13 @@
 // Old schemas (still used by merge.ts, dresscode.ts, state.ts, openclaw.ts)
 
 // Cron utilities
-export { addHours, cronFromTime } from './cron-utils.js';
+export { addHours, cronFromTime } from '#core/cron-utils.ts';
 // DRESSCODE generation
-export { generateDresscode } from './dresscode.js';
+export { generateDresscode } from '#core/dresscode.ts';
 // Driver interface
-export type { CronListEntry, OpenClawDriver, PluginConfigSchema } from './driver.js';
+export type { CronListEntry, OpenClawDriver, PluginConfigSchema } from '#core/driver.ts';
 // Dependency graph
-export { DependencyGraph } from './graph.js';
+export { DependencyGraph } from '#core/graph.ts';
 // Memory utilities
 export {
   buildMemoryScaffold,
@@ -16,10 +16,10 @@ export {
   removeSection,
   stripMarkers,
   wrapSection,
-} from './memory.js';
-export type { DesiredState, MergeConflict, StateDiff } from './merge.js';
+} from '#core/memory.ts';
+export type { DesiredState, MergeConflict, StateDiff } from '#core/merge.ts';
 // Merge and diff
-export { diffState, mergeDresses } from './merge.js';
+export { diffState, mergeDresses } from '#core/merge.ts';
 export type {
   AppliedCron,
   AppliedState,
@@ -37,7 +37,7 @@ export type {
   ResolvedDress,
   SecretDef,
   StateFile,
-} from './schema.js';
+} from '#core/schema.ts';
 export {
   appliedCronSchema,
   appliedStateSchema,
@@ -58,7 +58,7 @@ export {
   secretDefSchema,
   semverSchema,
   stateFileSchema,
-} from './schema.js';
+} from '#core/schema.ts';
 export type {
   ClawtiqueConfig as ClawtiqueConfigV2,
   CronJson,
@@ -73,7 +73,7 @@ export type {
   SkillParam,
   StateFile as StateFileV2,
   Weekday,
-} from './schemas/index.js';
+} from '#core/schemas/index.ts';
 // New JSON-based schemas
 export {
   cronJsonSchema,
@@ -82,4 +82,4 @@ export {
   registryIndexSchema,
   skillJsonSchema,
   skillParamSchema,
-} from './schemas/index.js';
+} from '#core/schemas/index.ts';

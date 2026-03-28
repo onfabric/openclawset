@@ -25,5 +25,8 @@
     "@types/proper-lockfile": "^4.1.4",
     "@types/write-file-atomic": "^4.0.3",
     "typescript": "^5.7.0"
+  },
+  "imports": {
+    "#*": "./src/*"
   }
 }

@@ -1,6 +1,6 @@
 import { Flags } from '@oclif/core';
 import chalk from 'chalk';
-import { BaseCommand } from '../base.js';
+import { BaseCommand } from '#base.ts';
 
 export default class Diff extends BaseCommand {
   static override summary = 'Show what clawtique has applied vs the current OpenClaw state';

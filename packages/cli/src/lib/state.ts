@@ -3,9 +3,9 @@ import { mkdir, readFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import lockfile from 'proper-lockfile';
 import writeFileAtomic from 'write-file-atomic';
-import type { DressEntry, StateFile } from '../core/index.js';
-import { stateFileSchema } from '../core/index.js';
-import type { ClawtiquePaths } from './paths.js';
+import type { DressEntry, StateFile } from '#core/index.ts';
+import { stateFileSchema } from '#core/index.ts';
+import type { ClawtiquePaths } from '#lib/paths.ts';
 
 const EMPTY_STATE: StateFile = {
   version: 1,
