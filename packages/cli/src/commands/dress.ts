@@ -61,7 +61,7 @@ export default class Dress extends BaseCommand {
     const { args, flags } = await this.parse(Dress);
     const config = await this.loadConfig();
 
-    const registry = createRegistryProvider(process.cwd());
+    const registry = createRegistryProvider(process.cwd(), this.clawtiquePaths.cache);
     const state = await this.stateManager.load();
 
     // Pick a dress

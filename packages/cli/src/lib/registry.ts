@@ -1,5 +1,5 @@
-import { existsSync } from 'node:fs';
-import { readdir, readFile } from 'node:fs/promises';
+import { existsSync, statSync } from 'node:fs';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
   type DressJson,
@@ -70,6 +70,116 @@ export class LocalRegistryProvider implements RegistryProvider {
 }
 
 // ---------------------------------------------------------------------------
+// GitHubRegistryProvider — fetches from a public GitHub repo
+// ---------------------------------------------------------------------------
+
+const DEFAULT_OWNER = 'onfabric';
+const DEFAULT_REPO = 'clawtique';
+const DEFAULT_BRANCH = 'main';
+const DEFAULT_REGISTRY_PATH = 'registry';
+
+/** Cache TTL: 10 minutes */
+const CACHE_TTL_MS = 10 * 60 * 1000;
+
+export interface GitHubRegistryOptions {
+  owner?: string;
+  repo?: string;
+  branch?: string;
+  registryPath?: string;
+  cacheDir?: string;
+}
+
+export class GitHubRegistryProvider implements RegistryProvider {
+  private baseUrl: string;
+  private cacheDir: string | undefined;
+
+  constructor(opts: GitHubRegistryOptions = {}) {
+    const owner = opts.owner ?? DEFAULT_OWNER;
+    const repo = opts.repo ?? DEFAULT_REPO;
+    const branch = opts.branch ?? DEFAULT_BRANCH;
+    const regPath = opts.registryPath ?? DEFAULT_REGISTRY_PATH;
+    this.baseUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${regPath}`;
+    this.cacheDir = opts.cacheDir;
+  }
+
+  async getIndex(): Promise<RegistryIndex> {
+    const raw = await this.fetchJson(`${this.baseUrl}/registry.json`, 'registry.json');
+    return registryIndexSchema.parse(raw);
+  }
+
+  async getDressJson(dressId: string): Promise<DressJson> {
+    const raw = await this.fetchJson(
+      `${this.baseUrl}/dresses/${dressId}/dress.json`,
+      `dresses/${dressId}/dress.json`,
+    );
+    return dressJsonSchema.parse(raw);
+  }
+
+  async getSkillContent(dressId: string, skillName: string): Promise<string> {
+    return this.fetchText(
+      `${this.baseUrl}/dresses/${dressId}/skills/${skillName}.md`,
+      `dresses/${dressId}/skills/${skillName}.md`,
+    );
+  }
+
+  async getLingerieJson(lingerieId: string): Promise<LingerieJson> {
+    const raw = await this.fetchJson(
+      `${this.baseUrl}/lingerie/${lingerieId}/lingerie.json`,
+      `lingerie/${lingerieId}/lingerie.json`,
+    );
+    return lingerieJsonSchema.parse(raw);
+  }
+
+  async listSkills(dressId: string): Promise<string[]> {
+    // GitHub raw doesn't support directory listing.
+    // Derive skill names from the dress.json skills field instead.
+    const dress = await this.getDressJson(dressId);
+    return Object.keys(dress.skills ?? {});
+  }
+
+  // ---- internal helpers ----------------------------------------------------
+
+  private async fetchText(url: string, cacheKey: string): Promise<string> {
+    const cached = await this.readCache(cacheKey);
+    if (cached !== undefined) return cached;
+
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`);
+    }
+    const text = await res.text();
+    await this.writeCache(cacheKey, text);
+    return text;
+  }
+
+  private async fetchJson(url: string, cacheKey: string): Promise<unknown> {
+    const text = await this.fetchText(url, cacheKey);
+    return JSON.parse(text);
+  }
+
+  private async readCache(key: string): Promise<string | undefined> {
+    if (!this.cacheDir) return undefined;
+    const path = join(this.cacheDir, key);
+    if (!existsSync(path)) return undefined;
+    try {
+      const { mtimeMs } = statSync(path);
+      if (Date.now() - mtimeMs > CACHE_TTL_MS) return undefined;
+      return await readFile(path, 'utf-8');
+    } catch {
+      return undefined;
+    }
+  }
+
+  private async writeCache(key: string, content: string): Promise<void> {
+    if (!this.cacheDir) return;
+    const path = join(this.cacheDir, key);
+    const dir = join(path, '..');
+    await mkdir(dir, { recursive: true });
+    await writeFile(path, content, 'utf-8');
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Detection: find the registry directory
 // ---------------------------------------------------------------------------
 
@@ -78,7 +188,6 @@ export class LocalRegistryProvider implements RegistryProvider {
  * Checks CWD first, then walks up looking for a registry/ with registry.json.
  */
 export function detectLocalRegistry(cwd: string): string | undefined {
-  // Check CWD/registry
   const candidate = join(cwd, 'registry');
   if (existsSync(join(candidate, 'registry.json'))) {
     return candidate;
@@ -88,16 +197,12 @@ export function detectLocalRegistry(cwd: string): string | undefined {
 
 /**
  * Create the appropriate RegistryProvider based on environment.
- * For now, only local is supported. Remote will be added later.
+ * Uses local registry/ if present, otherwise falls back to GitHub.
  */
-export function createRegistryProvider(cwd: string): RegistryProvider {
+export function createRegistryProvider(cwd: string, cacheDir?: string): RegistryProvider {
   const localDir = detectLocalRegistry(cwd);
   if (localDir) {
     return new LocalRegistryProvider(localDir);
   }
-  // TODO: return GitHubRegistryProvider when remote support is added
-  throw new Error(
-    'No local registry found. Remote registry support is not yet available.\n' +
-      'Run this command from the clawtique repository root, or install dresses from a local registry.',
-  );
+  return new GitHubRegistryProvider({ cacheDir });
 }

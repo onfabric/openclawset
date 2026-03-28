@@ -20,7 +20,7 @@ export default class Wardrobe extends BaseCommand {
     const { flags } = await this.parse(Wardrobe);
     await this.loadConfig();
 
-    const registry = createRegistryProvider(process.cwd());
+    const registry = createRegistryProvider(process.cwd(), this.clawtiquePaths.cache);
     const index = await registry.getIndex();
     const state = await this.stateManager.load();
 
