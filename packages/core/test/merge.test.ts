@@ -1,5 +1,5 @@
-import { describe, test, expect } from 'bun:test';
-import { mergeDresses, diffState, type DesiredState } from '../src/merge.js';
+import { describe, expect, test } from 'bun:test';
+import { type DesiredState, diffState, mergeDresses } from '../src/merge.js';
 import type { ResolvedDress } from '../src/schema.js';
 
 function makeDress(overrides: Partial<ResolvedDress> & { id: string }): ResolvedDress {
@@ -21,12 +21,17 @@ function makeDress(overrides: Partial<ResolvedDress> & { id: string }): Resolved
 describe('mergeDresses', () => {
   test('single dress merges cleanly', () => {
     const dresses = new Map<string, ResolvedDress>();
-    dresses.set('fitness', makeDress({
-      id: 'fitness',
-      crons: [{ id: 'workout', name: 'Workout', schedule: '0 8 * * *', skill: 'workout-planner' }],
-      memory: { dailySections: ['Fitness'], reads: [] },
-      requires: { plugins: [], skills: ['workout-planner'], dresses: {}, optionalDresses: {} },
-    }));
+    dresses.set(
+      'fitness',
+      makeDress({
+        id: 'fitness',
+        crons: [
+          { id: 'workout', name: 'Workout', schedule: '0 8 * * *', skill: 'workout-planner' },
+        ],
+        memory: { dailySections: ['Fitness'], reads: [] },
+        requires: { plugins: [], skills: ['workout-planner'], dresses: {}, optionalDresses: {} },
+      }),
+    );
 
     const { state, conflicts } = mergeDresses(dresses);
     expect(conflicts).toHaveLength(0);
@@ -38,14 +43,20 @@ describe('mergeDresses', () => {
 
   test('two dresses with no overlap merge cleanly', () => {
     const dresses = new Map<string, ResolvedDress>();
-    dresses.set('fitness', makeDress({
-      id: 'fitness',
-      memory: { dailySections: ['Fitness'], reads: [] },
-    }));
-    dresses.set('reading', makeDress({
-      id: 'reading',
-      memory: { dailySections: ['Reading'], reads: [] },
-    }));
+    dresses.set(
+      'fitness',
+      makeDress({
+        id: 'fitness',
+        memory: { dailySections: ['Fitness'], reads: [] },
+      }),
+    );
+    dresses.set(
+      'reading',
+      makeDress({
+        id: 'reading',
+        memory: { dailySections: ['Reading'], reads: [] },
+      }),
+    );
 
     const { conflicts } = mergeDresses(dresses);
     expect(conflicts).toHaveLength(0);
@@ -53,14 +64,20 @@ describe('mergeDresses', () => {
 
   test('conflicting memory sections produce a conflict', () => {
     const dresses = new Map<string, ResolvedDress>();
-    dresses.set('a', makeDress({
-      id: 'a',
-      memory: { dailySections: ['Health'], reads: [] },
-    }));
-    dresses.set('b', makeDress({
-      id: 'b',
-      memory: { dailySections: ['Health'], reads: [] },
-    }));
+    dresses.set(
+      'a',
+      makeDress({
+        id: 'a',
+        memory: { dailySections: ['Health'], reads: [] },
+      }),
+    );
+    dresses.set(
+      'b',
+      makeDress({
+        id: 'b',
+        memory: { dailySections: ['Health'], reads: [] },
+      }),
+    );
 
     const { conflicts } = mergeDresses(dresses);
     expect(conflicts).toHaveLength(1);
@@ -69,14 +86,30 @@ describe('mergeDresses', () => {
 
   test('shared skills/plugins are unioned without conflict', () => {
     const dresses = new Map<string, ResolvedDress>();
-    dresses.set('a', makeDress({
-      id: 'a',
-      requires: { plugins: [{ id: 'telegram', spec: 'telegram' }], skills: ['oura'], dresses: {}, optionalDresses: {} },
-    }));
-    dresses.set('b', makeDress({
-      id: 'b',
-      requires: { plugins: [{ id: 'telegram', spec: 'telegram' }], skills: ['reading-list'], dresses: {}, optionalDresses: {} },
-    }));
+    dresses.set(
+      'a',
+      makeDress({
+        id: 'a',
+        requires: {
+          plugins: [{ id: 'telegram', spec: 'telegram' }],
+          skills: ['oura'],
+          dresses: {},
+          optionalDresses: {},
+        },
+      }),
+    );
+    dresses.set(
+      'b',
+      makeDress({
+        id: 'b',
+        requires: {
+          plugins: [{ id: 'telegram', spec: 'telegram' }],
+          skills: ['reading-list'],
+          dresses: {},
+          optionalDresses: {},
+        },
+      }),
+    );
 
     const { state, conflicts } = mergeDresses(dresses);
     expect(conflicts).toHaveLength(0);
@@ -86,11 +119,14 @@ describe('mergeDresses', () => {
 
   test('cron referencing undeclared skill produces conflict', () => {
     const dresses = new Map<string, ResolvedDress>();
-    dresses.set('broken', makeDress({
-      id: 'broken',
-      crons: [{ id: 'task', name: 'Task', schedule: '0 8 * * *', skill: 'nonexistent' }],
-      requires: { plugins: [], skills: [], dresses: {}, optionalDresses: {} },
-    }));
+    dresses.set(
+      'broken',
+      makeDress({
+        id: 'broken',
+        crons: [{ id: 'task', name: 'Task', schedule: '0 8 * * *', skill: 'nonexistent' }],
+        requires: { plugins: [], skills: [], dresses: {}, optionalDresses: {} },
+      }),
+    );
 
     const { conflicts } = mergeDresses(dresses);
     expect(conflicts).toHaveLength(1);
@@ -99,11 +135,14 @@ describe('mergeDresses', () => {
 
   test('cron referencing declared skill passes', () => {
     const dresses = new Map<string, ResolvedDress>();
-    dresses.set('valid', makeDress({
-      id: 'valid',
-      crons: [{ id: 'task', name: 'Task', schedule: '0 8 * * *', skill: 'my-skill' }],
-      requires: { plugins: [], skills: ['my-skill'], dresses: {}, optionalDresses: {} },
-    }));
+    dresses.set(
+      'valid',
+      makeDress({
+        id: 'valid',
+        crons: [{ id: 'task', name: 'Task', schedule: '0 8 * * *', skill: 'my-skill' }],
+        requires: { plugins: [], skills: ['my-skill'], dresses: {}, optionalDresses: {} },
+      }),
+    );
 
     const { conflicts } = mergeDresses(dresses);
     expect(conflicts).toHaveLength(0);
@@ -112,9 +151,24 @@ describe('mergeDresses', () => {
 
 describe('diffState', () => {
   test('detects new crons to add', () => {
-    const current = { crons: new Set<string>(), plugins: new Set<string>(), skills: new Set<string>() };
+    const current = {
+      crons: new Set<string>(),
+      plugins: new Set<string>(),
+      skills: new Set<string>(),
+    };
     const desired: DesiredState = {
-      crons: new Map([['fitness:workout', { id: 'workout', name: 'Workout', schedule: '0 8 * * *', skill: 'workout-planner', dressId: 'fitness' }]]),
+      crons: new Map([
+        [
+          'fitness:workout',
+          {
+            id: 'workout',
+            name: 'Workout',
+            schedule: '0 8 * * *',
+            skill: 'workout-planner',
+            dressId: 'fitness',
+          },
+        ],
+      ]),
       plugins: new Map(),
       skills: new Set(['workout-planner']),
       memorySections: new Map(),

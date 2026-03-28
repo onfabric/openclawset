@@ -1,10 +1,10 @@
-import { readFile, mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { mkdir, readFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
-import writeFileAtomic from 'write-file-atomic';
-import lockfile from 'proper-lockfile';
-import type { StateFile, DressEntry } from '@clawtique/core';
+import type { DressEntry, StateFile } from '@clawtique/core';
 import { stateFileSchema } from '@clawtique/core';
+import lockfile from 'proper-lockfile';
+import writeFileAtomic from 'write-file-atomic';
 import type { ClawtiquePaths } from './paths.js';
 
 const EMPTY_STATE: StateFile = {
@@ -34,15 +34,13 @@ export class StateManager {
   async save(state: StateFile): Promise<void> {
     await mkdir(dirname(this.paths.state), { recursive: true });
     const next: StateFile = { ...state, serial: state.serial + 1 };
-    await writeFileAtomic(this.paths.state, JSON.stringify(next, null, 2) + '\n');
+    await writeFileAtomic(this.paths.state, `${JSON.stringify(next, null, 2)}\n`);
   }
 
   async lock(): Promise<void> {
     await mkdir(dirname(this.paths.lock), { recursive: true });
     // Lock the state file (or directory if it doesn't exist yet)
-    const lockTarget = existsSync(this.paths.state)
-      ? this.paths.state
-      : this.paths.root;
+    const lockTarget = existsSync(this.paths.state) ? this.paths.state : this.paths.root;
     try {
       this.release = await lockfile.lock(lockTarget, {
         stale: 15_000,
@@ -50,7 +48,9 @@ export class StateManager {
       });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      throw new Error(`Could not acquire lock — another clawtique process may be running.\n${message}`);
+      throw new Error(
+        `Could not acquire lock — another clawtique process may be running.\n${message}`,
+      );
     }
   }
 

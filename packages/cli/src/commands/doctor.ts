@@ -1,15 +1,14 @@
-import { Flags } from '@oclif/core';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import chalk from 'chalk';
 import { BaseCommand } from '../base.js';
 
 export default class Doctor extends BaseCommand {
-  static summary = 'Verify all active dresses are healthy';
+  static override summary = 'Verify all active dresses are healthy';
 
-  static examples = ['<%= config.bin %> doctor'];
+  static override examples = ['<%= config.bin %> doctor'];
 
-  static flags = {
+  static override flags = {
     ...BaseCommand.baseFlags,
   };
 
@@ -69,7 +68,9 @@ export default class Doctor extends BaseCommand {
 
       // Report memory sections
       if (entry.applied.memorySections.length > 0) {
-        this.log(`    ${chalk.green('✓')} Memory sections: ${entry.applied.memorySections.join(', ')}`);
+        this.log(
+          `    ${chalk.green('✓')} Memory sections: ${entry.applied.memorySections.join(', ')}`,
+        );
       }
 
       this.log('');

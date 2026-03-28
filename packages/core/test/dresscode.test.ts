@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test';
+import { describe, expect, test } from 'bun:test';
 import { generateDresscode } from '../src/dresscode.js';
 import type { ResolvedDress } from '../src/schema.js';
 
@@ -17,8 +17,18 @@ describe('generateDresscode', () => {
       },
       secrets: {},
       crons: [
-        { id: 'workout-schedule', name: 'Daily workout schedule', schedule: '30 21 * * 1,2,3,4,5', skill: 'workout-schedule' },
-        { id: 'workout-feedback', name: 'Post-workout check-in', schedule: '30 23 * * 1,2,3,4,5', skill: 'workout-feedback' },
+        {
+          id: 'workout-schedule',
+          name: 'Daily workout schedule',
+          schedule: '30 21 * * 1,2,3,4,5',
+          skill: 'workout-schedule',
+        },
+        {
+          id: 'workout-feedback',
+          name: 'Post-workout check-in',
+          schedule: '30 23 * * 1,2,3,4,5',
+          skill: 'workout-feedback',
+        },
       ],
       memory: { dailySections: ['Fitness'], reads: [] },
       heartbeat: ['If near workout time and no schedule sent, nudge via Telegram.'],

@@ -31,17 +31,8 @@ export function wrapSection(dressId: string, content: string): string {
 /**
  * Extract all sections owned by a dress from a memory file.
  */
-export function extractSections(
-  dressId: string,
-  fileContent: string,
-): string[] {
-  const regex = SECTION_REGEX(dressId);
-  const sections: string[] = [];
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(fileContent)) !== null) {
-    sections.push(match[1].trim());
-  }
-  return sections;
+export function extractSections(dressId: string, fileContent: string): string[] {
+  return [...fileContent.matchAll(SECTION_REGEX(dressId))].map((m) => m[1]!.trim());
 }
 
 /**
@@ -59,35 +50,30 @@ export function stripMarkers(dressId: string, fileContent: string): string {
  * Used for heartbeat rules and other config that should disappear on undress.
  */
 export function removeSection(dressId: string, fileContent: string): string {
-  return fileContent
+  return `${fileContent
     .replace(
-      new RegExp(`\\n*${escapeRegex(START_TAG(dressId))}\\n[\\s\\S]*?${escapeRegex(END_TAG(dressId))}\\n?`, 'g'),
+      new RegExp(
+        `\\n*${escapeRegex(START_TAG(dressId))}\\n[\\s\\S]*?${escapeRegex(END_TAG(dressId))}\\n?`,
+        'g',
+      ),
       '',
     )
     .replace(/\n{3,}/g, '\n\n')
-    .trimEnd() + '\n';
+    .trimEnd()}\n`;
 }
 
 /**
  * List all dress IDs that have markers in a memory file.
  */
 export function findDressMarkers(fileContent: string): string[] {
-  const regex = /<!-- clawtique:([a-z][a-z0-9-]*):start -->/g;
-  const ids = new Set<string>();
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(fileContent)) !== null) {
-    ids.add(match[1]);
-  }
-  return [...ids];
+  const matches = fileContent.matchAll(/<!-- clawtique:([a-z][a-z0-9-]*):start -->/g);
+  return [...new Set([...matches].map((m) => m[1]!))];
 }
 
 /**
  * Build initial memory section scaffolding for a dress.
  */
-export function buildMemoryScaffold(
-  dressId: string,
-  sections: string[],
-): string {
+export function buildMemoryScaffold(dressId: string, sections: string[]): string {
   if (sections.length === 0) return '';
   const content = sections.map((s) => `## ${s}\n`).join('\n');
   return wrapSection(dressId, content);

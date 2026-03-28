@@ -8,9 +8,11 @@ const registryDressEntrySchema = z.object({
   name: z.string(),
   version: z.string(),
   description: z.string().default(''),
-  requires: z.object({
-    lingerie: z.array(z.string()).default([]),
-  }).default({}),
+  requires: z
+    .object({
+      lingerie: z.array(z.string()).default([]),
+    })
+    .default({}),
   path: z.string(),
 });
 

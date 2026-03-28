@@ -1,12 +1,12 @@
+import type { DressJson, Weekday } from '@clawtique/core';
 import { cronFromTime } from '@clawtique/core';
-import type { DressJson, CronJson, SkillParam, Weekday } from '@clawtique/core';
 
 // ---------------------------------------------------------------------------
 // Types for user choices collected during prompting
 // ---------------------------------------------------------------------------
 
 export interface CronScheduleChoice {
-  time: string;       // HH:MM
+  time: string; // HH:MM
   days: Weekday[];
   channel?: string;
 }
@@ -15,7 +15,7 @@ export interface CompiledCron {
   id: string;
   dressId: string;
   name: string;
-  schedule: string;   // computed cron expression (UTC)
+  schedule: string; // computed cron expression (UTC)
   skill: string;
   channel: string;
 }
@@ -27,8 +27,8 @@ export interface CompiledDress {
   description: string;
 
   crons: CompiledCron[];
-  bundledSkills: Map<string, string>;    // skillId → compiled .md content
-  clawHubSkills: string[];               // skill IDs to install from ClawHub
+  bundledSkills: Map<string, string>; // skillId → compiled .md content
+  clawHubSkills: string[]; // skill IDs to install from ClawHub
   plugins: DressJson['requires']['plugins'];
   lingerie: string[];
 
@@ -40,9 +40,9 @@ export interface CompiledDress {
 
 export interface CompileInput {
   dress: DressJson;
-  skillContents: Map<string, string>;     // skillId → raw .md content
-  cronSchedules: Record<string, CronScheduleChoice>;  // cronId → user choices
-  skillParams: Record<string, Record<string, unknown>>;  // skillId → param values
+  skillContents: Map<string, string>; // skillId → raw .md content
+  cronSchedules: Record<string, CronScheduleChoice>; // cronId → user choices
+  skillParams: Record<string, Record<string, unknown>>; // skillId → param values
   timezone: string;
 }
 
@@ -68,7 +68,11 @@ function buildAutoVars(dress: DressJson): Record<string, string> {
 
 function isAutoVar(name: string): boolean {
   const autoVarNames = new Set([
-    'dress.id', 'dress.name', 'memory.dailySections', 'memory.reads', 'workspace.root',
+    'dress.id',
+    'dress.name',
+    'memory.dailySections',
+    'memory.reads',
+    'workspace.root',
   ]);
   if (autoVarNames.has(name)) return true;
   return AUTO_VAR_PREFIXES.some((p) => name.startsWith(p));
@@ -114,7 +118,11 @@ export function validateDress(
     if (!dress.skills[cron.skill]) {
       errors.push(`Cron "${cron.id}" references skill "${cron.skill}" which is not in skills`);
     }
-    if (cron.channel && cron.channel !== 'last' && !dress.requires.lingerie.includes(cron.channel)) {
+    if (
+      cron.channel &&
+      cron.channel !== 'last' &&
+      !dress.requires.lingerie.includes(cron.channel)
+    ) {
       errors.push(`Cron "${cron.id}" uses channel "${cron.channel}" not in requires.lingerie`);
     }
   }
@@ -140,7 +148,9 @@ export function validateDress(
 
     for (const param of declaredParams) {
       if (!placeholders.has(param)) {
-        warnings.push(`Skill "${skillId}": param "${param}" is declared but never used as {{${param}}}`);
+        warnings.push(
+          `Skill "${skillId}": param "${param}" is declared but never used as {{${param}}}`,
+        );
       }
     }
   }
@@ -199,7 +209,7 @@ export function compileDress(input: CompileInput): CompiledDress {
       injectionVars[key] = Array.isArray(value) ? value.join(', ') : String(value);
     }
 
-    let compiled = injectVars(rawContent, injectionVars);
+    const compiled = injectVars(rawContent, injectionVars);
 
     // Check for unresolved placeholders
     const unresolved = compiled.match(/\{\{[^}]+\}\}/g);

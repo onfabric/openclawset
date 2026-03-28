@@ -4,9 +4,7 @@ import { z } from 'zod';
 // Primitives
 // ---------------------------------------------------------------------------
 
-const dressIdSchema = z
-  .string()
-  .regex(/^[a-z][a-z0-9-]*$/);
+const dressIdSchema = z.string().regex(/^[a-z][a-z0-9-]*$/);
 
 const weekdaySchema = z.enum(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']);
 

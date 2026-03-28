@@ -1,93 +1,85 @@
 // Old schemas (still used by merge.ts, dresscode.ts, state.ts, openclaw.ts)
-export {
-  dressIdSchema,
-  cronExpressionSchema,
-  semverSchema,
-  paramDefSchema,
-  secretDefSchema,
-  cronDefSchema,
-  pluginDefSchema,
-  memoryContractSchema,
-  requiresSchema,
-  dressFilesSchema,
-  resolvedDressSchema,
-  appliedCronSchema,
-  appliedStateSchema,
-  dressEntrySchema,
-  lingerieDefSchema,
-  lingerieAppliedSchema,
-  lingerieEntrySchema,
-  stateFileSchema,
-  clawtiqueConfigSchema,
-} from './schema.js';
-
-export type {
-  DressId,
-  CronDef,
-  PluginDef,
-  MemoryContract,
-  Requires,
-  SecretDef,
-  DressFiles,
-  ResolvedDress,
-  AppliedCron,
-  AppliedState,
-  DressEntry,
-  LingerieDef,
-  LingerieApplied,
-  LingerieEntry,
-  StateFile,
-  ClawtiqueConfig,
-} from './schema.js';
-
-// DRESSCODE generation
-export { generateDresscode } from './dresscode.js';
-
-// Merge and diff
-export { mergeDresses, diffState } from './merge.js';
-export type { MergeConflict, DesiredState, StateDiff } from './merge.js';
-
-// Dependency graph
-export { DependencyGraph } from './graph.js';
-
-// Memory utilities
-export {
-  wrapSection,
-  extractSections,
-  stripMarkers,
-  removeSection,
-  findDressMarkers,
-  buildMemoryScaffold,
-} from './memory.js';
 
 // Cron utilities
-export { cronFromTime, addHours } from './cron-utils.js';
-
+export { addHours, cronFromTime } from './cron-utils.js';
+// DRESSCODE generation
+export { generateDresscode } from './dresscode.js';
 // Driver interface
-export type { OpenClawDriver, CronListEntry, PluginConfigSchema } from './driver.js';
-
-// New JSON-based schemas
+export type { CronListEntry, OpenClawDriver, PluginConfigSchema } from './driver.js';
+// Dependency graph
+export { DependencyGraph } from './graph.js';
+// Memory utilities
 export {
-  dressJsonSchema,
-  cronJsonSchema,
-  skillJsonSchema,
-  skillParamSchema,
-  lingerieJsonSchema,
-  registryIndexSchema,
-} from './schemas/index.js';
-
+  buildMemoryScaffold,
+  extractSections,
+  findDressMarkers,
+  removeSection,
+  stripMarkers,
+  wrapSection,
+} from './memory.js';
+export type { DesiredState, MergeConflict, StateDiff } from './merge.js';
+// Merge and diff
+export { diffState, mergeDresses } from './merge.js';
 export type {
-  DressJson,
+  AppliedCron,
+  AppliedState,
+  ClawtiqueConfig,
+  CronDef,
+  DressEntry,
+  DressFiles,
+  DressId,
+  LingerieApplied,
+  LingerieDef,
+  LingerieEntry,
+  MemoryContract,
+  PluginDef,
+  Requires,
+  ResolvedDress,
+  SecretDef,
+  StateFile,
+} from './schema.js';
+export {
+  appliedCronSchema,
+  appliedStateSchema,
+  clawtiqueConfigSchema,
+  cronDefSchema,
+  cronExpressionSchema,
+  dressEntrySchema,
+  dressFilesSchema,
+  dressIdSchema,
+  lingerieAppliedSchema,
+  lingerieDefSchema,
+  lingerieEntrySchema,
+  memoryContractSchema,
+  paramDefSchema,
+  pluginDefSchema,
+  requiresSchema,
+  resolvedDressSchema,
+  secretDefSchema,
+  semverSchema,
+  stateFileSchema,
+} from './schema.js';
+export type {
+  ClawtiqueConfig as ClawtiqueConfigV2,
   CronJson,
+  DressEntry as DressEntryV2,
+  DressJson,
+  LingerieEntry as LingerieEntryV2,
+  LingerieJson,
+  RegistryDressEntry,
+  RegistryIndex,
+  RegistryLingerieEntry,
   SkillJson,
   SkillParam,
-  Weekday,
-  LingerieJson,
-  RegistryIndex,
-  RegistryDressEntry,
-  RegistryLingerieEntry,
-  DressEntry as DressEntryV2,
-  LingerieEntry as LingerieEntryV2,
   StateFile as StateFileV2,
-  ClawtiqueConfig as ClawtiqueConfigV2,
+  Weekday,
+} from './schemas/index.js';
+// New JSON-based schemas
+export {
+  cronJsonSchema,
+  dressJsonSchema,
+  lingerieJsonSchema,
+  registryIndexSchema,
+  skillJsonSchema,
+  skillParamSchema,
 } from './schemas/index.js';

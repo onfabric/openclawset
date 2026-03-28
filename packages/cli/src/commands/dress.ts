@@ -1,50 +1,50 @@
-import { Args, Flags } from '@oclif/core';
-import { existsSync } from 'node:fs';
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { join } from 'node:path';
-import chalk from 'chalk';
 import { spawn } from 'node:child_process';
-import { input, confirm, select, checkbox } from '@inquirer/prompts';
-import { Listr } from 'listr2';
+import { existsSync } from 'node:fs';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import type { DressJson, LingerieJson, Weekday } from '@clawtique/core';
 import {
-  mergeDresses,
+  type AppliedCron,
+  type DressEntry,
   diffState,
   generateDresscode,
-  wrapSection,
-  type ResolvedDress,
-  type DressEntry,
-  type StateFile,
-  type AppliedCron,
+  mergeDresses,
   type PluginDef,
+  type ResolvedDress,
+  type StateFile,
+  wrapSection,
 } from '@clawtique/core';
-import type { DressJson, Weekday, LingerieJson, DressEntryV2 } from '@clawtique/core';
+import { checkbox, confirm, input, select } from '@inquirer/prompts';
+import { Args, Flags } from '@oclif/core';
+import chalk from 'chalk';
+import { Listr } from 'listr2';
 import { BaseCommand } from '../base.js';
-import { createRegistryProvider, type RegistryProvider } from '../lib/registry.js';
 import {
+  type CompiledDress,
+  type CronScheduleChoice,
   compileDress,
   validateDress,
-  type CronScheduleChoice,
-  type CompiledDress,
 } from '../lib/compile.js';
+import { createRegistryProvider, type RegistryProvider } from '../lib/registry.js';
 
 const ALL_DAYS: Weekday[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
 export default class Dress extends BaseCommand {
-  static summary = 'Install and activate a dress';
+  static override summary = 'Install and activate a dress';
 
-  static examples = [
+  static override examples = [
     '<%= config.bin %> dress fitness-coach',
     '<%= config.bin %> dress tech-bro-digest --dry-run',
   ];
 
-  static args = {
+  static override args = {
     id: Args.string({
       description: 'Dress ID from the registry',
       required: false,
     }),
   };
 
-  static flags = {
+  static override flags = {
     ...BaseCommand.baseFlags,
     'dry-run': Flags.boolean({
       description: 'Show what would change without applying',
@@ -138,7 +138,7 @@ export default class Dress extends BaseCommand {
           default: true,
         });
         if (!install) {
-          this.log('  You wouldn\'t go out without lingerie, would you?');
+          this.log("  You wouldn't go out without lingerie, would you?");
           this.error(`Missing lingerie: "${uwId}". Cannot dress without it.`);
         }
         await this.installLingerie(registry, uwId, state);
@@ -150,7 +150,7 @@ export default class Dress extends BaseCommand {
       if (!this.stateManager.isDressed(state, depId)) {
         this.error(
           `Missing required dress: "${depId}" (${depVersion})\n` +
-          `Install it first: clawtique dress ${depId}`,
+            `Install it first: clawtique dress ${depId}`,
         );
       }
     }
@@ -177,7 +177,7 @@ export default class Dress extends BaseCommand {
       // Save timezone to config for future dresses
       const configData = JSON.parse(await readFile(this.clawtiquePaths.config, 'utf-8'));
       configData.timezone = timezone;
-      await writeFile(this.clawtiquePaths.config, JSON.stringify(configData, null, 2) + '\n');
+      await writeFile(this.clawtiquePaths.config, `${JSON.stringify(configData, null, 2)}\n`);
     }
 
     // Cron schedules
@@ -198,14 +198,14 @@ export default class Dress extends BaseCommand {
         validate: (v) => /^\d{2}:\d{2}$/.test(v) || 'Use HH:MM format',
       });
 
-      const days = await checkbox({
+      const days = (await checkbox({
         message: `  Days`,
         choices: ALL_DAYS.map((d) => ({
           name: d,
           value: d as Weekday,
           checked: defaultDays.includes(d),
         })),
-      }) as Weekday[];
+      })) as Weekday[];
 
       if (days.length === 0) {
         this.error('Must select at least one day.');
@@ -249,7 +249,10 @@ export default class Dress extends BaseCommand {
             message: `  ${paramDef.description}`,
             default: (paramDef.default as string[]).join(', '),
           });
-          values[paramName] = raw.split(',').map((s: string) => s.trim()).filter(Boolean);
+          values[paramName] = raw
+            .split(',')
+            .map((s: string) => s.trim())
+            .filter(Boolean);
         } else {
           const raw = await input({
             message: `  ${paramDef.description}`,
@@ -318,7 +321,9 @@ export default class Dress extends BaseCommand {
     this.log(chalk.bold('Changes:'));
     for (const p of pluginsToInstall) {
       const setup = p.setupCommand ? 'requires setup' : '';
-      this.log(`  ${chalk.green('+')} plugin: ${p.id} ${chalk.dim(`(${p.spec})`)}${setup ? ` ${chalk.dim(`[${setup}]`)}` : ''}`);
+      this.log(
+        `  ${chalk.green('+')} plugin: ${p.id} ${chalk.dim(`(${p.spec})`)}${setup ? ` ${chalk.dim(`[${setup}]`)}` : ''}`,
+      );
     }
     for (const p of pluginsPreExisting) {
       this.log(`  ${chalk.dim('~')} plugin: ${p.id} ${chalk.dim('(already installed)')}`);
@@ -328,7 +333,9 @@ export default class Dress extends BaseCommand {
       this.log(`  ${chalk.green('+')} skill: ${s} ${chalk.dim(`(${source})`)}`);
     }
     for (const c of compiled.crons) {
-      this.log(`  ${chalk.green('+')} cron: ${c.name} ${chalk.dim(`(${c.schedule})`)} → skill: ${chalk.cyan(c.skill)}`);
+      this.log(
+        `  ${chalk.green('+')} cron: ${c.name} ${chalk.dim(`(${c.schedule})`)} → skill: ${chalk.cyan(c.skill)}`,
+      );
     }
     for (const s of compiled.memory.dailySections) {
       this.log(`  ${chalk.green('+')} memory section: ${s}`);
@@ -360,8 +367,8 @@ export default class Dress extends BaseCommand {
     if (!health.ok) {
       this.error(
         `OpenClaw is not reachable.\n\n` +
-        `  ${health.message || 'Could not connect to openclaw CLI.'}\n\n` +
-        `Make sure openclaw is installed and accessible, then try again.`,
+          `  ${health.message || 'Could not connect to openclaw CLI.'}\n\n` +
+          `Make sure openclaw is installed and accessible, then try again.`,
       );
     }
 
@@ -380,15 +387,20 @@ export default class Dress extends BaseCommand {
 
       // Install plugins
       if (pluginsToInstall.length > 0) {
-        const installTask = new Listr([{
-          title: 'Installing plugins',
-          task: async () => {
-            for (const plugin of pluginsToInstall) {
-              await this.openclawDriver.pluginInstall(plugin.spec);
-              installedPlugins.push(plugin.id);
-            }
-          },
-        }], { concurrent: false });
+        const installTask = new Listr(
+          [
+            {
+              title: 'Installing plugins',
+              task: async () => {
+                for (const plugin of pluginsToInstall) {
+                  await this.openclawDriver.pluginInstall(plugin.spec);
+                  installedPlugins.push(plugin.id);
+                }
+              },
+            },
+          ],
+          { concurrent: false },
+        );
         await installTask.run();
 
         // Run plugin setup
@@ -405,7 +417,7 @@ export default class Dress extends BaseCommand {
             this.log('');
             const [cmd, ...cmdArgs] = plugin.setupCommand.split(' ');
             const exitCode = await new Promise<number>((resolve, reject) => {
-              const child = spawn(cmd, cmdArgs, { stdio: 'inherit' });
+              const child = spawn(cmd!, cmdArgs, { stdio: 'inherit' });
               child.on('close', (code: number) => resolve(code));
               child.on('error', reject);
             });
@@ -415,7 +427,9 @@ export default class Dress extends BaseCommand {
                 default: true,
               });
               if (!cont) {
-                throw new Error(`Plugin setup "${plugin.setupCommand}" failed (exit code ${exitCode})`);
+                throw new Error(
+                  `Plugin setup "${plugin.setupCommand}" failed (exit code ${exitCode})`,
+                );
               }
             }
           } else {
@@ -439,136 +453,150 @@ export default class Dress extends BaseCommand {
 
         // Restart gateway
         this.log('');
-        const restartTask = new Listr([{
-          title: 'Restarting gateway',
-          task: async () => {
-            await this.openclawDriver.gatewayRestart();
-            for (let i = 0; i < 10; i++) {
-              await new Promise((r) => setTimeout(r, 2_000));
-              const h = await this.openclawDriver.health();
-              if (h.ok) return;
-            }
-            throw new Error('Gateway did not become healthy after restart');
-          },
-        }], { concurrent: false });
+        const restartTask = new Listr(
+          [
+            {
+              title: 'Restarting gateway',
+              task: async () => {
+                await this.openclawDriver.gatewayRestart();
+                for (let i = 0; i < 10; i++) {
+                  await new Promise((r) => setTimeout(r, 2_000));
+                  const h = await this.openclawDriver.health();
+                  if (h.ok) return;
+                }
+                throw new Error('Gateway did not become healthy after restart');
+              },
+            },
+          ],
+          { concurrent: false },
+        );
         await restartTask.run();
       }
 
       // Skills, crons, config files
-      const tasks = new Listr([
-        {
-          title: 'Installing skills',
-          skip: () => compiled.bundledSkills.size === 0 && compiled.clawHubSkills.length === 0,
-          task: async () => {
-            for (const [skillName, content] of compiled.bundledSkills) {
-              if (await this.openclawDriver.skillExists(skillName)) {
-                this.warn(`Skill "${skillName}" already exists — skipping`);
-              } else {
-                await this.openclawDriver.skillCopyBundled(skillName, content);
-                installedSkills.push(skillName);
+      const tasks = new Listr(
+        [
+          {
+            title: 'Installing skills',
+            skip: () => compiled.bundledSkills.size === 0 && compiled.clawHubSkills.length === 0,
+            task: async () => {
+              for (const [skillName, content] of compiled.bundledSkills) {
+                if (await this.openclawDriver.skillExists(skillName)) {
+                  this.warn(`Skill "${skillName}" already exists — skipping`);
+                } else {
+                  await this.openclawDriver.skillCopyBundled(skillName, content);
+                  installedSkills.push(skillName);
+                }
               }
-            }
-            for (const slug of compiled.clawHubSkills) {
-              if (await this.openclawDriver.skillExists(slug)) {
-                this.warn(`Skill "${slug}" already exists — skipping`);
-              } else {
-                await this.openclawDriver.skillInstall(slug);
-                installedSkills.push(slug);
+              for (const slug of compiled.clawHubSkills) {
+                if (await this.openclawDriver.skillExists(slug)) {
+                  this.warn(`Skill "${slug}" already exists — skipping`);
+                } else {
+                  await this.openclawDriver.skillInstall(slug);
+                  installedSkills.push(slug);
+                }
               }
-            }
+            },
           },
-        },
-        {
-          title: 'Setting up workspace files',
-          skip: () => Object.keys(compiled.workspace).length === 0,
-          task: async () => {
-            const workspaceDir = join(this.openclawPaths.root, 'workspace');
-            for (const [filePath, initialContent] of Object.entries(compiled.workspace)) {
-              const fullPath = join(workspaceDir, filePath);
-              if (existsSync(fullPath)) continue;
-              await mkdir(join(fullPath, '..'), { recursive: true });
-              await writeFile(fullPath, initialContent);
-            }
+          {
+            title: 'Setting up workspace files',
+            skip: () => Object.keys(compiled.workspace).length === 0,
+            task: async () => {
+              const workspaceDir = join(this.openclawPaths.root, 'workspace');
+              for (const [filePath, initialContent] of Object.entries(compiled.workspace)) {
+                const fullPath = join(workspaceDir, filePath);
+                if (existsSync(fullPath)) continue;
+                await mkdir(join(fullPath, '..'), { recursive: true });
+                await writeFile(fullPath, initialContent);
+              }
+            },
           },
-        },
-        {
-          title: 'Adding crons',
-          skip: () => compiled.crons.length === 0,
-          task: async () => {
-            for (const cron of compiled.crons) {
-              await this.openclawDriver.cronAdd(cron);
-              appliedCrons.push({
-                qualifiedId: `${cron.dressId}:${cron.id}`,
-                displayName: `[${cron.dressId}] ${cron.name}`,
-                skill: cron.skill,
-                channel: cron.channel,
-              });
-            }
+          {
+            title: 'Adding crons',
+            skip: () => compiled.crons.length === 0,
+            task: async () => {
+              for (const cron of compiled.crons) {
+                await this.openclawDriver.cronAdd(cron);
+                appliedCrons.push({
+                  qualifiedId: `${cron.dressId}:${cron.id}`,
+                  displayName: `[${cron.dressId}] ${cron.name}`,
+                  skill: cron.skill,
+                  channel: cron.channel,
+                });
+              }
+            },
           },
-        },
-        {
-          title: 'Writing DRESSCODE.md',
-          task: async () => {
-            const dressDir = join(this.openclawPaths.dresses, dress.id);
-            await mkdir(dressDir, { recursive: true });
-            const resolved = this.compiledToResolved(compiled);
-            const dresscode = generateDresscode(resolved);
-            const dresscodePath = join(dressDir, 'DRESSCODE.md');
-            await writeFile(dresscodePath, dresscode);
-            appliedFiles.push(dresscodePath);
+          {
+            title: 'Writing DRESSCODE.md',
+            task: async () => {
+              const dressDir = join(this.openclawPaths.dresses, dress.id);
+              await mkdir(dressDir, { recursive: true });
+              const resolved = this.compiledToResolved(compiled);
+              const dresscode = generateDresscode(resolved);
+              const dresscodePath = join(dressDir, 'DRESSCODE.md');
+              await writeFile(dresscodePath, dresscode);
+              appliedFiles.push(dresscodePath);
+            },
           },
-        },
-        {
-          title: 'Writing heartbeat rules',
-          skip: () => compiled.heartbeat.length === 0,
-          task: async () => {
-            await this.appendHeartbeatRules(dress.id, compiled.heartbeat);
+          {
+            title: 'Writing heartbeat rules',
+            skip: () => compiled.heartbeat.length === 0,
+            task: async () => {
+              await this.appendHeartbeatRules(dress.id, compiled.heartbeat);
+            },
           },
-        },
-        {
-          title: 'Updating DRESSES.md',
-          task: async () => {
-            await this.updateDressesIndex(state, dress.id, compiled);
+          {
+            title: 'Updating DRESSES.md',
+            task: async () => {
+              await this.updateDressesIndex(state, dress.id, compiled);
+            },
           },
-        },
-        {
-          title: 'Saving state',
-          task: async () => {
-            const allSkills = [...compiled.bundledSkills.keys(), ...compiled.clawHubSkills];
-            const entry: DressEntry = {
-              package: dress.id,
-              version: dress.version,
-              installedAt: new Date().toISOString(),
-              params: Object.fromEntries(
-                Object.entries(skillParams).filter(([, v]) => Object.keys(v).length > 0),
-              ),
-              applied: {
-                crons: appliedCrons,
-                skills: allSkills,
-                installedSkills,
-                plugins: compiled.plugins.map((p) => p.id),
-                installedPlugins,
-                memorySections: [...compiled.memory.dailySections],
-                files: appliedFiles,
-                heartbeatEntries: [...compiled.heartbeat],
-                workspaceFiles: Object.keys(compiled.workspace),
-                lingerie: [...compiled.lingerie],
-              },
-            };
-            state.dresses[dress.id] = entry;
-            await this.stateManager.save(state);
+          {
+            title: 'Saving state',
+            task: async () => {
+              const allSkills = [...compiled.bundledSkills.keys(), ...compiled.clawHubSkills];
+              const entry: DressEntry = {
+                package: dress.id,
+                version: dress.version,
+                installedAt: new Date().toISOString(),
+                params: Object.fromEntries(
+                  Object.entries(skillParams).filter(([, v]) => Object.keys(v).length > 0),
+                ),
+                applied: {
+                  crons: appliedCrons,
+                  skills: allSkills,
+                  installedSkills,
+                  plugins: compiled.plugins.map((p) => p.id),
+                  installedPlugins,
+                  memorySections: [...compiled.memory.dailySections],
+                  files: appliedFiles,
+                  heartbeatEntries: [...compiled.heartbeat],
+                  workspaceFiles: Object.keys(compiled.workspace),
+                  lingerie: [...compiled.lingerie],
+                },
+              };
+              state.dresses[dress.id] = entry;
+              await this.stateManager.save(state);
+            },
           },
-        },
-      ], { concurrent: false, rendererOptions: { collapseSubtasks: false } });
+        ],
+        { concurrent: false, rendererOptions: { collapseSubtasks: false } },
+      );
 
       await tasks.run();
 
       // Git commit
       const body = [
         allSkills().length > 0 ? `skills: ${allSkills().join(', ')}` : '',
-        compiled.crons.length > 0 ? `crons: ${compiled.crons.map((c) => `${c.name} → ${c.skill}`).join(', ')}` : '',
-        compiled.memory.dailySections.length > 0 ? `memory: ${compiled.memory.dailySections.join(', ')}` : '',
-      ].filter(Boolean).join('\n');
+        compiled.crons.length > 0
+          ? `crons: ${compiled.crons.map((c) => `${c.name} → ${c.skill}`).join(', ')}`
+          : '',
+        compiled.memory.dailySections.length > 0
+          ? `memory: ${compiled.memory.dailySections.join(', ')}`
+          : '',
+      ]
+        .filter(Boolean)
+        .join('\n');
 
       await this.gitManager.commit('feat', dress.id, `dress v${dress.version}`, body);
 
@@ -628,7 +656,7 @@ export default class Dress extends BaseCommand {
         this.log(`\n${chalk.bold(`Setting up ${plugin.id}...`)}\n`);
         const [cmd, ...cmdArgs] = plugin.setupCommand.split(' ');
         const exitCode = await new Promise<number>((resolve, reject) => {
-          const child = spawn(cmd, cmdArgs, { stdio: 'inherit' });
+          const child = spawn(cmd!, cmdArgs, { stdio: 'inherit' });
           child.on('close', (code: number) => resolve(code));
           child.on('error', reject);
         });
@@ -656,18 +684,23 @@ export default class Dress extends BaseCommand {
 
     // Restart gateway if we installed plugins
     if (installedPlugins.length > 0) {
-      const restartTask = new Listr([{
-        title: 'Restarting gateway',
-        task: async () => {
-          await this.openclawDriver.gatewayRestart();
-          for (let i = 0; i < 10; i++) {
-            await new Promise((r) => setTimeout(r, 2_000));
-            const h = await this.openclawDriver.health();
-            if (h.ok) return;
-          }
-          throw new Error('Gateway did not become healthy after restart');
-        },
-      }], { concurrent: false });
+      const restartTask = new Listr(
+        [
+          {
+            title: 'Restarting gateway',
+            task: async () => {
+              await this.openclawDriver.gatewayRestart();
+              for (let i = 0; i < 10; i++) {
+                await new Promise((r) => setTimeout(r, 2_000));
+                const h = await this.openclawDriver.health();
+                if (h.ok) return;
+              }
+              throw new Error('Gateway did not become healthy after restart');
+            },
+          },
+        ],
+        { concurrent: false },
+      );
       await restartTask.run();
     }
 
@@ -737,7 +770,7 @@ export default class Dress extends BaseCommand {
       crons: entry.applied.crons.map((c) => {
         const cronId = c.qualifiedId.includes(':') ? c.qualifiedId.split(':')[1] : c.qualifiedId;
         return {
-          id: cronId,
+          id: cronId!,
           name: c.displayName.replace(/^\[.*?\]\s*/, ''),
           schedule: '',
           skill: c.skill ?? '',
@@ -786,7 +819,7 @@ export default class Dress extends BaseCommand {
     const section = `\n## ${dressId}\n${rulesBlock}\n`;
     const wrapped = wrapSection(dressId, section);
 
-    content = content.trimEnd() + '\n\n' + wrapped + '\n';
+    content = `${content.trimEnd()}\n\n${wrapped}\n`;
     await writeFile(heartbeatPath, content);
   }
 }

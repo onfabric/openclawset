@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { dressIdSchema, semverSchema, pluginDefSchema } from './dress-json.js';
+import { dressIdSchema, pluginDefSchema, semverSchema } from './dress-json.js';
 
 // ---------------------------------------------------------------------------
 // lingerie.json schema

@@ -1,50 +1,45 @@
-export {
-  dressJsonSchema,
-  dressIdSchema,
-  semverSchema,
-  pluginDefSchema,
-  requiresSchema,
-  cronJsonSchema,
-  skillJsonSchema,
-  skillParamSchema,
-  memoryContractSchema,
-  secretDefSchema,
-} from './dress-json.js';
-
 export type {
-  DressJson,
   CronJson,
-  SkillJson,
-  SkillParam,
+  DressJson,
+  MemoryContract,
   PluginDef,
   Requires,
-  MemoryContract,
   SecretDef,
+  SkillJson,
+  SkillParam,
   Weekday,
 } from './dress-json.js';
-
-export { lingerieJsonSchema } from './lingerie-json.js';
-export type { LingerieJson } from './lingerie-json.js';
-
-export { registryIndexSchema } from './registry.js';
-export type { RegistryIndex, RegistryDressEntry, RegistryLingerieEntry } from './registry.js';
-
 export {
-  appliedCronSchema,
-  appliedStateSchema,
-  dressEntrySchema,
-  lingerieAppliedSchema,
-  lingerieEntrySchema,
-  stateFileSchema,
-  clawtiqueConfigSchema,
-} from './state.js';
-
+  cronJsonSchema,
+  dressIdSchema,
+  dressJsonSchema,
+  memoryContractSchema,
+  pluginDefSchema,
+  requiresSchema,
+  secretDefSchema,
+  semverSchema,
+  skillJsonSchema,
+  skillParamSchema,
+} from './dress-json.js';
+export type { LingerieJson } from './lingerie-json.js';
+export { lingerieJsonSchema } from './lingerie-json.js';
+export type { RegistryDressEntry, RegistryIndex, RegistryLingerieEntry } from './registry.js';
+export { registryIndexSchema } from './registry.js';
 export type {
   AppliedCron,
   AppliedState,
+  ClawtiqueConfig,
   DressEntry,
   LingerieApplied,
   LingerieEntry,
   StateFile,
-  ClawtiqueConfig,
+} from './state.js';
+export {
+  appliedCronSchema,
+  appliedStateSchema,
+  clawtiqueConfigSchema,
+  dressEntrySchema,
+  lingerieAppliedSchema,
+  lingerieEntrySchema,
+  stateFileSchema,
 } from './state.js';

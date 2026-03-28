@@ -1,5 +1,5 @@
-import { describe, test, expect } from 'bun:test';
-import { cronFromTime, addHours } from '../src/cron-utils.js';
+import { describe, expect, test } from 'bun:test';
+import { addHours, cronFromTime } from '../src/cron-utils.js';
 
 describe('cronFromTime', () => {
   test('UTC time produces correct cron expression', () => {

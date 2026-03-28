@@ -1,8 +1,8 @@
-import { describe, test, expect } from 'bun:test';
-import { LocalOpenClawDriver } from '../src/lib/openclaw.js';
-import { loadRecording, replayExec } from '../src/lib/exec-recorder.js';
+import { describe, expect, test } from 'bun:test';
 import { join } from 'node:path';
 import type { AppliedCron } from '@clawtique/core';
+import { loadRecording, replayExec } from '../src/lib/exec-recorder.js';
+import { LocalOpenClawDriver } from '../src/lib/openclaw.js';
 
 const FIXTURE = join(import.meta.dir, 'fixtures', 'dress-undress-session.json');
 
@@ -98,12 +98,14 @@ describe('driver: dress → undress round-trip', () => {
   test('cronRemove throws if display name not found', async () => {
     // Use a minimal fixture: just a cron list with no matching cron
     const driver = new LocalOpenClawDriver({
-      execFn: replayExec([{
-        args: ['cron', 'list', '--json'],
-        stdout: JSON.stringify({ jobs: [], total: 0 }),
-        stderr: '',
-        exitCode: 0,
-      }]),
+      execFn: replayExec([
+        {
+          args: ['cron', 'list', '--json'],
+          stdout: JSON.stringify({ jobs: [], total: 0 }),
+          stderr: '',
+          exitCode: 0,
+        },
+      ]),
     });
 
     const bogus: AppliedCron = {

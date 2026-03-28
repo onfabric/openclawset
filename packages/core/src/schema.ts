@@ -16,9 +16,7 @@ export const cronExpressionSchema = z
   )
   .or(z.string().startsWith('@'));
 
-export const semverSchema = z
-  .string()
-  .regex(/^\d+\.\d+\.\d+/, 'Must be a valid semver string');
+export const semverSchema = z.string().regex(/^\d+\.\d+\.\d+/, 'Must be a valid semver string');
 
 // ---------------------------------------------------------------------------
 // Param definition — describes a user-configurable parameter
@@ -215,4 +213,3 @@ export type LingerieApplied = z.infer<typeof lingerieAppliedSchema>;
 export type LingerieEntry = z.infer<typeof lingerieEntrySchema>;
 export type StateFile = z.infer<typeof stateFileSchema>;
 export type ClawtiqueConfig = z.infer<typeof clawtiqueConfigSchema>;
-

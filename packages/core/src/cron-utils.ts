@@ -16,8 +16,8 @@ const DAY_MAP: Record<DayName, number> = {
 function parseTime(time: string): { hours: number; minutes: number } {
   const match = time.match(/^(\d{1,2}):(\d{2})$/);
   if (!match) throw new Error(`Invalid time format: "${time}" — expected HH:MM`);
-  const hours = parseInt(match[1], 10);
-  const minutes = parseInt(match[2], 10);
+  const hours = parseInt(match[1]!, 10);
+  const minutes = parseInt(match[2]!, 10);
   if (hours < 0 || hours > 23) throw new Error(`Invalid hour: ${hours}`);
   if (minutes < 0 || minutes > 59) throw new Error(`Invalid minute: ${minutes}`);
   return { hours, minutes };
@@ -39,12 +39,8 @@ function toUtcTime(
   // Try to get offset from Intl
   try {
     const now = new Date();
-    const utcDate = new Date(
-      now.toLocaleString('en-US', { timeZone: 'UTC' }),
-    );
-    const tzDate = new Date(
-      now.toLocaleString('en-US', { timeZone: timezone }),
-    );
+    const utcDate = new Date(now.toLocaleString('en-US', { timeZone: 'UTC' }));
+    const tzDate = new Date(now.toLocaleString('en-US', { timeZone: timezone }));
     const offsetMinutes = (tzDate.getTime() - utcDate.getTime()) / 60_000;
 
     let totalMinutes = hours * 60 + minutes - offsetMinutes;
@@ -74,11 +70,7 @@ function toUtcTime(
  *
  * Returns a UTC cron expression string (5-field).
  */
-export function cronFromTime(
-  time: string,
-  days: DayName[],
-  timezone: string = 'UTC',
-): string {
+export function cronFromTime(time: string, days: DayName[], timezone: string = 'UTC'): string {
   const { hours, minutes } = parseTime(time);
   const utc = toUtcTime(hours, minutes, timezone);
 

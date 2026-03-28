@@ -1,29 +1,29 @@
-import { Args, Flags } from '@oclif/core';
-import { readFile, writeFile, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { removeSection, type StateFile, stripMarkers } from '@clawtique/core';
 import { confirm, select } from '@inquirer/prompts';
+import { Args, Flags } from '@oclif/core';
 import chalk from 'chalk';
 import { Listr } from 'listr2';
-import { stripMarkers, removeSection, type StateFile } from '@clawtique/core';
 import { BaseCommand } from '../base.js';
 
 export default class Undress extends BaseCommand {
-  static summary = 'Deactivate a dress and remove its config (data persists)';
+  static override summary = 'Deactivate a dress and remove its config (data persists)';
 
-  static examples = [
+  static override examples = [
     '<%= config.bin %> undress fitness-coach',
     '<%= config.bin %> undress fitness-coach --dry-run',
   ];
 
-  static args = {
+  static override args = {
     id: Args.string({
       description: 'Dress ID to remove',
       required: false,
     }),
   };
 
-  static flags = {
+  static override flags = {
     ...BaseCommand.baseFlags,
     'dry-run': Flags.boolean({
       description: 'Show what would change without applying',
@@ -57,7 +57,7 @@ export default class Undress extends BaseCommand {
       dressId = await select({
         message: 'Choose a dress to remove',
         choices: activeIds.map((id) => ({
-          name: `${id} ${chalk.dim(`v${state.dresses[id].version}`)}`,
+          name: `${id} ${chalk.dim(`v${state.dresses[id]!.version}`)}`,
           value: id,
         })),
       });
@@ -66,7 +66,9 @@ export default class Undress extends BaseCommand {
     const entry = this.stateManager.getDressEntry(state, dressId);
 
     if (!entry) {
-      this.error(`Dress "${dressId}" is not active.\nRun "clawtique status" to see active dresses.`);
+      this.error(
+        `Dress "${dressId}" is not active.\nRun "clawtique status" to see active dresses.`,
+      );
     }
 
     // Check for dependants
@@ -86,12 +88,20 @@ export default class Undress extends BaseCommand {
     const cronsToRemove = entry.applied.crons;
     // Only remove plugins that clawtique actually installed (not pre-existing ones)
     const installedPluginSet = new Set(entry.applied.installedPlugins ?? []);
-    const pluginsToRemove = entry.applied.plugins.filter((p) => installedPluginSet.has(p) && !othersNeed.plugins.has(p));
-    const pluginsRetained = entry.applied.plugins.filter((p) => !installedPluginSet.has(p) || othersNeed.plugins.has(p));
+    const pluginsToRemove = entry.applied.plugins.filter(
+      (p) => installedPluginSet.has(p) && !othersNeed.plugins.has(p),
+    );
+    const pluginsRetained = entry.applied.plugins.filter(
+      (p) => !installedPluginSet.has(p) || othersNeed.plugins.has(p),
+    );
     // Only remove skills that clawtique actually installed (not pre-existing ones)
     const installedSkillSet = new Set(entry.applied.installedSkills);
-    const skillsToRemove = entry.applied.skills.filter((s) => installedSkillSet.has(s) && !othersNeed.skills.has(s));
-    const skillsRetained = entry.applied.skills.filter((s) => !installedSkillSet.has(s) || othersNeed.skills.has(s));
+    const skillsToRemove = entry.applied.skills.filter(
+      (s) => installedSkillSet.has(s) && !othersNeed.skills.has(s),
+    );
+    const skillsRetained = entry.applied.skills.filter(
+      (s) => !installedSkillSet.has(s) || othersNeed.skills.has(s),
+    );
 
     // Show what will happen
     this.log(chalk.bold(`\nUndressing "${dressId}":\n`));
@@ -103,14 +113,18 @@ export default class Undress extends BaseCommand {
       this.log(`  ${chalk.red('-')} skill: ${s}`);
     }
     for (const s of skillsRetained) {
-      const reason = !installedSkillSet.has(s) ? 'not installed by clawtique' : 'used by another dress';
+      const reason = !installedSkillSet.has(s)
+        ? 'not installed by clawtique'
+        : 'used by another dress';
       this.log(`  ${chalk.dim('~')} skill: ${s} ${chalk.dim(`(retained — ${reason})`)}`);
     }
     for (const p of pluginsToRemove) {
       this.log(`  ${chalk.red('-')} plugin: ${p}`);
     }
     for (const p of pluginsRetained) {
-      const reason = !installedPluginSet.has(p) ? 'not installed by clawtique' : 'used by another dress';
+      const reason = !installedPluginSet.has(p)
+        ? 'not installed by clawtique'
+        : 'used by another dress';
       this.log(`  ${chalk.dim('~')} plugin: ${p} ${chalk.dim(`(retained — ${reason})`)}`);
     }
     if (entry.applied.heartbeatEntries.length > 0) {
@@ -118,7 +132,9 @@ export default class Undress extends BaseCommand {
     }
     if (entry.applied.memorySections.length > 0) {
       for (const s of entry.applied.memorySections) {
-        this.log(`  ${chalk.dim('~')} memory section "${s}" ${chalk.dim('(content preserved, markers removed)')}`);
+        this.log(
+          `  ${chalk.dim('~')} memory section "${s}" ${chalk.dim('(content preserved, markers removed)')}`,
+        );
       }
     }
     for (const f of entry.applied.files) {
@@ -141,8 +157,8 @@ export default class Undress extends BaseCommand {
     if (!health.ok) {
       this.error(
         `OpenClaw is not reachable.\n\n` +
-        `  ${health.message || 'Could not connect to openclaw CLI.'}\n\n` +
-        `Make sure openclaw is installed and accessible, then try again.`,
+          `  ${health.message || 'Could not connect to openclaw CLI.'}\n\n` +
+          `Make sure openclaw is installed and accessible, then try again.`,
       );
     }
 
@@ -167,125 +183,134 @@ export default class Undress extends BaseCommand {
     const snapshot = await this.gitManager.snapshot();
 
     try {
-      const tasks = new Listr([
-        {
-          title: 'Removing crons',
-          skip: () => cronsToRemove.length === 0,
-          task: async () => {
-            for (const cron of cronsToRemove) {
-              try {
-                await this.openclawDriver.cronRemove(cron);
-              } catch {
-                // Cron may have been manually removed
+      const tasks = new Listr(
+        [
+          {
+            title: 'Removing crons',
+            skip: () => cronsToRemove.length === 0,
+            task: async () => {
+              for (const cron of cronsToRemove) {
+                try {
+                  await this.openclawDriver.cronRemove(cron);
+                } catch {
+                  // Cron may have been manually removed
+                }
               }
-            }
+            },
           },
-        },
-        {
-          title: 'Removing plugins',
-          skip: () => pluginsToRemove.length === 0,
-          task: async () => {
-            for (const plugin of pluginsToRemove) {
-              try {
-                await this.openclawDriver.pluginUninstall(plugin);
-              } catch {
-                // Plugin may have been manually removed
+          {
+            title: 'Removing plugins',
+            skip: () => pluginsToRemove.length === 0,
+            task: async () => {
+              for (const plugin of pluginsToRemove) {
+                try {
+                  await this.openclawDriver.pluginUninstall(plugin);
+                } catch {
+                  // Plugin may have been manually removed
+                }
               }
-            }
+            },
           },
-        },
-        {
-          title: 'Removing skills',
-          skip: () => skillsToRemove.length === 0,
-          task: async () => {
-            for (const skill of skillsToRemove) {
-              try {
-                await this.openclawDriver.skillRemove(skill);
-              } catch {
-                // Skill may have been manually removed
+          {
+            title: 'Removing skills',
+            skip: () => skillsToRemove.length === 0,
+            task: async () => {
+              for (const skill of skillsToRemove) {
+                try {
+                  await this.openclawDriver.skillRemove(skill);
+                } catch {
+                  // Skill may have been manually removed
+                }
               }
-            }
+            },
           },
-        },
-        {
-          title: 'Stripping memory markers',
-          skip: () => entry.applied.memorySections.length === 0,
-          task: async () => {
-            await this.stripMemoryMarkers(dressId);
+          {
+            title: 'Stripping memory markers',
+            skip: () => entry.applied.memorySections.length === 0,
+            task: async () => {
+              await this.stripMemoryMarkers(dressId);
+            },
           },
-        },
-        {
-          title: 'Stripping heartbeat rules',
-          skip: () => entry.applied.heartbeatEntries.length === 0,
-          task: async () => {
-            await this.stripHeartbeatRules(dressId);
+          {
+            title: 'Stripping heartbeat rules',
+            skip: () => entry.applied.heartbeatEntries.length === 0,
+            task: async () => {
+              await this.stripHeartbeatRules(dressId);
+            },
           },
-        },
-        {
-          title: 'Removing dress files',
-          skip: () => entry.applied.files.length === 0,
-          task: async () => {
-            const { rm } = await import('node:fs/promises');
-            for (const f of entry.applied.files) {
-              if (existsSync(f)) {
-                await rm(f, { recursive: true });
+          {
+            title: 'Removing dress files',
+            skip: () => entry.applied.files.length === 0,
+            task: async () => {
+              const { rm } = await import('node:fs/promises');
+              for (const f of entry.applied.files) {
+                if (existsSync(f)) {
+                  await rm(f, { recursive: true });
+                }
               }
-            }
-            // Clean up empty dress directory
-            const dressDir = join(this.openclawPaths.dresses, dressId);
-            if (existsSync(dressDir)) {
-              try {
-                const items = await readdir(dressDir);
-                if (items.length === 0) await rm(dressDir, { recursive: true });
-              } catch { /* ignore */ }
-            }
-          },
-        },
-        {
-          title: 'Removing workspace files',
-          skip: () => !deleteWorkspace || workspaceFiles.length === 0,
-          task: async () => {
-            const { rm } = await import('node:fs/promises');
-            const workspaceDir = join(this.openclawPaths.root, 'workspace');
-            for (const w of workspaceFiles) {
-              const fullPath = join(workspaceDir, w);
-              if (existsSync(fullPath)) {
-                await rm(fullPath, { recursive: true });
+              // Clean up empty dress directory
+              const dressDir = join(this.openclawPaths.dresses, dressId);
+              if (existsSync(dressDir)) {
+                try {
+                  const items = await readdir(dressDir);
+                  if (items.length === 0) await rm(dressDir, { recursive: true });
+                } catch {
+                  /* ignore */
+                }
               }
-            }
+            },
           },
-        },
-        {
-          title: 'Restarting gateway',
-          skip: () => pluginsToRemove.length === 0,
-          task: async () => {
-            await this.openclawDriver.gatewayRestart();
+          {
+            title: 'Removing workspace files',
+            skip: () => !deleteWorkspace || workspaceFiles.length === 0,
+            task: async () => {
+              const { rm } = await import('node:fs/promises');
+              const workspaceDir = join(this.openclawPaths.root, 'workspace');
+              for (const w of workspaceFiles) {
+                const fullPath = join(workspaceDir, w);
+                if (existsSync(fullPath)) {
+                  await rm(fullPath, { recursive: true });
+                }
+              }
+            },
           },
-        },
-        {
-          title: 'Updating DRESSES.md',
-          task: async () => {
-            await this.rebuildDressesIndex(state, dressId);
+          {
+            title: 'Restarting gateway',
+            skip: () => pluginsToRemove.length === 0,
+            task: async () => {
+              await this.openclawDriver.gatewayRestart();
+            },
           },
-        },
-        {
-          title: 'Saving state',
-          task: async () => {
-            delete state.dresses[dressId];
-            await this.stateManager.save(state);
+          {
+            title: 'Updating DRESSES.md',
+            task: async () => {
+              await this.rebuildDressesIndex(state, dressId);
+            },
           },
-        },
-      ], { concurrent: false });
+          {
+            title: 'Saving state',
+            task: async () => {
+              delete state.dresses[dressId];
+              await this.stateManager.save(state);
+            },
+          },
+        ],
+        { concurrent: false },
+      );
 
       await tasks.run();
 
       const body = [
-        cronsToRemove.length > 0 ? `removed crons: ${cronsToRemove.map((c) => c.qualifiedId).join(', ')}` : '',
+        cronsToRemove.length > 0
+          ? `removed crons: ${cronsToRemove.map((c) => c.qualifiedId).join(', ')}`
+          : '',
         skillsToRemove.length > 0 ? `removed skills: ${skillsToRemove.join(', ')}` : '',
         skillsRetained.length > 0 ? `retained skills: ${skillsRetained.join(', ')}` : '',
         pluginsToRemove.length > 0 ? `removed plugins: ${pluginsToRemove.join(', ')}` : '',
         pluginsRetained.length > 0 ? `retained plugins: ${pluginsRetained.join(', ')}` : '',
-      ].filter(Boolean).join('\n');
+      ]
+        .filter(Boolean)
+        .join('\n');
 
       await this.gitManager.commit('revert', dressId, 'undress', body);
 
@@ -298,7 +323,7 @@ export default class Undress extends BaseCommand {
     }
   }
 
-  private findDependants(state: StateFile, dressId: string): string[] {
+  private findDependants(_state: StateFile, _dressId: string): string[] {
     return [];
   }
 

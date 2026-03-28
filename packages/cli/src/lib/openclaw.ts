@@ -1,11 +1,27 @@
 import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
-import { mkdir, writeFile, rm } from 'node:fs/promises';
+import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { OpenClawDriver, CronListEntry, CronDef, AppliedCron, PluginConfigSchema } from '@clawtique/core';
+import { promisify } from 'node:util';
+import type {
+  AppliedCron,
+  CronDef,
+  CronListEntry,
+  OpenClawDriver,
+  PluginConfigSchema,
+} from '@clawtique/core';
 import type { ExecFn } from './exec-recorder.js';
 
 const execFileAsync = promisify(execFile);
+
+type PluginInfo = {
+  plugin?: {
+    kind?: string;
+    configJsonSchema?: {
+      properties?: Record<string, { type: string; description: string }>;
+      required?: string[];
+    };
+  };
+};
 
 /**
  * Local OpenClaw driver — shells out to the `openclaw` CLI.
@@ -29,11 +45,14 @@ export class LocalOpenClawDriver implements OpenClawDriver {
     this.execOverride = options?.execFn;
     this.skillsDir = options?.skillsDir;
     if (options?.pathPrefix) {
-      this.env['PATH'] = `${options.pathPrefix}:${process.env['PATH'] ?? ''}`;
+      this.env.PATH = `${options.pathPrefix}:${process.env.PATH ?? ''}`;
     }
   }
 
-  async exec(args: string[], options?: { timeout?: number }): Promise<{ stdout: string; stderr: string; exitCode: number }> {
+  async exec(
+    args: string[],
+    options?: { timeout?: number },
+  ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
     if (this.execOverride) return this.execOverride(args);
     try {
       const { stdout, stderr } = await execFileAsync(this.bin, args, {
@@ -58,13 +77,14 @@ export class LocalOpenClawDriver implements OpenClawDriver {
       const data = JSON.parse(stdout);
       const jobs: Record<string, unknown>[] = Array.isArray(data) ? data : (data.jobs ?? []);
       return jobs.map((entry) => ({
-        id: String(entry['id'] ?? ''),
-        name: String(entry['name'] ?? ''),
-        schedule: typeof entry['schedule'] === 'object' && entry['schedule']
-          ? String((entry['schedule'] as Record<string, unknown>)['expr'] ?? '')
-          : String(entry['schedule'] ?? ''),
-        enabled: Boolean(entry['enabled']),
-        status: String(entry['status'] ?? 'unknown'),
+        id: String(entry.id ?? ''),
+        name: String(entry.name ?? ''),
+        schedule:
+          typeof entry.schedule === 'object' && entry.schedule
+            ? String((entry.schedule as Record<string, unknown>).expr ?? '')
+            : String(entry.schedule ?? ''),
+        enabled: Boolean(entry.enabled),
+        status: String(entry.status ?? 'unknown'),
       }));
     } catch {
       return [];
@@ -75,15 +95,23 @@ export class LocalOpenClawDriver implements OpenClawDriver {
     const name = `[${cron.dressId}] ${cron.name}`;
     const message = `Use the ${cron.skill} skill. Run \`openclaw skills info ${cron.skill}\` if you need to locate its SKILL.md.`;
     const { exitCode, stderr } = await this.exec([
-      'cron', 'add',
-      '--name', name,
-      '--cron', cron.schedule,
-      '--message', message,
-      '--session', 'isolated',
+      'cron',
+      'add',
+      '--name',
+      name,
+      '--cron',
+      cron.schedule,
+      '--message',
+      message,
+      '--session',
+      'isolated',
       '--announce',
-      '--channel', cron.channel ?? 'last',
-      '--thinking', 'low',
-      '--timeout-seconds', '240',
+      '--channel',
+      cron.channel ?? 'last',
+      '--thinking',
+      'low',
+      '--timeout-seconds',
+      '240',
       '--exact',
     ]);
     if (exitCode !== 0) {
@@ -98,9 +126,11 @@ export class LocalOpenClawDriver implements OpenClawDriver {
     try {
       const data = JSON.parse(stdout);
       const jobs: Record<string, unknown>[] = Array.isArray(data) ? data : (data.jobs ?? []);
-      const job = jobs.find((j) => String(j['name'] ?? '') === cron.displayName);
-      if (job) id = String(job['id']);
-    } catch { /* ignore parse errors */ }
+      const job = jobs.find((j) => String(j.name ?? '') === cron.displayName);
+      if (job) id = String(job.id);
+    } catch {
+      /* ignore parse errors */
+    }
     if (!id) {
       throw new Error(`Cron "${cron.displayName}" (${cron.qualifiedId}) not found in openclaw`);
     }
@@ -146,7 +176,9 @@ export class LocalOpenClawDriver implements OpenClawDriver {
   }
 
   async pluginInstall(spec: string): Promise<void> {
-    const { exitCode, stderr } = await this.exec(['plugins', 'install', spec], { timeout: 120_000 });
+    const { exitCode, stderr } = await this.exec(['plugins', 'install', spec], {
+      timeout: 120_000,
+    });
     if (exitCode !== 0) {
       throw new Error(`Failed to install plugin "${spec}": ${stderr}`);
     }
@@ -180,16 +212,14 @@ export class LocalOpenClawDriver implements OpenClawDriver {
   async pluginConfigSchema(id: string): Promise<PluginConfigSchema | undefined> {
     const { stdout, exitCode } = await this.exec(['plugins', 'inspect', id, '--json']);
     if (exitCode !== 0) return undefined;
-    const info = this.parseJsonOutput(stdout) as Record<string, any> | undefined;
+    const info = this.parseJsonOutput(stdout) as PluginInfo | undefined;
     if (!info) return undefined;
 
     const schema = info.plugin?.configJsonSchema;
     if (!schema?.properties) return undefined;
 
-    const kind: string = info.plugin?.kind ?? 'plugin';
-    const configPrefix = kind === 'channel'
-      ? `channels.${id}`
-      : `plugins.entries.${id}.config`;
+    const kind = info.plugin?.kind ?? 'plugin';
+    const configPrefix = kind === 'channel' ? `channels.${id}` : `plugins.entries.${id}.config`;
 
     return {
       kind,

@@ -4,14 +4,11 @@ import { BaseCommand } from '../base.js';
 import { createRegistryProvider } from '../lib/registry.js';
 
 export default class Wardrobe extends BaseCommand {
-  static summary = 'List available dresses and their status';
+  static override summary = 'List available dresses and their status';
 
-  static examples = [
-    '<%= config.bin %> wardrobe',
-    '<%= config.bin %> wardrobe --json',
-  ];
+  static override examples = ['<%= config.bin %> wardrobe', '<%= config.bin %> wardrobe --json'];
 
-  static flags = {
+  static override flags = {
     ...BaseCommand.baseFlags,
     json: Flags.boolean({
       description: 'Output as JSON',
@@ -33,17 +30,23 @@ export default class Wardrobe extends BaseCommand {
     if (flags.json) {
       const data = {
         dresses: Object.fromEntries(
-          Object.entries(index.dresses).map(([id, entry]) => [id, {
-            ...entry,
-            worn: wornIds.has(id),
-            ...(wornIds.has(id) ? { installedVersion: state.dresses[id].version } : {}),
-          }]),
+          Object.entries(index.dresses).map(([id, entry]) => [
+            id,
+            {
+              ...entry,
+              worn: wornIds.has(id),
+              ...(wornIds.has(id) ? { installedVersion: state.dresses[id]!.version } : {}),
+            },
+          ]),
         ),
         lingerie: Object.fromEntries(
-          Object.entries(index.lingerie).map(([id, entry]) => [id, {
-            ...entry,
-            worn: wornLingerie.has(id),
-          }]),
+          Object.entries(index.lingerie).map(([id, entry]) => [
+            id,
+            {
+              ...entry,
+              worn: wornLingerie.has(id),
+            },
+          ]),
         ),
       };
       this.log(JSON.stringify(data, null, 2));
@@ -67,9 +70,9 @@ export default class Wardrobe extends BaseCommand {
           this.log(`    ${chalk.dim(entry.description)}`);
         }
         if (entry.requires.lingerie.length > 0) {
-          const uwStatus = entry.requires.lingerie.map((uwId) =>
-            wornLingerie.has(uwId) ? chalk.green(uwId) : chalk.yellow(uwId),
-          ).join(', ');
+          const uwStatus = entry.requires.lingerie
+            .map((uwId) => (wornLingerie.has(uwId) ? chalk.green(uwId) : chalk.yellow(uwId)))
+            .join(', ');
           this.log(`    ${chalk.dim('requires:')} ${uwStatus}`);
         }
       }

@@ -1,26 +1,26 @@
+import type { StateFile } from '@clawtique/core';
+import { confirm, select } from '@inquirer/prompts';
 import { Args, Flags } from '@oclif/core';
 import chalk from 'chalk';
-import { confirm, select } from '@inquirer/prompts';
 import { Listr } from 'listr2';
-import type { StateFile } from '@clawtique/core';
 import { BaseCommand } from '../../base.js';
 
 export default class LingerieRemove extends BaseCommand {
-  static summary = 'Remove shared lingerie (uninstalls plugins if no dress depends on it)';
+  static override summary = 'Remove shared lingerie (uninstalls plugins if no dress depends on it)';
 
-  static examples = [
+  static override examples = [
     '<%= config.bin %> lingerie remove waclaw',
     '<%= config.bin %> lingerie remove waclaw --dry-run',
   ];
 
-  static args = {
+  static override args = {
     id: Args.string({
       description: 'Lingerie ID to remove',
       required: false,
     }),
   };
 
-  static flags = {
+  static override flags = {
     ...BaseCommand.baseFlags,
     'dry-run': Flags.boolean({
       description: 'Show what would change without applying',
@@ -62,13 +62,17 @@ export default class LingerieRemove extends BaseCommand {
 
     const entry = state.lingerie?.[lingerieId];
     if (!entry) {
-      this.error(`Lingerie "${lingerieId}" is not active.\nRun "clawtique lingerie list" to see active lingerie.`);
+      this.error(
+        `Lingerie "${lingerieId}" is not active.\nRun "clawtique lingerie list" to see active lingerie.`,
+      );
     }
 
     // Check for dependant dresses
     const dependants = this.findDependantDresses(state, lingerieId);
     if (dependants.length > 0 && !flags.force) {
-      this.log(chalk.yellow(`\nWarning: The following dresses depend on lingerie "${lingerieId}":`));
+      this.log(
+        chalk.yellow(`\nWarning: The following dresses depend on lingerie "${lingerieId}":`),
+      );
       for (const dep of dependants) {
         this.log(`  - ${dep}`);
       }
@@ -88,7 +92,9 @@ export default class LingerieRemove extends BaseCommand {
       this.log(`  ${chalk.red('-')} plugin: ${p}`);
     }
     for (const p of pluginsRetained) {
-      this.log(`  ${chalk.dim('~')} plugin: ${p} ${chalk.dim('(not installed by clawtique — retained)')}`);
+      this.log(
+        `  ${chalk.dim('~')} plugin: ${p} ${chalk.dim('(not installed by clawtique — retained)')}`,
+      );
     }
     this.log('');
 
@@ -102,8 +108,8 @@ export default class LingerieRemove extends BaseCommand {
     if (!health.ok) {
       this.error(
         `OpenClaw is not reachable.\n\n` +
-        `  ${health.message || 'Could not connect to openclaw CLI.'}\n\n` +
-        `Make sure openclaw is installed and accessible, then try again.`,
+          `  ${health.message || 'Could not connect to openclaw CLI.'}\n\n` +
+          `Make sure openclaw is installed and accessible, then try again.`,
       );
     }
 
@@ -119,42 +125,47 @@ export default class LingerieRemove extends BaseCommand {
     const snapshot = await this.gitManager.snapshot();
 
     try {
-      const tasks = new Listr([
-        {
-          title: 'Removing plugins',
-          skip: () => pluginsToRemove.length === 0,
-          task: async () => {
-            for (const plugin of pluginsToRemove) {
-              try {
-                await this.openclawDriver.pluginUninstall(plugin);
-              } catch {
-                // Plugin may have been manually removed
+      const tasks = new Listr(
+        [
+          {
+            title: 'Removing plugins',
+            skip: () => pluginsToRemove.length === 0,
+            task: async () => {
+              for (const plugin of pluginsToRemove) {
+                try {
+                  await this.openclawDriver.pluginUninstall(plugin);
+                } catch {
+                  // Plugin may have been manually removed
+                }
               }
-            }
+            },
           },
-        },
-        {
-          title: 'Restarting gateway',
-          skip: () => pluginsToRemove.length === 0,
-          task: async () => {
-            await this.openclawDriver.gatewayRestart();
+          {
+            title: 'Restarting gateway',
+            skip: () => pluginsToRemove.length === 0,
+            task: async () => {
+              await this.openclawDriver.gatewayRestart();
+            },
           },
-        },
-        {
-          title: 'Saving state',
-          task: async () => {
-            delete state.lingerie[lingerieId];
-            await this.stateManager.save(state);
+          {
+            title: 'Saving state',
+            task: async () => {
+              delete state.lingerie[lingerieId];
+              await this.stateManager.save(state);
+            },
           },
-        },
-      ], { concurrent: false });
+        ],
+        { concurrent: false },
+      );
 
       await tasks.run();
 
       const body = [
         pluginsToRemove.length > 0 ? `removed plugins: ${pluginsToRemove.join(', ')}` : '',
         pluginsRetained.length > 0 ? `retained plugins: ${pluginsRetained.join(', ')}` : '',
-      ].filter(Boolean).join('\n');
+      ]
+        .filter(Boolean)
+        .join('\n');
 
       await this.gitManager.commit('revert', lingerieId, 'lingerie remove', body);
 

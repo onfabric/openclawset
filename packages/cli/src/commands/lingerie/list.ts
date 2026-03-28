@@ -3,11 +3,11 @@ import chalk from 'chalk';
 import { BaseCommand } from '../../base.js';
 
 export default class LingerieList extends BaseCommand {
-  static summary = 'List active lingerie';
+  static override summary = 'List active lingerie';
 
-  static examples = ['<%= config.bin %> lingerie list'];
+  static override examples = ['<%= config.bin %> lingerie list'];
 
-  static flags = {
+  static override flags = {
     ...BaseCommand.baseFlags,
     json: Flags.boolean({
       description: 'Output as JSON',
@@ -37,8 +37,7 @@ export default class LingerieList extends BaseCommand {
 
     for (const [id, entry] of entries) {
       this.log(
-        `  ${chalk.cyan(id)} ${chalk.dim(`v${entry.version}`)} ` +
-        chalk.dim(`(${entry.package})`),
+        `  ${chalk.cyan(id)} ${chalk.dim(`v${entry.version}`)} ${chalk.dim(`(${entry.package})`)}`,
       );
 
       if (entry.applied.plugins.length > 0) {

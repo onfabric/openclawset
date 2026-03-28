@@ -82,7 +82,7 @@ export class DependencyGraph {
    */
   dependantsOf(id: string): string[] {
     const result = new Set<string>();
-    for (const [nodeId, deps] of this.nodes) {
+    for (const [nodeId, _deps] of this.nodes) {
       if (nodeId === id) continue;
       // Check if this node transitively depends on `id`
       const transitive = this.dependenciesOf(nodeId);

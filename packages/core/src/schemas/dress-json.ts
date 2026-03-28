@@ -8,9 +8,7 @@ export const dressIdSchema = z
   .string()
   .regex(/^[a-z][a-z0-9-]*$/, 'Must be lowercase alphanumeric with dashes');
 
-export const semverSchema = z
-  .string()
-  .regex(/^\d+\.\d+\.\d+/, 'Must be a valid semver string');
+export const semverSchema = z.string().regex(/^\d+\.\d+\.\d+/, 'Must be a valid semver string');
 
 const weekdaySchema = z.enum(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']);
 
@@ -29,21 +27,28 @@ export const pluginDefSchema = z.object({
 // Requires — dependencies
 // ---------------------------------------------------------------------------
 
-export const requiresSchema = z.object({
-  lingerie: z.array(z.string()).default([]),
-  plugins: z.array(pluginDefSchema).default([]),
-  dresses: z.record(z.string(), z.string()).default({}),
-  optionalDresses: z.record(z.string(), z.string()).default({}),
-}).default({});
+export const requiresSchema = z
+  .object({
+    lingerie: z.array(z.string()).default([]),
+    plugins: z.array(pluginDefSchema).default([]),
+    dresses: z.record(z.string(), z.string()).default({}),
+    optionalDresses: z.record(z.string(), z.string()).default({}),
+  })
+  .default({});
 
 // ---------------------------------------------------------------------------
 // Cron defaults — scheduling hints, not actual cron expressions
 // ---------------------------------------------------------------------------
 
-const cronDefaultsSchema = z.object({
-  time: z.string().regex(/^\d{2}:\d{2}$/, 'Use HH:MM format').optional(),
-  days: z.array(weekdaySchema).optional(),
-}).default({});
+const cronDefaultsSchema = z
+  .object({
+    time: z
+      .string()
+      .regex(/^\d{2}:\d{2}$/, 'Use HH:MM format')
+      .optional(),
+    days: z.array(weekdaySchema).optional(),
+  })
+  .default({});
 
 // ---------------------------------------------------------------------------
 // Cron definition
@@ -63,21 +68,27 @@ export const cronJsonSchema = z.object({
 
 const paramTypeSchema = z.enum(['string', 'number', 'string[]']);
 
-export const skillParamSchema = z.object({
-  description: z.string(),
-  type: paramTypeSchema,
-  default: z.unknown(),
-}).refine(
-  (p) => {
-    switch (p.type) {
-      case 'string': return typeof p.default === 'string';
-      case 'number': return typeof p.default === 'number';
-      case 'string[]': return Array.isArray(p.default) && p.default.every((v: unknown) => typeof v === 'string');
-      default: return false;
-    }
-  },
-  { message: 'Default value must match declared type' },
-);
+export const skillParamSchema = z
+  .object({
+    description: z.string(),
+    type: paramTypeSchema,
+    default: z.unknown(),
+  })
+  .refine(
+    (p) => {
+      switch (p.type) {
+        case 'string':
+          return typeof p.default === 'string';
+        case 'number':
+          return typeof p.default === 'number';
+        case 'string[]':
+          return Array.isArray(p.default) && p.default.every((v: unknown) => typeof v === 'string');
+        default:
+          return false;
+      }
+    },
+    { message: 'Default value must match declared type' },
+  );
 
 // ---------------------------------------------------------------------------
 // Skill definition
@@ -92,10 +103,12 @@ export const skillJsonSchema = z.object({
 // Memory contract
 // ---------------------------------------------------------------------------
 
-export const memoryContractSchema = z.object({
-  dailySections: z.array(z.string()).default([]),
-  reads: z.array(z.string()).default([]),
-}).default({});
+export const memoryContractSchema = z
+  .object({
+    dailySections: z.array(z.string()).default([]),
+    reads: z.array(z.string()).default([]),
+  })
+  .default({});
 
 // ---------------------------------------------------------------------------
 // Secret definition

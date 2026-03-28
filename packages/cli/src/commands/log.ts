@@ -3,14 +3,11 @@ import chalk from 'chalk';
 import { BaseCommand } from '../base.js';
 
 export default class Log extends BaseCommand {
-  static summary = 'Show the history of dress/undress operations';
+  static override summary = 'Show the history of dress/undress operations';
 
-  static examples = [
-    '<%= config.bin %> log',
-    '<%= config.bin %> log --count 50',
-  ];
+  static override examples = ['<%= config.bin %> log', '<%= config.bin %> log --count 50'];
 
-  static flags = {
+  static override flags = {
     ...BaseCommand.baseFlags,
     count: Flags.integer({
       char: 'n',

@@ -1,21 +1,19 @@
-import { Args, Flags } from '@oclif/core';
-import chalk from 'chalk';
 import { confirm } from '@inquirer/prompts';
+import { Flags } from '@oclif/core';
+import chalk from 'chalk';
 import { BaseCommand } from '../base.js';
 
 export default class Rollback extends BaseCommand {
-  static summary = 'Undo the last dress/undress operation';
+  static override summary = 'Undo the last dress/undress operation';
 
-  static description = `Rolls back the last clawtique operation by reverting the git state.
+  static override description = `Rolls back the last clawtique operation by reverting the git state.
 Note: This only reverts the clawtique state file. You may need to manually
 verify that OpenClaw crons/config match the rolled-back state.
 Run "clawtique doctor" after rollback to verify.`;
 
-  static examples = [
-    '<%= config.bin %> rollback',
-  ];
+  static override examples = ['<%= config.bin %> rollback'];
 
-  static flags = {
+  static override flags = {
     ...BaseCommand.baseFlags,
     yes: Flags.boolean({
       char: 'y',

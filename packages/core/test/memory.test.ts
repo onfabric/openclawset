@@ -1,5 +1,5 @@
-import { describe, test, expect } from 'bun:test';
-import { wrapSection, stripMarkers, removeSection } from '../src/memory.js';
+import { describe, expect, test } from 'bun:test';
+import { removeSection, stripMarkers, wrapSection } from '../src/memory.js';
 
 describe('wrapSection', () => {
   test('wraps content in markers', () => {

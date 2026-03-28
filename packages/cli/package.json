@@ -13,11 +13,13 @@
     }
   },
   "types": "./dist/index.d.ts",
-  "files": ["bin", "dist", "oclif.manifest.json"],
+  "files": [
+    "bin",
+    "dist",
+    "oclif.manifest.json"
+  ],
   "scripts": {
-    "build": "tsc",
-    "clean": "rm -rf dist *.tsbuildinfo",
-    "postbuild": "node --loader ts-node/esm ./node_modules/.bin/oclif manifest 2>/dev/null || true"
+    "check:types": "bun run --bun tsc"
   },
   "oclif": {
     "bin": "clawtique",
@@ -42,6 +44,7 @@
   },
   "devDependencies": {
     "@oclif/plugin-help": "^6.0.0",
+    "@repo/typescript-config": "workspace:*",
     "@types/proper-lockfile": "^4.1.4",
     "@types/write-file-atomic": "^4.0.3",
     "typescript": "^5.7.0"

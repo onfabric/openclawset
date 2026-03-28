@@ -13,13 +13,19 @@
       "id": "workout-schedule",
       "name": "Daily workout schedule",
       "skill": "workout-schedule",
-      "defaults": { "time": "18:00", "days": ["mon", "tue", "wed", "thu", "fri"] }
+      "defaults": {
+        "time": "18:00",
+        "days": ["mon", "tue", "wed", "thu", "fri"]
+      }
     },
     {
       "id": "workout-feedback",
       "name": "Post-workout check-in",
       "skill": "workout-feedback",
-      "defaults": { "time": "20:00", "days": ["mon", "tue", "wed", "thu", "fri"] }
+      "defaults": {
+        "time": "20:00",
+        "days": ["mon", "tue", "wed", "thu", "fri"]
+      }
     }
   ],
 

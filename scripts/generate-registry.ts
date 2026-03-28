@@ -12,9 +12,9 @@
  *  - every declared param appears as {{param}} in the .md (warning)
  */
 
-import { readFileSync, readdirSync, existsSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { dressJsonSchema, type DressJson } from '../packages/core/src/schemas/dress-json.js';
+import { type DressJson, dressJsonSchema } from '../packages/core/src/schemas/dress-json.js';
 import { lingerieJsonSchema } from '../packages/core/src/schemas/lingerie-json.js';
 import type { RegistryIndex } from '../packages/core/src/schemas/registry.js';
 
@@ -94,7 +94,11 @@ for (const dir of dressDirs) {
     if (!dress.skills[cron.skill]) {
       error(`cron "${cron.id}" references skill "${cron.skill}" which is not in skills`);
     }
-    if (cron.channel && cron.channel !== 'last' && !dress.requires.lingerie.includes(cron.channel)) {
+    if (
+      cron.channel &&
+      cron.channel !== 'last' &&
+      !dress.requires.lingerie.includes(cron.channel)
+    ) {
       error(`cron "${cron.id}" uses channel "${cron.channel}" not in requires.lingerie`);
     }
   }
@@ -205,9 +209,11 @@ const registry: RegistryIndex = {
 };
 
 const outPath = join(REGISTRY_DIR, 'registry.json');
-writeFileSync(outPath, JSON.stringify(registry, null, 2) + '\n');
+writeFileSync(outPath, `${JSON.stringify(registry, null, 2)}\n`);
 
-console.log(`\n✓ registry.json generated (${Object.keys(dressIndex).length} dresses, ${Object.keys(lingerieIndex).length} lingerie)`);
+console.log(
+  `\n✓ registry.json generated (${Object.keys(dressIndex).length} dresses, ${Object.keys(lingerieIndex).length} lingerie)`,
+);
 if (warnings > 0) {
   console.warn(`  ${warnings} warning(s)`);
 }

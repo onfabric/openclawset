@@ -3,21 +3,21 @@ import chalk from 'chalk';
 import { BaseCommand } from '../base.js';
 
 export default class Params extends BaseCommand {
-  static summary = 'View or update params for an active dress';
+  static override summary = 'View or update params for an active dress';
 
-  static examples = [
+  static override examples = [
     '<%= config.bin %> params fitness-coach',
     '<%= config.bin %> params tech-bro-digest --set tech-bro-digest.sources="Hacker News, Reddit"',
   ];
 
-  static args = {
+  static override args = {
     id: Args.string({
       description: 'Dress ID',
       required: true,
     }),
   };
 
-  static flags = {
+  static override flags = {
     ...BaseCommand.baseFlags,
     set: Flags.string({
       description: 'Set a param (skill.key=value)',
@@ -77,7 +77,9 @@ export default class Params extends BaseCommand {
       const rawValue = s.slice(eqIdx + 1);
       const dotIdx = fullKey.indexOf('.');
       if (dotIdx === -1) {
-        this.error(`Invalid param key: "${fullKey}". Use skill.key format (e.g. tech-bro-digest.sources).`);
+        this.error(
+          `Invalid param key: "${fullKey}". Use skill.key format (e.g. tech-bro-digest.sources).`,
+        );
       }
       const skillId = fullKey.slice(0, dotIdx);
       const paramKey = fullKey.slice(dotIdx + 1);
@@ -112,7 +114,10 @@ export default class Params extends BaseCommand {
 
     this.warn(
       'Param changes are saved to state but skills are not re-compiled.\n' +
-      '  To apply, run: clawtique undress ' + args.id + ' && clawtique dress ' + args.id,
+        '  To apply, run: clawtique undress ' +
+        args.id +
+        ' && clawtique dress ' +
+        args.id,
     );
 
     // Apply
@@ -128,11 +133,7 @@ export default class Params extends BaseCommand {
       const changedKeys = Object.entries(updates)
         .flatMap(([s, p]) => Object.keys(p).map((k) => `${s}.${k}`))
         .join(', ');
-      await this.gitManager.commit(
-        'refactor',
-        args.id,
-        `update params: ${changedKeys}`,
-      );
+      await this.gitManager.commit('refactor', args.id, `update params: ${changedKeys}`);
 
       this.log(`${chalk.green('✓')} Params updated.`);
     } finally {

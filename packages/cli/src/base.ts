@@ -1,15 +1,20 @@
-import { Command, Flags } from '@oclif/core';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import type { ClawtiqueConfig } from '@clawtique/core';
 import { clawtiqueConfigSchema } from '@clawtique/core';
-import { getClawtiquePaths, getOpenClawPaths, type ClawtiquePaths, type OpenClawPaths } from './lib/paths.js';
-import { StateManager } from './lib/state.js';
+import { Command, Flags } from '@oclif/core';
 import { GitManager } from './lib/git.js';
 import { LocalOpenClawDriver } from './lib/openclaw.js';
+import {
+  type ClawtiquePaths,
+  getClawtiquePaths,
+  getOpenClawPaths,
+  type OpenClawPaths,
+} from './lib/paths.js';
+import { StateManager } from './lib/state.js';
 
 export abstract class BaseCommand extends Command {
-  static baseFlags = {
+  static override baseFlags = {
     'clawtique-dir': Flags.string({
       description: 'Path to clawtique directory',
       env: 'CLAWTIQUE_DIR',
@@ -27,9 +32,7 @@ export abstract class BaseCommand extends Command {
     this.clawtiquePaths = getClawtiquePaths(flags['clawtique-dir']);
 
     if (!existsSync(this.clawtiquePaths.config)) {
-      this.error(
-        'Clawtique is not initialized.\nRun: clawtique init',
-      );
+      this.error('Clawtique is not initialized.\nRun: clawtique init');
     }
 
     const raw = await readFile(this.clawtiquePaths.config, 'utf-8');

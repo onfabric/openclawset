@@ -1,5 +1,5 @@
-import type { ResolvedDress, CronDef, PluginDef } from './schema.js';
 import { DependencyGraph } from './graph.js';
+import type { CronDef, PluginDef, ResolvedDress } from './schema.js';
 
 // ---------------------------------------------------------------------------
 // Conflict types
@@ -29,9 +29,10 @@ export interface DesiredState {
 // Merge all active dresses into a desired state
 // ---------------------------------------------------------------------------
 
-export function mergeDresses(
-  dresses: Map<string, ResolvedDress>,
-): { state: DesiredState; conflicts: MergeConflict[] } {
+export function mergeDresses(dresses: Map<string, ResolvedDress>): {
+  state: DesiredState;
+  conflicts: MergeConflict[];
+} {
   const conflicts: MergeConflict[] = [];
 
   const state: DesiredState = {

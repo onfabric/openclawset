@@ -1,6 +1,6 @@
-import { simpleGit, type SimpleGit } from 'simple-git';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { type SimpleGit, simpleGit } from 'simple-git';
 
 export class GitManager {
   private git: SimpleGit;
@@ -61,11 +61,13 @@ export class GitManager {
   }
 
   /** Get recent log entries. */
-  async log(count: number = 20): Promise<Array<{
-    hash: string;
-    date: string;
-    message: string;
-  }>> {
+  async log(count: number = 20): Promise<
+    Array<{
+      hash: string;
+      date: string;
+      message: string;
+    }>
+  > {
     try {
       const log = await this.git.log({ maxCount: count });
       return log.all.map((entry) => ({
@@ -84,8 +86,8 @@ export class GitManager {
       const log = await this.git.log({ maxCount: 1 });
       if (log.all.length === 0) return null;
       return {
-        hash: log.all[0].hash,
-        message: log.all[0].message,
+        hash: log.all[0]!.hash,
+        message: log.all[0]!.message,
       };
     } catch {
       return null;

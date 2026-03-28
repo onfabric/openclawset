@@ -1,4 +1,4 @@
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 
 // ---------------------------------------------------------------------------
@@ -12,7 +12,9 @@ export interface ExecCall {
   exitCode: number;
 }
 
-export type ExecFn = (args: string[]) => Promise<{ stdout: string; stderr: string; exitCode: number }>;
+export type ExecFn = (
+  args: string[],
+) => Promise<{ stdout: string; stderr: string; exitCode: number }>;
 
 // ---------------------------------------------------------------------------
 // Recording — wraps a real exec and saves every call to a fixture file
@@ -28,7 +30,7 @@ export function recordingExec(realExec: ExecFn, calls: ExecCall[]): ExecFn {
 
 export async function saveRecording(calls: ExecCall[], path: string): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
-  await writeFile(path, JSON.stringify(calls, null, 2) + '\n');
+  await writeFile(path, `${JSON.stringify(calls, null, 2)}\n`);
 }
 
 // ---------------------------------------------------------------------------
@@ -53,11 +55,11 @@ export function replayExec(calls: ExecCall[]): ExecFn {
     if (idx === -1) {
       throw new Error(
         `No recorded response for: openclaw ${args.join(' ')}\n` +
-        `Remaining recordings: ${queue.map((c) => c.args.join(' ')).join('\n  ')}`,
+          `Remaining recordings: ${queue.map((c) => c.args.join(' ')).join('\n  ')}`,
       );
     }
     const [call] = queue.splice(idx, 1);
-    return { stdout: call.stdout, stderr: call.stderr, exitCode: call.exitCode };
+    return { stdout: call!.stdout, stderr: call!.stderr, exitCode: call!.exitCode };
   };
 }
 

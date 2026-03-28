@@ -1,22 +1,22 @@
-import { Command, Flags } from '@oclif/core';
 import { existsSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { input, confirm } from '@inquirer/prompts';
-import chalk from 'chalk';
 import type { ClawtiqueConfig, StateFile } from '@clawtique/core';
-import { getClawtiquePaths, getOpenClawPaths } from '../lib/paths.js';
+import { confirm, input } from '@inquirer/prompts';
+import { Command, Flags } from '@oclif/core';
+import chalk from 'chalk';
 import { GitManager } from '../lib/git.js';
+import { getClawtiquePaths, getOpenClawPaths } from '../lib/paths.js';
 
 export default class Init extends Command {
-  static summary = 'Initialize clawtique for an OpenClaw instance';
+  static override summary = 'Initialize clawtique for an OpenClaw instance';
 
-  static examples = [
+  static override examples = [
     '<%= config.bin %> init',
     '<%= config.bin %> init --openclaw-dir ~/.openclaw',
   ];
 
-  static flags = {
+  static override flags = {
     'openclaw-dir': Flags.string({
       char: 'o',
       description: 'Path to the OpenClaw directory',
@@ -49,7 +49,7 @@ export default class Init extends Command {
     if (!openclawDir) {
       openclawDir = await input({
         message: 'Where is your OpenClaw directory?',
-        default: join(process.env['HOME'] ?? '~', '.openclaw'),
+        default: join(process.env.HOME ?? '~', '.openclaw'),
       });
     }
 
@@ -78,7 +78,7 @@ export default class Init extends Command {
       timezone: 'UTC',
       version: '0.1.0',
     };
-    await writeFile(paths.config, JSON.stringify(config, null, 2) + '\n');
+    await writeFile(paths.config, `${JSON.stringify(config, null, 2)}\n`);
 
     // Write initial state
     const state: StateFile = {
@@ -88,7 +88,7 @@ export default class Init extends Command {
       dresses: {},
       lingerie: {},
     };
-    await writeFile(paths.state, JSON.stringify(state, null, 2) + '\n');
+    await writeFile(paths.state, `${JSON.stringify(state, null, 2)}\n`);
 
     // Initialize git repo
     const git = new GitManager(paths.root);
@@ -96,9 +96,9 @@ export default class Init extends Command {
     await git.commit('feat', 'clawtique', 'initialize clawtique');
 
     this.log('');
-    this.log(chalk.green('✓') + ' Initialized clawtique at ' + chalk.cyan(paths.root));
-    this.log(chalk.green('✓') + ' OpenClaw directory: ' + chalk.cyan(openclawDir));
-    this.log(chalk.green('✓') + ' Git repo initialized');
+    this.log(`${chalk.green('✓')} Initialized clawtique at ${chalk.cyan(paths.root)}`);
+    this.log(`${chalk.green('✓')} OpenClaw directory: ${chalk.cyan(openclawDir)}`);
+    this.log(`${chalk.green('✓')} Git repo initialized`);
     this.log('');
     this.log('Ready. Try:');
     this.log(`  ${chalk.cyan('clawtique dress')} ./path/to/dress`);

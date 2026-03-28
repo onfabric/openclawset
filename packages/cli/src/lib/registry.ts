@@ -1,13 +1,13 @@
-import { readFile, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
-  dressJsonSchema,
-  lingerieJsonSchema,
-  registryIndexSchema,
   type DressJson,
+  dressJsonSchema,
   type LingerieJson,
+  lingerieJsonSchema,
   type RegistryIndex,
+  registryIndexSchema,
 } from '@clawtique/core';
 
 // ---------------------------------------------------------------------------
@@ -98,6 +98,6 @@ export function createRegistryProvider(cwd: string): RegistryProvider {
   // TODO: return GitHubRegistryProvider when remote support is added
   throw new Error(
     'No local registry found. Remote registry support is not yet available.\n' +
-    'Run this command from the clawtique repository root, or install dresses from a local registry.',
+      'Run this command from the clawtique repository root, or install dresses from a local registry.',
   );
 }

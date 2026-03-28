@@ -3,11 +3,11 @@ import chalk from 'chalk';
 import { BaseCommand } from '../base.js';
 
 export default class Diff extends BaseCommand {
-  static summary = 'Show what clawtique has applied vs the current OpenClaw state';
+  static override summary = 'Show what clawtique has applied vs the current OpenClaw state';
 
-  static examples = ['<%= config.bin %> diff'];
+  static override examples = ['<%= config.bin %> diff'];
 
-  static flags = {
+  static override flags = {
     ...BaseCommand.baseFlags,
     json: Flags.boolean({
       description: 'Output as JSON',
@@ -23,11 +23,17 @@ export default class Diff extends BaseCommand {
     const applied = this.stateManager.currentApplied(state);
 
     if (flags.json) {
-      this.log(JSON.stringify({
-        crons: [...applied.crons],
-        plugins: [...applied.plugins],
-        skills: [...applied.skills],
-      }, null, 2));
+      this.log(
+        JSON.stringify(
+          {
+            crons: [...applied.crons],
+            plugins: [...applied.plugins],
+            skills: [...applied.skills],
+          },
+          null,
+          2,
+        ),
+      );
       return;
     }
 
