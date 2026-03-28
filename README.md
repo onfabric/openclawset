@@ -90,7 +90,7 @@ clawtique params fitness-coach --set workout-schedule.time=18:00
 | Command | Description |
 |---------|-------------|
 | `clawtique init` | Initialize clawtique for an OpenClaw instance |
-| `clawtique dress [id]` | Install a dress (interactive picker if no id) |
+| `clawtique dress <id>` | Install a dress (interactive picker if no id) |
 | `clawtique undress <id>` | Remove a dress's config, keep its data |
 | `clawtique status` | List active dresses and their components |
 | `clawtique params <id>` | View or update a dress's parameters |
