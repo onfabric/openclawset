@@ -9,8 +9,8 @@ import {
   PERSONALITY_FILES,
   type PersonalityFile,
   personalityJsonSchema,
-  type ResolvedPersonality,
   type RegistryIndex,
+  type ResolvedPersonality,
   registryIndexSchema,
 } from '#core/index.ts';
 
@@ -167,10 +167,7 @@ export class GitHubRegistryProvider implements RegistryProvider {
 
     const files = {} as Record<PersonalityFile, string>;
     for (const file of PERSONALITY_FILES) {
-      files[file] = await this.fetchText(
-        `${this.baseUrl}/${base}/${file}`,
-        `${base}/${file}`,
-      );
+      files[file] = await this.fetchText(`${this.baseUrl}/${base}/${file}`, `${base}/${file}`);
     }
 
     return { ...manifest, files };
