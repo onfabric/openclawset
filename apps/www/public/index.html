@@ -870,8 +870,7 @@
 
     // ═══ PIXEL ART WARDROBE ═══
     // Colors
-    const WOOD = { dark: '#3d2b1f', mid: '#5c3d2e', light: '#7a5240', highlight: '#96654a' };
-    const BRASS = { dark: '#9a7b3c', mid: '#d4a94e', light: '#f0d078' };
+    const BRASS = { dark: '#c4967a', mid: '#e8b89e', light: '#f5d5c4' };
 
     // Garment pixel art — each defined as array of [dx, dy, color] from anchor (cx, cy)
     // These are miniature outfits hanging on the rack
@@ -994,72 +993,130 @@
     function drawWardrobe(activeIdx) {
       wCtx.clearRect(0, 0, wCanvas.width, wCanvas.height);
 
-      // Wardrobe frame — open closet / clothes rack style
-      // Left pillar
-      wrect(0, 0, 2, 48, WOOD.dark);
-      wrect(2, 0, 1, 48, WOOD.mid);
-      // Right pillar
-      wrect(75, 0, 1, 48, WOOD.mid);
-      wrect(76, 0, 2, 48, WOOD.dark);
-      // Top beam
-      wrect(0, 0, 78, 2, WOOD.dark);
-      wrect(1, 0, 76, 1, WOOD.mid);
-      wrect(2, 1, 74, 1, WOOD.highlight);
-      // Bottom shelf
-      wrect(0, 44, 78, 2, WOOD.dark);
-      wrect(1, 44, 76, 1, WOOD.mid);
-      // Decorative corners
-      wpx(0, 0, WOOD.light); wpx(77, 0, WOOD.light);
-      wpx(0, 45, WOOD.light); wpx(77, 45, WOOD.light);
+      // ═══ BOUTIQUE STOREFRONT ═══  (78 x 48 pixel grid)
+      const FACADE = '#1c1828';
+      const FRAME_C = '#e8c8b8', FRAME_D = '#c4967a', FRAME_L = '#f5e0d4';
+      const INTERIOR = '#110e18';
+      const SIGN_BG = '#16111e';
+      const PINK = '#ff6b8a', PINK_DK = '#d4506c';
 
-      // Interior background — warm linen tone for contrast
-      wrect(3, 2, 72, 42, '#2a2218');
-      // Subtle vertical gradient: slightly lighter at top
-      wCtx.fillStyle = 'rgba(196, 166, 125, 0.06)';
-      wCtx.fillRect(3 * W, 2 * W, 72 * W, 10 * W);
+      // ── Building facade ──
+      wrect(0, 0, 78, 48, FACADE);
 
-      // Brass rod
-      wrect(5, 5, 68, 1, BRASS.dark);
-      wrect(5, 4, 68, 1, BRASS.mid);
-      wrect(6, 3, 66, 1, BRASS.light);
-      // Rod end caps
-      wpx(4, 4, BRASS.light); wpx(73, 4, BRASS.light);
-      wpx(4, 5, BRASS.dark); wpx(73, 5, BRASS.dark);
+      // ── Awning — 3 rows ──
+      wrect(0, 0, 78, 3, PINK);
+      wrect(0, 1, 78, 1, PINK_DK);
+      wrect(0, 2, 78, 1, '#b8354a');
+      wrect(1, 0, 76, 1, '#ff8da4');
+      // Scalloped trim
+      for (let x = 0; x < 78; x++) {
+        if (x % 8 < 4) wpx(x, 3, '#9a2e42');
+      }
 
-      // Draw a spotlight behind the active garment (skip during install to avoid ghost glow)
+      // ── Sign — "clawtique" ──
+      wrect(10, 5, 58, 5, SIGN_BG);
+      wrect(10, 5, 58, 1, '#2a2036');
+      wrect(10, 9, 58, 1, '#2a2036');
+      wrect(10, 5, 1, 5, '#2a2036');
+      wrect(67, 5, 1, 5, '#2a2036');
+      wpx(11, 6, PINK); wpx(66, 6, PINK);
+      wpx(11, 8, PINK); wpx(66, 8, PINK);
+      wCtx.save();
+      wCtx.font = '700 11px "Space Mono", monospace';
+      wCtx.fillStyle = '#f0d0d8';
+      wCtx.textAlign = 'center';
+      wCtx.textBaseline = 'middle';
+      wCtx.fillText('c l a w t i q u e', 39 * W, 7.5 * W);
+      wCtx.restore();
+
+      // ── Display window ──
+      wrect(3, 11, 72, 1, FRAME_L);
+      wrect(3, 11, 1, 33, FRAME_D);
+      wrect(74, 11, 1, 33, FRAME_D);
+      wrect(3, 43, 72, 1, FRAME_L);
+      wrect(4, 12, 70, 1, FRAME_C);
+      wpx(3, 11, '#fff'); wpx(74, 11, '#fff');
+
+      // Interior
+      wrect(4, 13, 70, 30, INTERIOR);
+      wCtx.fillStyle = 'rgba(255, 180, 200, 0.04)';
+      wCtx.fillRect(4 * W, 13 * W, 70 * W, 15 * W);
+      wCtx.fillStyle = 'rgba(255, 200, 190, 0.025)';
+      wCtx.fillRect(4 * W, 28 * W, 70 * W, 15 * W);
+
+      // Display rod
+      wrect(7, 15, 64, 1, FRAME_D);
+      wrect(7, 14, 64, 1, FRAME_C);
+      wrect(8, 13, 62, 1, FRAME_L);
+      wpx(6, 13, FRAME_L); wpx(71, 13, FRAME_L);
+      wpx(6, 14, FRAME_C); wpx(71, 14, FRAME_C);
+      wpx(6, 15, FRAME_D); wpx(71, 15, FRAME_D);
+
+      // ── Base — sill + sidewalk ──
+      wrect(0, 44, 78, 1, FRAME_C);
+      wrect(0, 45, 78, 1, '#3a3440');
+      wrect(0, 46, 78, 2, '#2e2832');
+      wpx(14, 46, '#42404a'); wpx(39, 46, '#42404a'); wpx(62, 46, '#42404a');
+
+      // ── Browsing spotlight — soft glow behind hovered dress ──
       if (activeIdx >= 0 && activeIdx < GARMENT_DRAW.length && wardrobeSkip.size === 0) {
         const glowCx = GARMENT_CX[activeIdx];
-        wCtx.fillStyle = 'rgba(255, 200, 140, 0.08)';
-        wCtx.fillRect((glowCx - 7) * W, 6 * W, 15 * W, 38 * W);
-        wCtx.fillStyle = 'rgba(255, 220, 160, 0.06)';
-        wCtx.fillRect((glowCx - 6) * W, 8 * W, 13 * W, 34 * W);
+        wCtx.fillStyle = 'rgba(255, 200, 190, 0.10)';
+        wCtx.fillRect((glowCx - 7) * W, 14 * W, 15 * W, 28 * W);
+        wCtx.fillStyle = 'rgba(255, 230, 220, 0.06)';
+        wCtx.fillRect((glowCx - 5) * W, 16 * W, 11 * W, 24 * W);
+        // Selection cursor
+        wpx(glowCx, 12, PINK);
+        wpx(glowCx - 1, 11, PINK);
+        wpx(glowCx + 1, 11, PINK);
       }
 
-      // Selection cursor — pixel arrow pointing down at active garment
-      if (activeIdx >= 0 && activeIdx < GARMENT_DRAW.length) {
-        const acx = GARMENT_CX[activeIdx];
-        wpx(acx, 1, '#ff4d6a');
-        wpx(acx - 1, 0, '#ff4d6a');
-        wpx(acx + 1, 0, '#ff4d6a');
-      }
-
-      // Draw hangers and garments
+      // ── Hangers and garments ──
       for (let i = 0; i < GARMENT_DRAW.length; i++) {
         const cx = GARMENT_CX[i];
         const bright = (i === activeIdx);
-        drawHanger(cx, 7);
-        // Pass skip set to the chosen garment so removed items disappear
+        drawHanger(cx, 16);
         if (GARMENT_DRAW[i] === drawGarmentSleep) {
-          GARMENT_DRAW[i](cx, 10, bright, wardrobeSkip);
+          GARMENT_DRAW[i](cx, 19, bright, wardrobeSkip);
         } else {
-          GARMENT_DRAW[i](cx, 10, bright);
+          GARMENT_DRAW[i](cx, 19, bright);
         }
       }
 
+      // ── Highlight active dress: dim entire interior, then spotlight + redraw active ──
+      if (activeIdx >= 0 && activeIdx < GARMENT_DRAW.length && wardrobeSkip.size > 0) {
+        // Dim the whole interior
+        wCtx.fillStyle = 'rgba(8, 6, 14, 0.5)';
+        wCtx.fillRect(4 * W, 13 * W, 70 * W, 30 * W);
+
+        // Spotlight glow on the active garment
+        const glowCx = GARMENT_CX[activeIdx];
+        wCtx.fillStyle = 'rgba(255, 220, 210, 0.18)';
+        wCtx.fillRect((glowCx - 8) * W, 13 * W, 17 * W, 30 * W);
+        wCtx.fillStyle = 'rgba(255, 240, 230, 0.12)';
+        wCtx.fillRect((glowCx - 6) * W, 15 * W, 13 * W, 26 * W);
+        wCtx.fillStyle = 'rgba(255, 250, 245, 0.06)';
+        wCtx.fillRect((glowCx - 4) * W, 17 * W, 9 * W, 22 * W);
+
+        // Redraw active hanger + garment on top so it's crisp
+        drawHanger(activeIdx === 0 ? 16 : activeIdx === 1 ? 39 : 62, 16);
+        const acx = GARMENT_CX[activeIdx];
+        if (GARMENT_DRAW[activeIdx] === drawGarmentSleep) {
+          GARMENT_DRAW[activeIdx](acx, 19, true, wardrobeSkip);
+        } else {
+          GARMENT_DRAW[activeIdx](acx, 19, true);
+        }
+
+        // Selection cursor
+        wpx(acx, 12, PINK);
+        wpx(acx - 1, 11, PINK);
+        wpx(acx + 1, 11, PINK);
+      }
+
       // Floor shadow
-      wCtx.fillStyle = 'rgba(0,0,0,0.12)';
+      wCtx.fillStyle = 'rgba(0,0,0,0.06)';
       for (let x = 5; x < 73; x++) {
-        wCtx.fillRect(x * W, 43 * W, W, 2);
+        wCtx.fillRect(x * W, 42 * W, W, 2);
       }
     }
 
@@ -1168,9 +1225,9 @@
         const wRect = wCanvas.getBoundingClientRect();
         const cRect = canvasContainer.getBoundingClientRect();
 
-        // Start: center of the garment in the wardrobe
+        // Start: center of the garment in the storefront display
         const sx = wRect.left - stageRect.left + GARMENT_CX[garmentIdx] * W;
-        const sy = wRect.top - stageRect.top + 22 * W;
+        const sy = wRect.top - stageRect.top + 29 * W;
 
         // End: target on the lobster (scaled)
         const scale = 0.8;
