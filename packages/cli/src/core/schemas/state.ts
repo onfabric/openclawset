@@ -41,7 +41,8 @@ export const appliedStateSchema = z.object({
   installedPlugins: z.array(z.string()).default([]),
   memorySections: z.array(z.string()).default([]),
   files: z.array(z.string()).default([]),
-  heartbeatEntries: z.array(z.string()).default([]),
+  heartbeatSkills: z.array(z.string()).default([]),
+  userSkills: z.array(z.string()).default([]),
   workspaceFiles: z.array(z.string()).default([]),
   lingerie: z.array(z.string()).default([]),
 });

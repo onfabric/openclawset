@@ -75,6 +75,7 @@ export type {
   ResolvedPersonality,
   SkillJson,
   SkillParam,
+  SkillTrigger,
   StateFile as StateFileV2,
   Weekday,
 } from '#core/schemas/index.ts';
@@ -89,4 +90,5 @@ export {
   registryIndexSchema,
   skillJsonSchema,
   skillParamSchema,
+  skillTriggerSchema,
 } from '#core/schemas/index.ts';

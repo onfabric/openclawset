@@ -1,4 +1,4 @@
-import type { ClawtiqueConfig, DressJson, PersonalityFile, Weekday } from '#core/index.ts';
+import type { ClawtiqueConfig, DressJson, PersonalityFile, SkillTrigger, Weekday } from '#core/index.ts';
 import { cronFromTime, PERSONALITY_FILES } from '#core/index.ts';
 
 // ---------------------------------------------------------------------------
@@ -52,12 +52,12 @@ export interface CompiledDress {
   crons: CompiledCron[];
   bundledSkills: Map<string, string>; // skillId → compiled .md content
   clawHubSkills: string[]; // skill IDs to install from ClawHub
+  skillTriggers: Record<string, SkillTrigger>; // skillId → trigger definition
   plugins: DressJson['requires']['plugins'];
   lingerie: string[];
 
   memory: DressJson['memory'];
-  heartbeat: string[];
-  workspace: Record<string, string>;
+  workspace: string[];
   secrets: DressJson['secrets'];
 }
 
@@ -83,7 +83,7 @@ export function buildAutoVars(dress: DressJson): Record<string, string> {
     'memory.reads': dress.memory.reads.join(', '),
     'workspace.root': `~/.openclaw/workspace/${dress.id}`,
   };
-  for (const wsPath of Object.keys(dress.workspace)) {
+  for (const wsPath of dress.workspace) {
     vars[`workspace.${wsPath}`] = `~/.openclaw/workspace/${wsPath}`;
   }
   return vars;
@@ -136,10 +136,33 @@ export function validateDress(
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  // Every cron.skill must reference a key in skills
+  // Build cron ID set for validation
+  const cronIds = new Set(dress.crons.map((c) => c.id));
+  // Track which crons have a skill bound to them
+  const boundCrons = new Map<string, string>(); // cronId → skillId
+
+  // Validate skill triggers
+  for (const [skillId, skillDef] of Object.entries(dress.skills)) {
+    const trigger = skillDef.trigger;
+    if (trigger.type === 'cron') {
+      if (!cronIds.has(trigger.cronId)) {
+        errors.push(
+          `Skill "${skillId}" has trigger.cronId "${trigger.cronId}" which does not match any cron`,
+        );
+      } else if (boundCrons.has(trigger.cronId)) {
+        errors.push(
+          `Cron "${trigger.cronId}" is bound to both "${boundCrons.get(trigger.cronId)}" and "${skillId}"`,
+        );
+      } else {
+        boundCrons.set(trigger.cronId, skillId);
+      }
+    }
+  }
+
+  // Every cron must have exactly one skill bound to it
   for (const cron of dress.crons) {
-    if (!dress.skills[cron.skill]) {
-      errors.push(`Cron "${cron.id}" references skill "${cron.skill}" which is not in skills`);
+    if (!boundCrons.has(cron.id)) {
+      errors.push(`Cron "${cron.id}" has no skill with trigger.cronId pointing to it`);
     }
     if (
       cron.channel &&
@@ -194,18 +217,32 @@ export function compileDress(input: CompileInput): CompiledDress {
   const { dress, skillContents, cronSchedules, skillParams, timezone } = input;
   const autoVars = buildAutoVars(dress);
 
+  // Build cronId → skillId mapping from skill triggers
+  const cronToSkill = new Map<string, string>();
+  const skillTriggers: Record<string, SkillTrigger> = {};
+  for (const [skillId, skillDef] of Object.entries(dress.skills)) {
+    skillTriggers[skillId] = skillDef.trigger;
+    if (skillDef.trigger.type === 'cron') {
+      cronToSkill.set(skillDef.trigger.cronId, skillId);
+    }
+  }
+
   // Compile crons
   const compiledCrons: CompiledCron[] = dress.crons.map((cron) => {
     const schedule = cronSchedules[cron.id];
     if (!schedule) {
       throw new Error(`No schedule provided for cron "${cron.id}"`);
     }
+    const skill = cronToSkill.get(cron.id);
+    if (!skill) {
+      throw new Error(`No skill bound to cron "${cron.id}"`);
+    }
     return {
       id: cron.id,
       dressId: dress.id,
       name: cron.name,
       schedule: cronFromTime(schedule.time, schedule.days, timezone),
-      skill: cron.skill,
+      skill,
       channel: schedule.channel ?? 'last',
     };
   });
@@ -254,11 +291,11 @@ export function compileDress(input: CompileInput): CompiledDress {
     crons: compiledCrons,
     bundledSkills,
     clawHubSkills,
+    skillTriggers,
     plugins: dress.requires.plugins,
     lingerie: dress.requires.lingerie,
 
     memory: dress.memory,
-    heartbeat: dress.heartbeat,
     workspace: dress.workspace,
     secrets: dress.secrets,
   };

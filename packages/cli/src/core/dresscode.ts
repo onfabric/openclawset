@@ -1,3 +1,4 @@
+import type { SkillTrigger } from '#core/schemas/index.ts';
 import type { ResolvedDress } from '#core/schema.ts';
 
 /**
@@ -7,7 +8,10 @@ import type { ResolvedDress } from '#core/schema.ts';
  * It lives at ~/.openclaw/workspace/dresses/<id>/DRESSCODE.md and is referenced from
  * DRESSES.md so the agent knows about active dress configurations.
  */
-export function generateDresscode(dress: ResolvedDress): string {
+export function generateDresscode(
+  dress: ResolvedDress,
+  skillTriggers: Record<string, SkillTrigger>,
+): string {
   const lines: string[] = [];
 
   lines.push(`# ${dress.name}`);
@@ -17,22 +21,56 @@ export function generateDresscode(dress: ResolvedDress): string {
     lines.push('');
   }
 
-  // Skills
-  if (dress.requires.skills.length > 0) {
-    lines.push('## Skills');
+  // Group skills by trigger type
+  const cronSkills: [string, SkillTrigger & { type: 'cron' }][] = [];
+  const userSkills: [string, SkillTrigger & { type: 'user' }][] = [];
+  const heartbeatSkills: [string, SkillTrigger & { type: 'heartbeat' }][] = [];
+
+  for (const skill of dress.requires.skills) {
+    const trigger = skillTriggers[skill];
+    if (!trigger) continue;
+    if (trigger.type === 'cron') cronSkills.push([skill, trigger]);
+    else if (trigger.type === 'user') userSkills.push([skill, trigger]);
+    else if (trigger.type === 'heartbeat') heartbeatSkills.push([skill, trigger]);
+  }
+
+  // Cron skills — show schedule binding
+  if (cronSkills.length > 0) {
+    lines.push('## Cron Skills');
     lines.push('');
-    for (const skill of dress.requires.skills) {
-      lines.push(`- **${skill}** — \`~/.openclaw/skills/${skill}/SKILL.md\``);
+    for (const [skillId, trigger] of cronSkills) {
+      const cron = dress.crons.find((c) => c.id === trigger.cronId);
+      const schedule = cron ? ` (\`${cron.schedule}\`)` : '';
+      const cronName = cron ? `**${cron.name}**${schedule} → ` : '';
+      lines.push(`- ${cronName}\`~/.openclaw/skills/${skillId}/SKILL.md\``);
     }
     lines.push('');
   }
 
-  // Crons → skill bindings
-  if (dress.crons.length > 0) {
-    lines.push('## Crons');
+  // User skills — show description for routing
+  if (userSkills.length > 0) {
+    lines.push('## User Skills');
     lines.push('');
-    for (const cron of dress.crons) {
-      lines.push(`- **${cron.name}** (\`${cron.schedule}\`) → skill: **${cron.skill}**`);
+    lines.push(
+      'When the user\'s request matches one of these, read the skill file and follow its instructions.',
+    );
+    lines.push('');
+    for (const [skillId, trigger] of userSkills) {
+      lines.push(`- **${skillId}** — ${trigger.description}`);
+      lines.push(`  → \`~/.openclaw/skills/${skillId}/SKILL.md\``);
+    }
+    lines.push('');
+  }
+
+  // Heartbeat skills — proactive behaviors
+  if (heartbeatSkills.length > 0) {
+    lines.push('## Heartbeat Skills');
+    lines.push('');
+    lines.push('Proactive behaviors to follow between scheduled tasks.');
+    lines.push('');
+    for (const [skillId, trigger] of heartbeatSkills) {
+      lines.push(`- **${skillId}** — ${trigger.description}`);
+      lines.push(`  → \`~/.openclaw/skills/${skillId}/SKILL.md\``);
     }
     lines.push('');
   }
@@ -50,16 +88,6 @@ export function generateDresscode(dress: ResolvedDress): string {
     lines.push('');
   }
 
-  // Heartbeat
-  if (dress.heartbeat.length > 0) {
-    lines.push('## Heartbeat');
-    lines.push('');
-    for (const entry of dress.heartbeat) {
-      lines.push(`- ${entry}`);
-    }
-    lines.push('');
-  }
-
   // Plugins
   if (dress.requires.plugins.length > 0) {
     lines.push('## Plugins');
@@ -71,11 +99,10 @@ export function generateDresscode(dress: ResolvedDress): string {
   }
 
   // Workspace files
-  const workspacePaths = Object.keys(dress.workspace);
-  if (workspacePaths.length > 0) {
+  if (dress.workspace.length > 0) {
     lines.push('## Workspace');
     lines.push('');
-    for (const path of workspacePaths) {
+    for (const path of dress.workspace) {
       lines.push(`- \`~/.openclaw/workspace/${path}\``);
     }
     lines.push('');

@@ -5,7 +5,7 @@
  * Validation:
  *  - dress.json / lingerie.json parse against Zod schemas
  *  - param defaults match their declared type (enforced by schema)
- *  - every cron.skill references a key in skills
+ *  - every cron-triggered skill references a valid cron, and every cron has exactly one skill
  *  - every cron.channel is in requires.lingerie
  *  - every bundled skill has a .md file
  *  - every {{placeholder}} in a bundled .md has a matching param or is an auto-var (error)
@@ -98,10 +98,24 @@ for (const dir of dressDirs) {
     error(`dress.id "${dress.id}" does not match directory name "${dir}"`);
   }
 
-  // Validate cron → skill references
+  // Validate skill triggers → cron bindings
+  const cronIds = new Set(dress.crons.map((c) => c.id));
+  const boundCrons = new Map<string, string>();
+  for (const [skillId, skillDef] of Object.entries(dress.skills)) {
+    const trigger = skillDef.trigger;
+    if (trigger.type === 'cron') {
+      if (!cronIds.has(trigger.cronId)) {
+        error(`skill "${skillId}" has trigger.cronId "${trigger.cronId}" which does not match any cron`);
+      } else if (boundCrons.has(trigger.cronId)) {
+        error(`cron "${trigger.cronId}" is bound to both "${boundCrons.get(trigger.cronId)}" and "${skillId}"`);
+      } else {
+        boundCrons.set(trigger.cronId, skillId);
+      }
+    }
+  }
   for (const cron of dress.crons) {
-    if (!dress.skills[cron.skill]) {
-      error(`cron "${cron.id}" references skill "${cron.skill}" which is not in skills`);
+    if (!boundCrons.has(cron.id)) {
+      error(`cron "${cron.id}" has no skill with trigger.cronId pointing to it`);
     }
     if (
       cron.channel &&
@@ -138,6 +152,14 @@ for (const dir of dressDirs) {
       if (!placeholders.has(param)) {
         warn(`skill "${skillId}": param "${param}" is declared but never used as {{${param}}}`);
       }
+    }
+  }
+
+  // Validate workspace files exist
+  for (const wsPath of dress.workspace) {
+    const wsFilePath = join(DRESSES_DIR, dir, 'workspace', wsPath);
+    if (!existsSync(wsFilePath)) {
+      error(`workspace file "${wsPath}" not found at workspace/${wsPath}`);
     }
   }
 

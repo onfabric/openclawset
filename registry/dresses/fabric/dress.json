@@ -22,20 +22,27 @@
     {
       "id": "deep-user-profile",
       "name": "Daily user profile update",
-      "skill": "deep-user-profile",
       "defaults": { "time": "00:00" }
     }
   ],
 
   "skills": {
-    "user-check-in": {},
-    "deep-user-profile": {}
+    "deep-user-profile": {
+      "trigger": { "type": "cron", "cronId": "deep-user-profile" }
+    },
+    "user-check-in": {
+      "trigger": {
+        "type": "heartbeat",
+        "description": "Proactively check in with the user when there is something worth discussing"
+      }
+    },
+    "retrieve-memories": {
+      "trigger": {
+        "type": "user",
+        "description": "User discusses a topic that could benefit from personalised context from their history"
+      }
+    }
   },
 
-  "memory": { "dailySections": ["Fabric"] },
-
-  "heartbeat": [
-    "Follow the guidelines of the user-check-in skill to check in with the user.",
-    "Whenever the user is discussing a topic that could benefit from personalised context, use the retrieve-relevant-user-memories skill before responding."
-  ]
+  "memory": { "dailySections": ["Fabric"] }
 }

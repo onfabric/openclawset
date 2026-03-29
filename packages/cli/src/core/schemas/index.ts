@@ -7,6 +7,7 @@ export type {
   SecretDef,
   SkillJson,
   SkillParam,
+  SkillTrigger,
   Weekday,
 } from '#core/schemas/dress-json.ts';
 export {
@@ -20,6 +21,7 @@ export {
   semverSchema,
   skillJsonSchema,
   skillParamSchema,
+  skillTriggerSchema,
 } from '#core/schemas/dress-json.ts';
 export type { LingerieJson } from '#core/schemas/lingerie-json.ts';
 export { lingerieJsonSchema } from '#core/schemas/lingerie-json.ts';

@@ -51,13 +51,12 @@ const cronDefaultsSchema = z
   .default({});
 
 // ---------------------------------------------------------------------------
-// Cron definition
+// Cron definition (pure schedule — skill binding lives in the skill's trigger)
 // ---------------------------------------------------------------------------
 
 export const cronJsonSchema = z.object({
   id: dressIdSchema,
   name: z.string(),
-  skill: z.string(),
   channel: z.string().optional(),
   defaults: cronDefaultsSchema,
 });
@@ -91,11 +90,37 @@ export const skillParamSchema = z
   );
 
 // ---------------------------------------------------------------------------
+// Skill trigger — determines when and how a skill is activated
+// ---------------------------------------------------------------------------
+
+const cronTriggerSchema = z.object({
+  type: z.literal('cron'),
+  cronId: dressIdSchema,
+});
+
+const userTriggerSchema = z.object({
+  type: z.literal('user'),
+  description: z.string().min(1, 'User-triggered skills must have a description'),
+});
+
+const heartbeatTriggerSchema = z.object({
+  type: z.literal('heartbeat'),
+  description: z.string().min(1, 'Heartbeat-triggered skills must have a description'),
+});
+
+export const skillTriggerSchema = z.discriminatedUnion('type', [
+  cronTriggerSchema,
+  userTriggerSchema,
+  heartbeatTriggerSchema,
+]);
+
+// ---------------------------------------------------------------------------
 // Skill definition
 // ---------------------------------------------------------------------------
 
 export const skillJsonSchema = z.object({
   source: z.enum(['bundled', 'clawhub']).default('bundled'),
+  trigger: skillTriggerSchema,
   params: z.record(z.string(), skillParamSchema).default({}),
 });
 
@@ -136,8 +161,7 @@ export const dressJsonSchema = z.object({
   secrets: z.record(z.string(), secretDefSchema).default({}),
 
   memory: memoryContractSchema,
-  heartbeat: z.array(z.string()).default([]),
-  workspace: z.record(z.string(), z.string()).default({}),
+  workspace: z.array(z.string()).default([]),
 });
 
 // ---------------------------------------------------------------------------
@@ -147,6 +171,7 @@ export const dressJsonSchema = z.object({
 export type DressJson = z.infer<typeof dressJsonSchema>;
 export type CronJson = z.infer<typeof cronJsonSchema>;
 export type SkillJson = z.infer<typeof skillJsonSchema>;
+export type SkillTrigger = z.infer<typeof skillTriggerSchema>;
 export type SkillParam = z.infer<typeof skillParamSchema>;
 export type PluginDef = z.infer<typeof pluginDefSchema>;
 export type Requires = z.infer<typeof requiresSchema>;

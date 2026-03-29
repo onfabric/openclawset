@@ -21,7 +21,6 @@ export interface DesiredState {
   skills: Set<string>;
   crons: Map<string, CronDef & { dressId: string }>;
   memorySections: Map<string, string>; // section name → dress id
-  heartbeatEntries: Map<string, string[]>; // dress id → entries
   secrets: Map<string, { dressId: string; description: string; url?: string }>;
 }
 
@@ -40,7 +39,6 @@ export function mergeDresses(dresses: Map<string, ResolvedDress>): {
     skills: new Set(),
     crons: new Map(),
     memorySections: new Map(),
-    heartbeatEntries: new Map(),
     secrets: new Map(),
   };
 
@@ -112,11 +110,6 @@ export function mergeDresses(dresses: Map<string, ResolvedDress>): {
       } else {
         state.memorySections.set(section, dressId);
       }
-    }
-
-    // Heartbeat — append
-    if (dress.heartbeat.length > 0) {
-      state.heartbeatEntries.set(dressId, dress.heartbeat);
     }
 
     // Secrets — fail if same key with different description

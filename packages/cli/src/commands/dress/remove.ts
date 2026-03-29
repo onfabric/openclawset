@@ -127,8 +127,11 @@ export default class DressRemove extends BaseCommand {
         : 'used by another dress';
       this.log(`  ${chalk.dim('~')} plugin: ${p} ${chalk.dim(`(retained — ${reason})`)}`);
     }
-    if (entry.applied.heartbeatEntries.length > 0) {
-      this.log(`  ${chalk.red('-')} heartbeat: ${entry.applied.heartbeatEntries.length} rule(s)`);
+    if ((entry.applied.heartbeatSkills ?? []).length > 0) {
+      this.log(`  ${chalk.red('-')} heartbeat skills: ${entry.applied.heartbeatSkills!.join(', ')}`);
+    }
+    if ((entry.applied.userSkills ?? []).length > 0) {
+      this.log(`  ${chalk.red('-')} user skills: ${entry.applied.userSkills!.join(', ')}`);
     }
     if (entry.applied.memorySections.length > 0) {
       for (const s of entry.applied.memorySections) {
@@ -233,7 +236,7 @@ export default class DressRemove extends BaseCommand {
           },
           {
             title: 'Stripping heartbeat rules',
-            skip: () => entry.applied.heartbeatEntries.length === 0,
+            skip: () => (entry.applied.heartbeatSkills ?? []).length === 0,
             task: async () => {
               await this.stripHeartbeatRules(dressId);
             },
@@ -369,8 +372,31 @@ export default class DressRemove extends BaseCommand {
   }
 
   private async rebuildDressesIndex(state: StateFile, excludeId: string): Promise<void> {
+    // Collect user skills from remaining dresses
+    const allUserSkills: { skillId: string; dressId: string }[] = [];
+    for (const [id, entry] of Object.entries(state.dresses)) {
+      if (id === excludeId) continue;
+      for (const skillId of entry.applied.userSkills ?? []) {
+        allUserSkills.push({ skillId, dressId: id });
+      }
+    }
+
     const lines = ['# Active Dresses\n'];
     lines.push('Read each DRESSCODE.md for details on skills, crons, and memory conventions.\n');
+
+    if (allUserSkills.length > 0) {
+      lines.push('## User Skills');
+      lines.push('');
+      lines.push(
+        "When the user's request matches one of these, you MUST read the linked skill file and follow its instructions before taking any action.",
+      );
+      lines.push('');
+      for (const { skillId, dressId } of allUserSkills) {
+        lines.push(`- **${skillId}** (${dressId})`);
+        lines.push(`  → \`~/.openclaw/skills/${skillId}/SKILL.md\``);
+      }
+      lines.push('');
+    }
 
     for (const [id] of Object.entries(state.dresses)) {
       if (id === excludeId) continue;
@@ -378,7 +404,7 @@ export default class DressRemove extends BaseCommand {
       lines.push(`DRESSCODE: ~/.openclaw/workspace/dresses/${id}/DRESSCODE.md\n`);
     }
 
-    if (lines.length === 2) {
+    if (allUserSkills.length === 0 && Object.keys(state.dresses).filter((id) => id !== excludeId).length === 0) {
       lines.push('No dresses active.\n');
     }
 

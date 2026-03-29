@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-03-29T15:06:22.177Z",
+  "generatedAt": "2026-03-29T18:20:31.818Z",
   "dresses": {
     "sleeping-coach": {
       "name": "Sleeping Coach",
@@ -24,17 +24,6 @@
       },
       "path": "dresses/fitness-coach"
     },
-    "ontology": {
-      "name": "Knowledge Graph",
-      "version": "1.0.0",
-      "description": "Maintains a personal knowledge graph via the ontology skill from ClawHub.",
-      "requires": {
-        "lingerie": [
-          "waclaw"
-        ]
-      },
-      "path": "dresses/ontology"
-    },
     "daily-reflection": {
       "name": "Daily Reflection",
       "version": "1.0.0",
@@ -57,17 +46,6 @@
       },
       "path": "dresses/tech-bro-digest"
     },
-    "daily-pill": {
-      "name": "Daily Pill",
-      "version": "1.0.0",
-      "description": "One bookmark a day — the most relevant link for what you're working on right now.",
-      "requires": {
-        "lingerie": [
-          "waclaw"
-        ]
-      },
-      "path": "dresses/daily-pill"
-    },
     "fabric": {
       "name": "Fabric Memory",
       "version": "1.0.0",
@@ -78,6 +56,17 @@
         ]
       },
       "path": "dresses/fabric"
+    },
+    "url-bookmark": {
+      "name": "URL Bookmark",
+      "version": "1.0.0",
+      "description": "Save and manage bookmarks — get one relevant link delivered daily.",
+      "requires": {
+        "lingerie": [
+          "waclaw"
+        ]
+      },
+      "path": "dresses/url-bookmark"
     }
   },
   "lingerie": {

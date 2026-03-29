@@ -45,7 +45,7 @@ export const cronDefSchema = z.object({
   id: dressIdSchema,
   name: z.string(),
   schedule: z.string(), // validated after param resolution
-  skill: z.string(), // skill this cron triggers — must exist in requires.skills
+  skill: z.string(), // derived from the skill whose trigger.cronId matches this cron
   channel: z.string().optional(), // channel to announce on — must match an active lingerie ID; omit for 'last'
 });
 
@@ -117,11 +117,10 @@ export const resolvedDressSchema = z.object({
   secrets: z.record(z.string(), secretDefSchema).default({}),
   crons: z.array(cronDefSchema).default([]),
   memory: memoryContractSchema.default({ dailySections: [], reads: [] }),
-  heartbeat: z.array(z.string()).default([]),
   files: dressFilesSchema.default({ skills: {}, templates: [] }),
-  // Workspace files: path (relative to workspace dir) → initial content
+  // Workspace files: paths relative to workspace dir
   // Created on dress if missing, preserved on undress (user data)
-  workspace: z.record(z.string(), z.string()).default({}),
+  workspace: z.array(z.string()).default([]),
 });
 
 // ---------------------------------------------------------------------------
@@ -167,7 +166,8 @@ export const appliedStateSchema = z.object({
   installedPlugins: z.array(z.string()).default([]),
   memorySections: z.array(z.string()).default([]),
   files: z.array(z.string()).default([]),
-  heartbeatEntries: z.array(z.string()).default([]),
+  heartbeatSkills: z.array(z.string()).default([]),
+  userSkills: z.array(z.string()).default([]),
   workspaceFiles: z.array(z.string()).default([]),
   lingerie: z.array(z.string()).default([]), // lingerie IDs this dress depends on
 });

@@ -145,28 +145,43 @@ export default class DressAdd extends BaseCommand {
       }
     }
 
-    // Dress breakdown
+    // Dress breakdown — group skills by trigger type
     const skillEntries = Object.entries(dress.skills);
-    if (skillEntries.length > 0) {
-      this.log(chalk.bold('  Skills:'));
-      for (const [id, skillDef] of skillEntries) {
+    const cronSkills = skillEntries.filter(([, s]) => s.trigger.type === 'cron');
+    const userSkills = skillEntries.filter(([, s]) => s.trigger.type === 'user');
+    const heartbeatSkills = skillEntries.filter(([, s]) => s.trigger.type === 'heartbeat');
+
+    if (cronSkills.length > 0) {
+      this.log(chalk.bold('  Cron Skills:'));
+      for (const [id, skillDef] of cronSkills) {
         const meta = skillMetaMap.get(id);
-        const source = skillDef.source === 'clawhub' ? ' (ClawHub)' : '';
         const displayName = meta?.name ?? id;
-        const desc = meta?.description ? ` — ${meta.description}` : '';
-        this.log(`    ${chalk.cyan(displayName)}${chalk.dim(source)}${desc}`);
+        const cron = dress.crons.find((c) => c.id === (skillDef.trigger as { cronId: string }).cronId);
+        const time = cron?.defaults.time ?? '—';
+        const days = cron?.defaults.days ? cron.defaults.days.join(', ') : 'every day';
+        this.log(`    ${chalk.cyan(displayName)} ${chalk.dim(`(${time}, ${days})`)}`);
       }
       this.log('');
     }
 
-    if (dress.crons.length > 0) {
-      this.log(chalk.bold('  Crons:'));
-      for (const cron of dress.crons) {
-        const time = cron.defaults.time ?? '—';
-        const days = cron.defaults.days ? cron.defaults.days.join(', ') : 'every day';
-        this.log(
-          `    ${cron.name} → ${chalk.cyan(cron.skill)} ${chalk.dim(`(default: ${time}, ${days})`)}`,
-        );
+    if (userSkills.length > 0) {
+      this.log(chalk.bold('  User Skills:'));
+      for (const [id, skillDef] of userSkills) {
+        const meta = skillMetaMap.get(id);
+        const displayName = meta?.name ?? id;
+        const desc = (skillDef.trigger as { description: string }).description;
+        this.log(`    ${chalk.cyan(displayName)} — ${chalk.dim(desc)}`);
+      }
+      this.log('');
+    }
+
+    if (heartbeatSkills.length > 0) {
+      this.log(chalk.bold('  Heartbeat Skills:'));
+      for (const [id, skillDef] of heartbeatSkills) {
+        const meta = skillMetaMap.get(id);
+        const displayName = meta?.name ?? id;
+        const desc = (skillDef.trigger as { description: string }).description;
+        this.log(`    ${chalk.cyan(displayName)} — ${chalk.dim(desc)}`);
       }
       this.log('');
     }
@@ -175,11 +190,8 @@ export default class DressAdd extends BaseCommand {
     if (dress.memory.dailySections.length > 0) {
       extras.push(`Memory: ${dress.memory.dailySections.join(', ')}`);
     }
-    if (dress.heartbeat.length > 0) {
-      extras.push(`Heartbeat: ${dress.heartbeat.length} rule(s)`);
-    }
-    if (Object.keys(dress.workspace).length > 0) {
-      extras.push(`Workspace: ${Object.keys(dress.workspace).length} file(s)`);
+    if (dress.workspace.length > 0) {
+      extras.push(`Workspace: ${dress.workspace.length} file(s)`);
     }
     if (dress.requires.plugins.length > 0) {
       extras.push(`Plugins: ${dress.requires.plugins.map((p) => p.id).join(', ')}`);
@@ -261,7 +273,11 @@ export default class DressAdd extends BaseCommand {
       const defaultTime = cron.defaults.time ?? '09:00';
       const defaultDays = cron.defaults.days ?? ALL_DAYS;
 
-      this.log(`  ${chalk.cyan(cron.name)} → skill: ${cron.skill}`);
+      // Find the skill bound to this cron via trigger
+      const cronSkillId = Object.entries(dress.skills).find(
+        ([, s]) => s.trigger.type === 'cron' && s.trigger.cronId === cron.id,
+      )?.[0];
+      this.log(`  ${chalk.cyan(cron.name)}${cronSkillId ? ` → skill: ${cronSkillId}` : ''}`);
 
       const time = await input({
         message: `  Time (HH:MM)`,
@@ -306,11 +322,13 @@ export default class DressAdd extends BaseCommand {
       if (paramEntries.length === 0) continue;
 
       const meta = skillMetaMap.get(skillId);
-      const relatedCrons = dress.crons.filter((c) => c.skill === skillId);
-      const cronInfo =
-        relatedCrons.length > 0
-          ? ` ${chalk.dim(`(used by: ${relatedCrons.map((c) => c.name).join(', ')})`)}`
-          : '';
+      const trigger = skillDef.trigger;
+      const relatedCron = trigger.type === 'cron'
+        ? dress.crons.find((c) => c.id === trigger.cronId)
+        : undefined;
+      const cronInfo = relatedCron
+        ? ` ${chalk.dim(`(used by: ${relatedCron.name})`)}`
+        : '';
       this.log(`  ${chalk.bold(meta?.name ?? skillId)}${cronInfo}`);
       if (meta?.description) {
         this.log(`  ${chalk.dim(meta.description)}`);
@@ -425,10 +443,15 @@ export default class DressAdd extends BaseCommand {
     for (const s of compiled.memory.dailySections) {
       this.log(`  ${chalk.green('+')} memory section: ${s}`);
     }
-    if (compiled.heartbeat.length > 0) {
-      this.log(`  ${chalk.green('+')} heartbeat: ${compiled.heartbeat.length} rule(s)`);
+    const hbSkills = Object.entries(compiled.skillTriggers).filter(([, t]) => t.type === 'heartbeat');
+    const usrSkills = Object.entries(compiled.skillTriggers).filter(([, t]) => t.type === 'user');
+    for (const [id, trigger] of hbSkills) {
+      this.log(`  ${chalk.green('+')} heartbeat skill: ${id} — ${chalk.dim((trigger as { description: string }).description)}`);
     }
-    for (const wp of Object.keys(compiled.workspace)) {
+    for (const [id, trigger] of usrSkills) {
+      this.log(`  ${chalk.green('+')} user skill: ${id} — ${chalk.dim((trigger as { description: string }).description)}`);
+    }
+    for (const wp of compiled.workspace) {
       this.log(`  ${chalk.green('+')} workspace: ~/.openclaw/workspace/${wp}`);
     }
     this.log(
@@ -587,14 +610,15 @@ export default class DressAdd extends BaseCommand {
           },
           {
             title: 'Setting up workspace files',
-            skip: () => Object.keys(compiled.workspace).length === 0,
+            skip: () => compiled.workspace.length === 0,
             task: async () => {
               const workspaceDir = join(this.openclawPaths.root, 'workspace');
-              for (const [filePath, initialContent] of Object.entries(compiled.workspace)) {
+              for (const filePath of compiled.workspace) {
                 const fullPath = join(workspaceDir, filePath);
                 if (existsSync(fullPath)) continue;
+                const content = await registry.getWorkspaceFileContent(dress.id, filePath);
                 await mkdir(join(fullPath, '..'), { recursive: true });
-                await writeFile(fullPath, initialContent);
+                await writeFile(fullPath, content);
               }
             },
           },
@@ -619,7 +643,7 @@ export default class DressAdd extends BaseCommand {
               const dressDir = join(this.openclawPaths.dresses, dress.id);
               await mkdir(dressDir, { recursive: true });
               const resolved = this.compiledToResolved(compiled);
-              const dresscode = generateDresscode(resolved);
+              const dresscode = generateDresscode(resolved, compiled.skillTriggers);
               const dresscodePath = join(dressDir, 'DRESSCODE.md');
               await writeFile(dresscodePath, dresscode);
               appliedFiles.push(dresscodePath);
@@ -627,9 +651,13 @@ export default class DressAdd extends BaseCommand {
           },
           {
             title: 'Writing heartbeat rules',
-            skip: () => compiled.heartbeat.length === 0,
+            skip: () =>
+              Object.values(compiled.skillTriggers).every((t) => t.type !== 'heartbeat'),
             task: async () => {
-              await this.appendHeartbeatRules(dress.id, compiled.heartbeat);
+              const hbEntries = Object.entries(compiled.skillTriggers)
+                .filter(([, t]) => t.type === 'heartbeat')
+                .map(([id, t]) => `**${id}** — ${(t as { description: string }).description}\n  → \`~/.openclaw/skills/${id}/SKILL.md\``);
+              await this.appendHeartbeatRules(dress.id, hbEntries);
             },
           },
           {
@@ -657,8 +685,13 @@ export default class DressAdd extends BaseCommand {
                   installedPlugins,
                   memorySections: [...compiled.memory.dailySections],
                   files: appliedFiles,
-                  heartbeatEntries: [...compiled.heartbeat],
-                  workspaceFiles: Object.keys(compiled.workspace),
+                  heartbeatSkills: Object.entries(compiled.skillTriggers)
+                    .filter(([, t]) => t.type === 'heartbeat')
+                    .map(([id]) => id),
+                  userSkills: Object.entries(compiled.skillTriggers)
+                    .filter(([, t]) => t.type === 'user')
+                    .map(([id]) => id),
+                  workspaceFiles: [...compiled.workspace],
                   lingerie: [...compiled.lingerie],
                 },
               };
@@ -828,7 +861,6 @@ export default class DressAdd extends BaseCommand {
         channel: c.channel === 'last' ? undefined : c.channel,
       })),
       memory: compiled.memory,
-      heartbeat: compiled.heartbeat,
       files: { skills: {}, templates: [] },
       workspace: compiled.workspace,
     };
@@ -861,9 +893,8 @@ export default class DressAdd extends BaseCommand {
         dailySections: entry.applied.memorySections,
         reads: [],
       },
-      heartbeat: entry.applied.heartbeatEntries,
       files: { skills: {}, templates: [] },
-      workspace: {},
+      workspace: [],
     };
   }
 
@@ -872,8 +903,42 @@ export default class DressAdd extends BaseCommand {
     newDressId: string,
     compiled: CompiledDress,
   ): Promise<void> {
+    // Collect all user skills for the routing table
+    const allUserSkills: { skillId: string; dressId: string; description: string }[] = [];
+
+    // From existing dresses — we only have skill IDs, read descriptions from DRESSCODE.md
+    // For now, just list them; the DRESSCODE.md has the full details
+    for (const [id, entry] of Object.entries(state.dresses)) {
+      for (const skillId of entry.applied.userSkills ?? []) {
+        allUserSkills.push({ skillId, dressId: id, description: '' });
+      }
+    }
+
+    // From the newly compiled dress ��� we have full trigger info
+    for (const [skillId, trigger] of Object.entries(compiled.skillTriggers)) {
+      if (trigger.type === 'user') {
+        allUserSkills.push({ skillId, dressId: newDressId, description: trigger.description });
+      }
+    }
+
     const lines = ['# Active Dresses\n'];
     lines.push('Read each DRESSCODE.md for details on skills, crons, and memory conventions.\n');
+
+    // User skill routing table
+    if (allUserSkills.length > 0) {
+      lines.push('## User Skills');
+      lines.push('');
+      lines.push(
+        "When the user's request matches one of these, you MUST read the linked skill file and follow its instructions before taking any action.",
+      );
+      lines.push('');
+      for (const { skillId, dressId, description } of allUserSkills) {
+        const desc = description ? ` — ${description}` : '';
+        lines.push(`- **${skillId}** (${dressId})${desc}`);
+        lines.push(`  → \`~/.openclaw/skills/${skillId}/SKILL.md\``);
+      }
+      lines.push('');
+    }
 
     for (const [id] of Object.entries(state.dresses)) {
       lines.push(`## ${id}`);

@@ -1,0 +1,35 @@
+{
+  "id": "url-bookmark",
+  "name": "URL Bookmark",
+  "version": "1.0.0",
+  "description": "Save and manage bookmarks — get one relevant link delivered daily.",
+
+  "requires": {
+    "lingerie": ["waclaw"]
+  },
+
+  "crons": [
+    {
+      "id": "daily-pill",
+      "name": "Daily pill",
+      "defaults": { "time": "10:00" }
+    }
+  ],
+
+  "skills": {
+    "daily-pill": {
+      "trigger": { "type": "cron", "cronId": "daily-pill" }
+    },
+    "save-bookmark": {
+      "trigger": {
+        "type": "user",
+        "description": "User wants to save, bookmark, or share a link/URL to read later"
+      }
+    }
+  },
+
+  "workspace": [
+    "url-bookmark/bookmarks.md",
+    "url-bookmark/pill-history.md"
+  ]
+}

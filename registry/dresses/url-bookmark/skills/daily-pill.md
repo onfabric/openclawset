@@ -39,31 +39,7 @@ All data lives in `{{workspace.root}}/`:
 
 **If nothing fits**, skip entirely. Don't force a pill just to fill the slot. Log the skip to pill history.
 
-## Step 4: Handle the response
-
-After sending, the user might:
-
-- **React positively or ask questions** — engage naturally, help them explore the topic
-- **Ask to remove it** — delete the bookmark from `{{workspace.root}}/bookmarks.md` and confirm
-- **Want to take notes** — append their notes to the bookmark entry in `{{workspace.root}}/bookmarks.md` under a `notes:` field
-- **Ignore it** — that's fine, move on
-
-## Step 5: Update state
+## Step 4: Update state
 
 - In `{{workspace.root}}/pill-history.md`: append an entry with the date, link sent (or skip reason)
 - In `{{workspace.root}}/bookmarks.md`: update `last_sent` date for the bookmark if one was sent
-
-## Bookmarks format
-
-Each bookmark in `bookmarks.md` should have:
-- URL
-- Title
-- Date added
-- Tags
-- `times_sent: 0` (incremented each time it's picked as a pill)
-- `last_sent:` (date, empty if never sent)
-- `notes:` (user notes, empty if none)
-
-## Adding bookmarks
-
-When the user shares a link to save, append it to `{{workspace.root}}/bookmarks.md` with the fields above. Fetch the title if not provided. Infer tags from the content and user context.

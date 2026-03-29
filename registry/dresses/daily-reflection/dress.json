@@ -12,7 +12,6 @@
     {
       "id": "daily-reflection",
       "name": "Daily reflection and tomorrow bullets",
-      "skill": "daily-reflection",
       "defaults": {
         "time": "23:00",
         "days": ["mon", "tue", "wed", "thu", "fri"]
@@ -21,7 +20,9 @@
   ],
 
   "skills": {
-    "daily-reflection": {}
+    "daily-reflection": {
+      "trigger": { "type": "cron", "cronId": "daily-reflection" }
+    }
   },
 
   "memory": { "dailySections": ["Reflections"] }

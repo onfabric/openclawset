@@ -12,13 +12,13 @@
     {
       "id": "tech-bro-digest",
       "name": "Tech digest",
-      "skill": "tech-bro-digest",
       "defaults": { "time": "08:00" }
     }
   ],
 
   "skills": {
     "tech-bro-digest": {
+      "trigger": { "type": "cron", "cronId": "tech-bro-digest" },
       "params": {
         "sources": {
           "description": "News sources to search (comma-separated)",

@@ -12,7 +12,6 @@
     {
       "id": "workout-schedule",
       "name": "Daily workout schedule",
-      "skill": "workout-schedule",
       "defaults": {
         "time": "18:00",
         "days": ["mon", "tue", "wed", "thu", "fri"]
@@ -21,7 +20,6 @@
     {
       "id": "workout-feedback",
       "name": "Post-workout check-in",
-      "skill": "workout-feedback",
       "defaults": {
         "time": "20:00",
         "days": ["mon", "tue", "wed", "thu", "fri"]
@@ -30,13 +28,19 @@
   ],
 
   "skills": {
-    "workout-schedule": {},
-    "workout-feedback": {}
+    "workout-schedule": {
+      "trigger": { "type": "cron", "cronId": "workout-schedule" }
+    },
+    "workout-feedback": {
+      "trigger": { "type": "cron", "cronId": "workout-feedback" }
+    },
+    "workout-nudge": {
+      "trigger": {
+        "type": "heartbeat",
+        "description": "If near workout time and no schedule sent today, nudge via WhatsApp"
+      }
+    }
   },
 
-  "memory": { "dailySections": ["Fitness"] },
-
-  "heartbeat": [
-    "If it is near workout time and no schedule has been sent today, nudge via WhatsApp."
-  ]
+  "memory": { "dailySections": ["Fitness"] }
 }

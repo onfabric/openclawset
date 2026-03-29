@@ -29,18 +29,21 @@
     {
       "id": "sleep-report",
       "name": "Morning sleep report",
-      "skill": "sleep-report",
       "defaults": { "time": "07:30" }
     }
   ],
 
   "skills": {
-    "sleep-report": {}
+    "sleep-report": {
+      "trigger": { "type": "cron", "cronId": "sleep-report" }
+    },
+    "sleep-context": {
+      "trigger": {
+        "type": "user",
+        "description": "User mentions feeling tired, poorly rested, or asks about sleep"
+      }
+    }
   },
 
-  "memory": { "dailySections": ["Sleep"] },
-
-  "heartbeat": [
-    "If the user mentions feeling tired, poorly rested, or asks about sleep, use the oura_data tool to check recent sleep data before responding."
-  ]
+  "memory": { "dailySections": ["Sleep"] }
 }
