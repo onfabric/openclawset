@@ -2,6 +2,29 @@ import type { DressJson, Weekday } from '#core/index.ts';
 import { cronFromTime } from '#core/index.ts';
 
 // ---------------------------------------------------------------------------
+// Skill frontmatter parsing
+// ---------------------------------------------------------------------------
+
+export interface SkillMeta {
+  name: string;
+  description: string;
+}
+
+/**
+ * Parse YAML frontmatter from a skill .md file to extract name and description.
+ * Returns undefined if the frontmatter is missing or incomplete.
+ */
+export function parseSkillMeta(content: string): SkillMeta | undefined {
+  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return undefined;
+  const block = match[1]!;
+  const name = block.match(/^name:\s*(.+)$/m)?.[1]?.trim();
+  const description = block.match(/^description:\s*(.+)$/m)?.[1]?.trim();
+  if (!name || !description) return undefined;
+  return { name, description };
+}
+
+// ---------------------------------------------------------------------------
 // Types for user choices collected during prompting
 // ---------------------------------------------------------------------------
 
@@ -52,7 +75,7 @@ export interface CompileInput {
 
 const AUTO_VAR_PREFIXES = ['workspace.'];
 
-function buildAutoVars(dress: DressJson): Record<string, string> {
+export function buildAutoVars(dress: DressJson): Record<string, string> {
   const vars: Record<string, string> = {
     'dress.id': dress.id,
     'dress.name': dress.name,
@@ -88,7 +111,7 @@ function extractPlaceholders(content: string): Set<string> {
   return new Set(matches.map((m) => m.slice(2, -2).trim()));
 }
 
-function injectVars(content: string, vars: Record<string, string>): string {
+export function injectVars(content: string, vars: Record<string, string>): string {
   let result = content;
   for (const [key, value] of Object.entries(vars)) {
     result = result.replaceAll(`{{${key}}}`, value);

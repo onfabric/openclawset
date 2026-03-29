@@ -1,6 +1,6 @@
 ---
-name: user-check-in
-description: Check what the user has been up to and try to be helpful.
+name: User check-in
+description: Proactively checks in with the user to gather context and build rapport.
 ---
 
 ## How to run a check-in

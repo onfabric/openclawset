@@ -1,6 +1,6 @@
 ---
-name: tech-bro-digest
-description: Daily digest of tech news from configured sources and topics.
+name: Tech digest
+description: Searches configured news sources and compiles a morning digest of the most relevant stories.
 ---
 
 # Tech Digest

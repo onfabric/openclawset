@@ -1,6 +1,6 @@
 ---
-name: daily-reflection
-description: End-of-day reflection — capture what mattered and set tomorrow's intentions.
+name: Daily reflection
+description: Guides an end-of-day reflection capturing highlights and setting tomorrow's intentions.
 ---
 
 # Daily Reflection

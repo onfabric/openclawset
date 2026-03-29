@@ -1,6 +1,6 @@
 ---
-name: sleep-report
-description: Analyze last night's sleep and provide actionable coaching advice.
+name: Sleep report
+description: Fetches Oura Ring sleep data and sends a morning sleep quality summary.
 ---
 
 # Morning Sleep Report

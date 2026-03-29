@@ -1,6 +1,6 @@
 ---
-name: daily-pill
-description: Pick the single most relevant bookmark for the user today.
+name: Daily pill
+description: Picks the most relevant bookmark for today based on current projects and interests.
 ---
 
 # Daily Pill
