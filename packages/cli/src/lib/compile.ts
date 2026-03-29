@@ -1,5 +1,5 @@
-import type { DressJson, Weekday } from '#core/index.ts';
-import { cronFromTime } from '#core/index.ts';
+import type { ClawtiqueConfig, DressJson, PersonalityFile, Weekday } from '#core/index.ts';
+import { cronFromTime, PERSONALITY_FILES } from '#core/index.ts';
 
 // ---------------------------------------------------------------------------
 // Skill frontmatter parsing
@@ -262,4 +262,40 @@ export function compileDress(input: CompileInput): CompiledDress {
     workspace: dress.workspace,
     secrets: dress.secrets,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Personality compilation
+// ---------------------------------------------------------------------------
+
+export function buildPersonalityVars(config: ClawtiqueConfig): Record<string, string> {
+  return {
+    'user.name': config.user.name,
+  };
+}
+
+/**
+ * Compile personality files: inject config vars and validate that no
+ * unresolved placeholders remain.
+ */
+export function compilePersonality(
+  files: Record<PersonalityFile, string>,
+  config: ClawtiqueConfig,
+): Record<PersonalityFile, string> {
+  const vars = buildPersonalityVars(config);
+  const compiled = {} as Record<PersonalityFile, string>;
+
+  for (const file of PERSONALITY_FILES) {
+    const content = files[file] ?? '';
+    const result = injectVars(content, vars);
+
+    const unresolved = result.match(/\{\{[^}]+\}\}/g);
+    if (unresolved) {
+      throw new Error(`Unresolved placeholders in ${file}: ${[...new Set(unresolved)].join(', ')}`);
+    }
+
+    compiled[file] = result;
+  }
+
+  return compiled;
 }

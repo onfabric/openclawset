@@ -5,8 +5,9 @@ import { confirm, select } from '@inquirer/prompts';
 import { Args, Flags } from '@oclif/core';
 import chalk from 'chalk';
 import { BaseCommand } from '#base.ts';
-import type { PersonalityJson } from '#core/index.ts';
+import type { PersonalityFile, ResolvedPersonality } from '#core/index.ts';
 import { PERSONALITY_FILES } from '#core/index.ts';
+import { compilePersonality } from '#lib/compile.ts';
 import { createRegistryProvider } from '#lib/registry.ts';
 
 const DEFAULT_PERSONALITY_ID = 'default';
@@ -37,7 +38,7 @@ export default class PersonalitySet extends BaseCommand {
 
   async run(): Promise<void> {
     const { args, flags } = await this.parse(PersonalitySet);
-    await this.loadConfig();
+    const config = await this.loadConfig();
 
     const registry = createRegistryProvider(process.cwd(), this.clawtiquePaths.cache);
     const state = await this.stateManager.load();
@@ -73,7 +74,7 @@ export default class PersonalitySet extends BaseCommand {
     let name: string;
     let version: string;
     let description: string;
-    let fileContents: Record<string, string>;
+    let fileContents: Record<PersonalityFile, string>;
 
     if (personalityId === DEFAULT_PERSONALITY_ID) {
       name = 'Default';
@@ -81,16 +82,16 @@ export default class PersonalitySet extends BaseCommand {
       description = 'Restore original personality files.';
       fileContents = await this.loadBackup();
     } else {
-      let personality: PersonalityJson;
+      let personality: ResolvedPersonality;
       try {
-        personality = await registry.getPersonalityJson(personalityId);
+        personality = await registry.getPersonality(personalityId);
       } catch {
         this.error(`Personality "${personalityId}" not found in the registry.`);
       }
       name = personality.name;
       version = personality.version;
       description = personality.description;
-      fileContents = personality.files;
+      fileContents = compilePersonality(personality.files, config);
     }
 
     // Show what will happen
@@ -176,9 +177,9 @@ export default class PersonalitySet extends BaseCommand {
   /**
    * Load file contents from the personality backup.
    */
-  private async loadBackup(): Promise<Record<string, string>> {
+  private async loadBackup(): Promise<Record<PersonalityFile, string>> {
     const backupDir = this.clawtiquePaths.personalityBackup;
-    const result: Record<string, string> = {};
+    const result = {} as Record<PersonalityFile, string>;
     for (const file of PERSONALITY_FILES) {
       const path = join(backupDir, file);
       if (existsSync(path)) {

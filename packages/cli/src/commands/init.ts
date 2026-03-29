@@ -67,6 +67,11 @@ export default class Init extends Command {
       }
     }
 
+    // Get user name
+    const userName = await input({
+      message: "What's your name?",
+    });
+
     // Create clawtique directory structure
     await mkdir(paths.root, { recursive: true });
     await mkdir(paths.dresses, { recursive: true });
@@ -77,6 +82,7 @@ export default class Init extends Command {
       openclawDir,
       timezone: 'UTC',
       version: '0.1.0',
+      user: { name: userName },
     };
     await writeFile(paths.config, `${JSON.stringify(config, null, 2)}\n`);
 

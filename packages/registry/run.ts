@@ -19,6 +19,8 @@ import {
   type DressJson,
   dressJsonSchema,
   lingerieJsonSchema,
+  PERSONALITY_AUTO_VARS,
+  PERSONALITY_FILES,
   personalityJsonSchema,
 } from '@repo/cli/core';
 
@@ -213,6 +215,23 @@ for (const dir of personalityDirs) {
 
     if (p.id !== dir) {
       error(`personality.id "${p.id}" does not match directory name "${dir}"`);
+    }
+
+    // Check that all 4 .md files exist and validate placeholders
+    for (const file of PERSONALITY_FILES) {
+      const filePath = join(PERSONALITIES_DIR, dir, file);
+      if (!existsSync(filePath)) {
+        error(`personality "${dir}" is missing ${file}`);
+        continue;
+      }
+
+      const content = readFileSync(filePath, 'utf-8');
+      const placeholders = extractPlaceholders(content);
+      for (const placeholder of placeholders) {
+        if (!PERSONALITY_AUTO_VARS.has(placeholder)) {
+          error(`personality "${dir}" ${file}: {{${placeholder}}} is not a known auto-var`);
+        }
+      }
     }
 
     personalityIndex[p.id] = {
