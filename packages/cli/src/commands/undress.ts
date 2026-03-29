@@ -375,7 +375,7 @@ export default class Undress extends BaseCommand {
     for (const [id] of Object.entries(state.dresses)) {
       if (id === excludeId) continue;
       lines.push(`## ${id}`);
-      lines.push(`DRESSCODE: ~/.openclaw/dresses/${id}/DRESSCODE.md\n`);
+      lines.push(`DRESSCODE: ~/.openclaw/workspace/dresses/${id}/DRESSCODE.md\n`);
     }
 
     if (lines.length === 2) {

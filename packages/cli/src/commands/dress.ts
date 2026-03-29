@@ -426,7 +426,7 @@ export default class Dress extends BaseCommand {
     for (const wp of Object.keys(compiled.workspace)) {
       this.log(`  ${chalk.green('+')} workspace: ~/.openclaw/workspace/${wp}`);
     }
-    this.log(`  ${chalk.green('+')} dresscode: ~/.openclaw/dresses/${dress.id}/DRESSCODE.md`);
+    this.log(`  ${chalk.green('+')} dresscode: ~/.openclaw/workspace/dresses/${dress.id}/DRESSCODE.md`);
     this.log('');
 
     if (flags['dry-run']) {
@@ -876,12 +876,12 @@ export default class Dress extends BaseCommand {
 
     for (const [id] of Object.entries(state.dresses)) {
       lines.push(`## ${id}`);
-      lines.push(`DRESSCODE: ~/.openclaw/dresses/${id}/DRESSCODE.md\n`);
+      lines.push(`DRESSCODE: ~/.openclaw/workspace/dresses/${id}/DRESSCODE.md\n`);
     }
 
     lines.push(`## ${newDressId}`);
     lines.push(compiled.description || compiled.name);
-    lines.push(`DRESSCODE: ~/.openclaw/dresses/${newDressId}/DRESSCODE.md\n`);
+    lines.push(`DRESSCODE: ~/.openclaw/workspace/dresses/${newDressId}/DRESSCODE.md\n`);
 
     await writeFile(this.openclawPaths.dressesIndex, lines.join('\n'));
   }

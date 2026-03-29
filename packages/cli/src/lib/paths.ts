@@ -48,7 +48,7 @@ export function getOpenClawPaths(root: string): OpenClawPaths {
   return {
     root,
     config: join(root, 'openclaw.json'),
-    dresses: join(root, 'dresses'),
+    dresses: join(root, 'workspace', 'dresses'),
     skills: join(root, 'workspace', 'skills'),
     memory: join(root, 'memory'),
     heartbeat: join(root, 'workspace', 'HEARTBEAT.md'),

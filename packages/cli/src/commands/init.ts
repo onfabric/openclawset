@@ -70,7 +70,7 @@ export default class Init extends Command {
     // Create clawtique directory structure
     await mkdir(paths.root, { recursive: true });
     await mkdir(paths.dresses, { recursive: true });
-    await mkdir(join(openclawDir, 'dresses'), { recursive: true });
+    await mkdir(join(openclawDir, 'workspace', 'dresses'), { recursive: true });
 
     // Write config
     const config: ClawtiqueConfig = {

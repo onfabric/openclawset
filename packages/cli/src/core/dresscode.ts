@@ -4,7 +4,7 @@ import type { ResolvedDress } from '#core/schema.ts';
  * Generate a DRESSCODE.md from a resolved dress definition.
  *
  * This is the "glue" document that explains how a dress's pieces fit together.
- * It lives at ~/.openclaw/dresses/<id>/DRESSCODE.md and is referenced from
+ * It lives at ~/.openclaw/workspace/dresses/<id>/DRESSCODE.md and is referenced from
  * DRESSES.md so the agent knows about active dress configurations.
  */
 export function generateDresscode(dress: ResolvedDress): string {
