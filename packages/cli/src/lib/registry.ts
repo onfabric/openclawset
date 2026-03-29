@@ -6,8 +6,10 @@ import {
   dressJsonSchema,
   type LingerieJson,
   lingerieJsonSchema,
-  type PersonalityJson,
+  PERSONALITY_FILES,
+  type PersonalityFile,
   personalityJsonSchema,
+  type ResolvedPersonality,
   type RegistryIndex,
   registryIndexSchema,
 } from '#core/index.ts';
@@ -32,8 +34,8 @@ export interface RegistryProvider {
   /** List all available skill .md files for a dress. */
   listSkills(dressId: string): Promise<string[]>;
 
-  /** Fetch a personality definition by ID. */
-  getPersonalityJson(personalityId: string): Promise<PersonalityJson>;
+  /** Fetch a personality definition by ID, with file contents resolved. */
+  getPersonality(personalityId: string): Promise<ResolvedPersonality>;
 }
 
 // ---------------------------------------------------------------------------
@@ -73,10 +75,17 @@ export class LocalRegistryProvider implements RegistryProvider {
     return files.filter((f) => f.endsWith('.md')).map((f) => f.replace(/\.md$/, ''));
   }
 
-  async getPersonalityJson(personalityId: string): Promise<PersonalityJson> {
-    const path = join(this.registryDir, 'personalities', personalityId, 'personality.json');
-    const raw = JSON.parse(await readFile(path, 'utf-8'));
-    return personalityJsonSchema.parse(raw);
+  async getPersonality(personalityId: string): Promise<ResolvedPersonality> {
+    const dir = join(this.registryDir, 'personalities', personalityId);
+    const raw = JSON.parse(await readFile(join(dir, 'personality.json'), 'utf-8'));
+    const manifest = personalityJsonSchema.parse(raw);
+
+    const files = {} as Record<PersonalityFile, string>;
+    for (const file of PERSONALITY_FILES) {
+      files[file] = await readFile(join(dir, file), 'utf-8');
+    }
+
+    return { ...manifest, files };
   }
 }
 
@@ -148,12 +157,23 @@ export class GitHubRegistryProvider implements RegistryProvider {
     return Object.keys(dress.skills ?? {});
   }
 
-  async getPersonalityJson(personalityId: string): Promise<PersonalityJson> {
+  async getPersonality(personalityId: string): Promise<ResolvedPersonality> {
+    const base = `personalities/${personalityId}`;
     const raw = await this.fetchJson(
-      `${this.baseUrl}/personalities/${personalityId}/personality.json`,
-      `personalities/${personalityId}/personality.json`,
+      `${this.baseUrl}/${base}/personality.json`,
+      `${base}/personality.json`,
     );
-    return personalityJsonSchema.parse(raw);
+    const manifest = personalityJsonSchema.parse(raw);
+
+    const files = {} as Record<PersonalityFile, string>;
+    for (const file of PERSONALITY_FILES) {
+      files[file] = await this.fetchText(
+        `${this.baseUrl}/${base}/${file}`,
+        `${base}/${file}`,
+      );
+    }
+
+    return { ...manifest, files };
   }
 
   // ---- internal helpers ----------------------------------------------------

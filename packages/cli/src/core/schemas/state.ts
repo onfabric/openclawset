@@ -107,6 +107,11 @@ export const clawtiqueConfigSchema = z.object({
   openclawDir: z.string(),
   timezone: z.string().default('UTC'),
   version: z.string().default('0.1.0'),
+  user: z
+    .object({
+      name: z.string().min(1),
+    })
+    .default({ name: 'there' }),
 });
 
 // ---------------------------------------------------------------------------
