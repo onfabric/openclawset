@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clawtique — A boutique for your OpenClaw</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0c0e14;
+      --bg-card: #12151e;
+      --bg-raised: #181c28;
+      --border: #252a3a;
+      --border-focus: #3d4560;
+      --red: #ff4d6a;
+      --red-dim: #cc3d55;
+      --orange: #ff8a4c;
+      --gold: #fbbf24;
+      --green: #34d399;
+      --blue: #60a5fa;
+      --purple: #a78bfa;
+      --text: #e2e4ea;
+      --text-dim: #6b7294;
+      --text-muted: #3d4260;
+      --terminal-bg: #0a0c12;
+      --terminal-border: #1e2235
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(255, 77, 106, .015) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+      z-index: 0
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 32px
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px
+    }
+
+    .nav-logo {
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--red);
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none
+    }
+
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted)
+    }
+
+    footer a {
+      color: var(--text-dim);
+      text-decoration: none
+    }
+
+    footer a:hover {
+      color: var(--text)
+    }
+
+    .nav-links a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color .2s
+    }
+
+    .nav-links a:hover {
+      color: var(--text)
+    }
+
+    .gh-btn {
+      font-size: 12px;
+      padding: 8px 18px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text);
+      text-decoration: none;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    .gh-btn:hover {
+      border-color: var(--red);
+      color: var(--red)
+    }
+
+    .hero {
+      padding: 60px 0 40px;
+      text-align: center
+    }
+
+    .hero h1 {
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      font-size: clamp(32px, 5.5vw, 58px);
+      line-height: 1.15;
+      letter-spacing: -2px;
+      margin-bottom: 20px;
+      color: var(--text)
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: var(--red)
+    }
+
+    .hero-sub {
+      font-size: 15px;
+      color: var(--text-dim);
+      max-width: 540px;
+      margin: 0 auto 40px;
+      line-height: 1.7
+    }
+
+    .demo-section {
+      padding: 40px 0 80px
+    }
+
+    .demo-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      overflow: hidden;
+      height: 560px
+    }
+
+    .demo-terminal {
+      background: var(--terminal-bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column
+    }
+
+    .term-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--terminal-border);
+      font-size: 11px;
+      color: var(--text-muted)
+    }
+
+    .term-dots {
+      display: flex;
+      gap: 6px
+    }
+
+    .term-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%
+    }
+
+    .term-dots span:nth-child(1) {
+      background: #ff5f57
+    }
+
+    .term-dots span:nth-child(2) {
+      background: #ffbd2e
+    }
+
+    .term-dots span:nth-child(3) {
+      background: #28c840
+    }
+
+    .term-title {
+      margin-left: 8px
+    }
+
+    .term-body {
+      flex: 1;
+      padding: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 1.75;
+      overflow-y: auto
+    }
+
+    .term-line {
+      white-space: pre-wrap;
+      min-height: 1.8em
+    }
+
+    .t-prompt {
+      color: var(--green)
+    }
+
+    .t-output {
+      color: var(--text-dim)
+    }
+
+    .t-success {
+      color: var(--green)
+    }
+
+    .t-highlight {
+      color: var(--red)
+    }
+
+    .t-dim {
+      color: var(--text-muted)
+    }
+
+    .menu-item {
+      padding: 1px 0
+    }
+
+    .menu-item.active {
+      color: var(--green)
+    }
+
+    .menu-item:not(.active) {
+      color: var(--text-dim)
+    }
+
+    .cursor-blink::after {
+      content: '\2588';
+      animation: blink 1s step-end infinite;
+      color: #fff
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0
+      }
+    }
+
+    /* ═══ STAGE ═══ */
+    .demo-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: var(--bg-card);
+      overflow: hidden;
+      padding: 20px;
+      gap: 8px
+    }
+
+    .demo-stage::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 85%, rgba(255, 77, 106, .05) 0%, transparent 55%);
+      pointer-events: none
+    }
+
+    /* ═══ WARDROBE CANVAS ═══ */
+    .wardrobe-container {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 5;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .wardrobe-container.hidden {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-20px);
+      pointer-events: none;
+    }
+
+    #wardrobeCanvas {
+      image-rendering: pixelated;
+    }
+
+    /* ═══ LOBSTER CANVAS ═══ */
+    .canvas-container {
+      position: absolute;
+      z-index: 2;
+      width: 280px;
+      height: 280px;
+      left: 50%;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .canvas-container.browsing {
+      bottom: 10px;
+      transform: translateX(-50%) scale(0.8);
+    }
+
+    .canvas-container.dressing {
+      bottom: 10px;
+      transform: translateX(-50%) scale(0.8);
+    }
+
+    .canvas-container.centered {
+      bottom: 50%;
+      transform: translate(-50%, 50%) scale(1);
+    }
+
+    #lobsterCanvas {
+      image-rendering: pixelated;
+      display: block;
+      margin: 0 auto;
+    }
+
+    /* Flying label during install */
+    .fly-item {
+      position: absolute;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 5px 12px;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 10;
+      background: rgba(12, 14, 20, .94);
+      border-radius: 2px;
+      opacity: 0;
+    }
+
+    /* ═══ CELEBRATION ═══ */
+    @keyframes celebrate {
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(0deg);
+      }
+
+      12% {
+        transform: translateY(-14px) rotate(-4deg);
+      }
+
+      24% {
+        transform: translateY(0) rotate(0deg);
+      }
+
+      36% {
+        transform: translateY(-10px) rotate(4deg);
+      }
+
+      48% {
+        transform: translateY(0) rotate(0deg);
+      }
+
+      60% {
+        transform: translateY(-6px) rotate(-2deg);
+      }
+
+      72% {
+        transform: translateY(0) rotate(0deg);
+      }
+
+      84% {
+        transform: translateY(-3px) rotate(1deg);
+      }
+    }
+
+    .canvas-container.celebrating canvas {
+      animation: celebrate 1.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .sparkle {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 20;
+      opacity: 1;
+      transition: all 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    @keyframes equipFlash {
+      0% {
+        filter: brightness(1);
+      }
+
+      50% {
+        filter: brightness(1.5);
+      }
+
+      100% {
+        filter: brightness(1);
+      }
+    }
+
+    .canvas-container.flash canvas {
+      animation: equipFlash 0.3s ease;
+    }
+
+    /* ═══ FASHION SHOW BACKDROP ═══ */
+    .runway-backdrop {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 1s ease;
+      pointer-events: none;
+    }
+
+    .runway-backdrop.visible {
+      opacity: 1;
+    }
+
+    /* Spotlight cone from above */
+    .runway-backdrop .spotlight {
+      position: absolute;
+      top: -20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 200%;
+      height: 120%;
+      background: conic-gradient(from 180deg at 50% 0%, transparent 42%, rgba(255, 220, 150, .07) 47%, rgba(255, 220, 150, .12) 50%, rgba(255, 220, 150, .07) 53%, transparent 58%);
+    }
+
+    /* Warm wash across the whole stage */
+    .runway-backdrop .wash {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 50% 50%, rgba(255, 180, 100, .08) 0%, transparent 60%),
+        radial-gradient(ellipse at 50% 100%, rgba(255, 77, 106, .06) 0%, transparent 50%);
+    }
+
+    /* Twinkle stars — pixelated, behind the lobster */
+    .twinkle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #fff;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      image-rendering: pixelated;
+    }
+
+    @keyframes twinkle {
+      0% {
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 0.85;
+      }
+
+      30% {
+        opacity: 0.2;
+      }
+
+      50% {
+        opacity: 0.75;
+      }
+
+      70% {
+        opacity: 0.15;
+      }
+
+      90% {
+        opacity: 0.6;
+      }
+
+      100% {
+        opacity: 0;
+      }
+    }
+
+    .twinkle.on {
+      animation: twinkle 2.4s steps(5) infinite;
+    }
+
+    /* Cross-shaped pixel star */
+    .twinkle.cross {
+      background: transparent;
+      box-shadow:
+        0 0 0 0 transparent,
+        -4px 0 0 0 rgba(255, 255, 255, 0.5),
+        4px 0 0 0 rgba(255, 255, 255, 0.5),
+        0 -4px 0 0 rgba(255, 255, 255, 0.5),
+        0 4px 0 0 rgba(255, 255, 255, 0.5),
+        0 0 0 0 #fff;
+    }
+
+    @media(max-width:860px) {
+      .demo-wrapper {
+        grid-template-columns: 1fr
+      }
+
+      .demo-terminal {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        min-height: 360px
+      }
+
+      .demo-stage {
+        min-height: 420px
+      }
+
+      .nav-links {
+        display: none
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg)
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border)
+    }
+
+    ::selection {
+      background: var(--red);
+      color: #fff
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <nav>
+      <div class="nav-logo"><span>&#x1F457;</span> clawtique</div>
+      <ul class="nav-links">
+        <li><a href="#demo">Demo</a></li>
+        <li><a href="https://github.com/onfabric/clawtique" target="_blank">Docs</a></li>
+      </ul>
+      <a href="https://github.com/onfabric/clawtique" class="gh-btn" target="_blank"><svg width="14" height="14"
+          viewBox="0 0 16 16" fill="currentColor" aria-label="GitHub">
+          <title>GitHub</title>
+          <path
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
+        </svg>GitHub</a>
+    </nav>
+    <section class="hero">
+      <h1>The boutique your <br><em>OpenClaw</em> needs</h1>
+      <p class="hero-sub">Skills, cron jobs, memory and plugins — bundled into installable dresses.
+        One command to dress up, one to take it off. No mess left behind.</p>
+    </section>
+    <section class="demo-section" id="demo">
+      <div class="demo-wrapper">
+        <div class="demo-terminal">
+          <div class="term-header">
+            <div class="term-dots"><span></span><span></span><span></span></div><span class="term-title">~/.openclaw —
+              zsh</span>
+          </div>
+          <div class="term-body" id="termBody"></div>
+        </div>
+        <div class="demo-stage" id="demoStage">
+          <div class="runway-backdrop" id="runwayBackdrop">
+            <div class="spotlight"></div>
+            <div class="wash"></div>
+          </div>
+          <div class="wardrobe-container" id="wardrobeContainer">
+            <canvas id="wardrobeCanvas" width="312" height="192" style="width:312px;height:192px"></canvas>
+          </div>
+          <div class="canvas-container centered" id="canvasContainer">
+            <canvas id="lobsterCanvas" width="252" height="245" style="width:252px;height:245px"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <footer>
+    <p>Built by <a href="https://github.com/onfabric">Fabric</a></p>
+  </footer>
+
+  <script>
+    // ═══ LOBSTER CANVAS ═══
+    const canvas = document.getElementById('lobsterCanvas'), ctx = canvas.getContext('2d'), S = 7;
+    const canvasContainer = document.getElementById('canvasContainer');
+    const wardrobeContainer = document.getElementById('wardrobeContainer');
+
+    // ═══ WARDROBE CANVAS ═══
+    const wCanvas = document.getElementById('wardrobeCanvas'), wCtx = wCanvas.getContext('2d');
+    const W = 4; // wardrobe pixel scale
+
+    // ═══ LOBSTER PALETTE ═══
+    const P = {
+      body: '#e94560', bodyHi: '#ff6b7f', bodyDk: '#c42847', bodyShade: '#a31d3a',
+      belly: '#ffb3b3', bellyDk: '#ff8a8a',
+      eye: '#fbbf24', eyePupil: '#0c0e14', eyeWhite: '#fff8e7',
+      claw: '#ff7849', clawDk: '#d45a2e', clawHi: '#ffa07a',
+      leg: '#c42847', antenna: '#ff7849', antennaTip: '#fbbf24',
+      lash: '#1a1a2e', bow: '#a78bfa', bowDk: '#7c5cbf', bowCenter: '#c4b5fd', lipgloss: '#ff8aaf',
+    };
+
+    const LX = 2; // offset to center lobster art in canvas
+    function px(x, y, c) { ctx.fillStyle = c; ctx.fillRect((x + LX) * S, y * S, S, S) }
+    function rect(x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect((x + LX) * S, y * S, w * S, h * S) }
+
+    // Wardrobe pixel helpers
+    function wpx(x, y, c) { wCtx.fillStyle = c; wCtx.fillRect(x * W, y * W, W, W) }
+    function wrect(x, y, w, h, c) { wCtx.fillStyle = c; wCtx.fillRect(x * W, y * W, w * W, h * W) }
+
+    // ═══ LOBSTER DRAWING ═══
+    function drawLobster() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      px(11, 5, P.antenna); px(10, 4, P.antenna); px(9, 3, P.antenna); px(8, 2, P.antennaTip);
+      px(20, 5, P.antenna); px(21, 4, P.antenna); px(22, 3, P.antenna); px(23, 2, P.antennaTip);
+      px(22, 2, P.bow); px(23, 3, P.bow); px(24, 2, P.bow); px(22, 1, P.bowDk); px(24, 1, P.bowDk); px(23, 2, P.bowCenter);
+      rect(10, 6, 12, 7, P.body); rect(11, 6, 10, 1, P.bodyHi);
+      px(9, 7, P.body); px(9, 8, P.body); px(9, 9, P.body); px(9, 10, P.body);
+      px(22, 7, P.body); px(22, 8, P.body); px(22, 9, P.body); px(22, 10, P.body);
+      px(10, 5, P.body); px(21, 5, P.body); rect(11, 11, 10, 2, P.bodyDk);
+      px(12, 8, P.eyeWhite); px(13, 8, P.eyeWhite); px(12, 9, P.eye); px(13, 9, P.eyePupil);
+      px(18, 8, P.eyeWhite); px(19, 8, P.eyeWhite); px(19, 9, P.eye); px(18, 9, P.eyePupil);
+      px(12, 8, 'rgba(255,255,255,0.5)'); px(18, 8, 'rgba(255,255,255,0.5)');
+      px(11, 7, P.lash); px(12, 7, P.lash); px(14, 7, P.lash); px(17, 7, P.lash); px(19, 7, P.lash); px(20, 7, P.lash);
+      px(11, 10, P.bodyHi); px(10, 10, P.bodyHi); px(20, 10, P.bodyHi); px(21, 10, P.bodyHi);
+      px(15, 11, P.lipgloss); px(16, 11, P.lipgloss);
+      rect(9, 13, 14, 10, P.body); rect(10, 13, 12, 1, P.bodyHi);
+      px(8, 19, P.body); px(8, 20, P.body); px(8, 21, P.body); px(23, 19, P.body); px(23, 20, P.body); px(23, 21, P.body);
+      rect(12, 15, 8, 6, P.belly); rect(13, 15, 6, 1, P.bellyDk); rect(12, 17, 8, 1, P.bellyDk); rect(12, 19, 8, 1, P.bellyDk);
+      rect(9, 14, 1, 9, P.bodyDk); rect(22, 14, 1, 9, P.bodyDk);
+      rect(6, 14, 3, 2, P.body); rect(3, 13, 3, 3, P.claw); rect(2, 12, 1, 3, P.claw); rect(1, 12, 1, 2, P.clawDk);
+      px(1, 11, P.claw); px(2, 11, P.clawHi); px(1, 14, P.claw); px(2, 15, P.clawDk); px(1, 13, P.bodyDk); px(3, 13, P.clawHi);
+      rect(23, 14, 3, 2, P.body); rect(26, 13, 3, 3, P.claw); rect(29, 12, 1, 3, P.claw); rect(30, 12, 1, 2, P.clawDk);
+      px(30, 11, P.claw); px(29, 11, P.clawHi); px(30, 14, P.claw); px(29, 15, P.clawDk); px(30, 13, P.bodyDk); px(28, 13, P.clawHi);
+      rect(10, 23, 12, 3, P.body); rect(11, 23, 10, 1, P.bodyDk); rect(11, 26, 10, 2, P.bodyDk); rect(12, 28, 8, 1, P.bodyShade);
+      rect(8, 29, 4, 1, P.bodyDk); rect(12, 29, 3, 1, P.body); rect(15, 29, 3, 1, P.body); rect(20, 29, 4, 1, P.bodyDk); rect(18, 29, 2, 1, P.body);
+      rect(8, 30, 4, 1, P.body); rect(20, 30, 4, 1, P.body); rect(12, 30, 8, 1, P.bodyDk); px(7, 30, P.bodyDk); px(24, 30, P.bodyDk);
+      px(9, 24, P.leg); px(8, 25, P.leg); px(9, 26, P.leg); px(8, 27, P.leg);
+      px(22, 24, P.leg); px(23, 25, P.leg); px(22, 26, P.leg); px(23, 27, P.leg);
+      ctx.fillStyle = 'rgba(0,0,0,0.07)'; for (let i = 0; i < 20; i++) ctx.fillRect((6 + LX + i) * S, 32 * S, S, 3);
+    }
+
+    // ═══ LOBSTER CLOTHING ═══
+    function drawHeadband() { rect(9, 7, 14, 2, '#34d399'); px(9, 7, '#059669'); px(22, 7, '#059669'); rect(11, 7, 10, 1, '#059669'); rect(11, 8, 10, 1, '#34d399'); px(23, 7, '#34d399'); px(23, 8, '#34d399'); px(24, 8, '#059669'); px(24, 9, '#34d399') }
+    function drawGlasses() { rect(11, 8, 4, 3, '#3b82f6'); rect(12, 9, 2, 1, '#1e3a5f'); px(12, 8, '#1e3a5f'); px(13, 8, '#1e3a5f'); px(12, 10, '#1e3a5f'); px(13, 10, '#1e3a5f'); px(12, 8, '#93c5fd'); rect(17, 8, 4, 3, '#3b82f6'); rect(18, 9, 2, 1, '#1e3a5f'); px(18, 8, '#1e3a5f'); px(19, 8, '#1e3a5f'); px(18, 10, '#1e3a5f'); px(19, 10, '#1e3a5f'); px(18, 8, '#93c5fd'); rect(15, 9, 2, 1, '#3b82f6'); px(9, 9, '#3b82f6'); px(8, 9, '#3b82f6'); px(22, 9, '#3b82f6'); px(23, 9, '#3b82f6') }
+    function drawBowTie() { px(12, 13, '#a78bfa'); px(11, 13, '#a78bfa'); px(11, 14, '#7c5cbf'); px(12, 14, '#a78bfa'); px(10, 13, '#7c5cbf'); px(13, 13, '#c4b5fd'); px(13, 14, '#c4b5fd'); px(14, 13, '#c4b5fd'); px(14, 14, '#c4b5fd'); px(15, 13, '#a78bfa'); px(16, 13, '#a78bfa'); px(15, 14, '#a78bfa'); px(16, 14, '#7c5cbf'); px(17, 13, '#7c5cbf') }
+    function drawSneakers() { rect(8, 26, 5, 2, '#f8f8f8'); rect(8, 28, 5, 1, '#555'); px(7, 27, '#f8f8f8'); px(7, 28, '#555'); px(9, 26, '#e94560'); px(10, 26, '#e94560'); px(9, 27, '#e94560'); px(11, 26, '#ddd'); rect(19, 26, 5, 2, '#f8f8f8'); rect(19, 28, 5, 1, '#555'); px(24, 27, '#f8f8f8'); px(24, 28, '#555'); px(21, 26, '#e94560'); px(22, 26, '#e94560'); px(22, 27, '#e94560'); px(20, 26, '#ddd') }
+    function drawScarf() { rect(9, 12, 14, 2, '#fbbf24'); rect(10, 12, 12, 1, '#f59e0b'); px(8, 12, '#fbbf24'); px(23, 12, '#fbbf24'); px(8, 13, '#d97706'); px(23, 13, '#d97706'); rect(8, 14, 2, 5, '#fbbf24'); px(8, 14, '#f59e0b'); px(9, 14, '#f59e0b'); px(8, 16, '#f59e0b'); px(9, 16, '#f59e0b'); px(8, 18, '#f59e0b'); px(9, 18, '#f59e0b'); px(8, 19, '#b45309'); px(9, 19, '#b45309') }
+    function drawWatch() { rect(3, 14, 3, 1, '#333'); rect(3, 13, 3, 1, '#333'); rect(4, 12, 2, 3, '#e2e4ea'); px(5, 13, '#e94560'); px(4, 13, '#333') }
+    function drawTopHat() { rect(8, 5, 16, 2, '#1a1a2e'); rect(10, 0, 12, 5, '#1a1a2e'); rect(11, 0, 10, 1, '#2d2d4e'); rect(11, 1, 2, 4, '#2d2d4e'); rect(10, 4, 12, 1, '#e94560'); px(8, 5, '#2d2d4e'); px(23, 5, '#2d2d4e') }
+    function drawSunglasses() { rect(11, 8, 4, 3, '#1a1a2e'); rect(12, 9, 2, 1, '#333'); px(12, 8, '#333'); px(13, 8, '#333'); px(12, 10, '#333'); px(13, 10, '#333'); px(13, 8, 'rgba(255,255,255,0.15)'); rect(17, 8, 4, 3, '#1a1a2e'); rect(18, 9, 2, 1, '#333'); px(18, 8, '#333'); px(19, 8, '#333'); px(18, 10, '#333'); px(19, 10, '#333'); px(19, 8, 'rgba(255,255,255,0.15)'); rect(15, 9, 2, 1, '#1a1a2e'); px(9, 9, '#1a1a2e'); px(8, 9, '#1a1a2e'); px(22, 9, '#1a1a2e'); px(23, 9, '#1a1a2e') }
+    function drawTie() { rect(15, 13, 2, 8, '#3b82f6'); px(15, 13, '#60a5fa'); px(16, 13, '#60a5fa'); rect(14, 14, 4, 1, '#2563eb'); px(15, 21, '#2563eb'); px(16, 21, '#2563eb'); px(14, 21, '#3b82f6'); px(17, 21, '#3b82f6') }
+    function drawBoots() { rect(8, 25, 5, 3, '#92400e'); rect(8, 28, 5, 1, '#5c2d0e'); px(7, 27, '#92400e'); px(7, 28, '#5c2d0e'); rect(8, 25, 5, 1, '#b45309'); px(10, 26, '#d97706'); rect(19, 25, 5, 3, '#92400e'); rect(19, 28, 5, 1, '#5c2d0e'); px(24, 27, '#92400e'); px(24, 28, '#5c2d0e'); rect(19, 25, 5, 1, '#b45309'); px(21, 26, '#d97706') }
+    function drawNecklace() { px(13, 12, '#fbbf24'); px(14, 12, '#d97706'); px(15, 13, '#fbbf24'); px(16, 13, '#fbbf24'); px(17, 12, '#d97706'); px(18, 12, '#fbbf24'); px(15, 14, '#ff4d6a'); px(16, 14, '#ff4d6a') }
+    function drawApron() { rect(11, 15, 10, 7, '#f8f8f8'); rect(12, 15, 8, 1, '#ddd'); rect(11, 15, 1, 7, '#ddd'); rect(20, 15, 1, 7, '#ddd'); rect(14, 17, 4, 2, '#ddd'); px(13, 22, '#f8f8f8'); px(18, 22, '#f8f8f8') }
+    function drawCrown() { rect(10, 3, 12, 3, '#fbbf24'); rect(11, 3, 10, 1, '#d97706'); px(10, 2, '#fbbf24'); px(13, 1, '#fbbf24'); px(15, 0, '#ff4d6a'); px(17, 1, '#fbbf24'); px(21, 2, '#fbbf24'); px(15, 4, '#ff4d6a'); px(16, 4, '#ff4d6a') }
+
+    const PIECES = {
+      headband: { draw: drawHeadband, tx: 126, ty: 52 }, glasses: { draw: drawGlasses, tx: 126, ty: 63 },
+      sunglasses: { draw: drawSunglasses, tx: 126, ty: 63 }, bowtie: { draw: drawBowTie, tx: 109, ty: 95 },
+      tie: { draw: drawTie, tx: 126, ty: 120 }, scarf: { draw: drawScarf, tx: 94, ty: 95 },
+      necklace: { draw: drawNecklace, tx: 126, ty: 90 }, apron: { draw: drawApron, tx: 126, ty: 135 },
+      sneakers: { draw: drawSneakers, tx: 126, ty: 190 }, boots: { draw: drawBoots, tx: 126, ty: 188 },
+      watch: { draw: drawWatch, tx: 44, ty: 92 }, tophat: { draw: drawTopHat, tx: 126, ty: 20 },
+      crown: { draw: drawCrown, tx: 126, ty: 18 },
+    };
+    const drawOrder = ['apron', 'scarf', 'sneakers', 'boots', 'watch', 'necklace', 'bowtie', 'tie', 'glasses', 'sunglasses', 'headband', 'tophat', 'crown'];
+    const activeClothes = new Set();
+
+    function renderLobster() {
+      drawLobster();
+      for (const item of drawOrder) { if (activeClothes.has(item) && PIECES[item]) PIECES[item].draw() }
+    }
+
+    // ═══ PIXEL ART WARDROBE ═══
+    // Colors
+    const WOOD = { dark: '#3d2b1f', mid: '#5c3d2e', light: '#7a5240', highlight: '#96654a' };
+    const BRASS = { dark: '#8b7355', mid: '#c4a67d', light: '#dcc9a3' };
+
+    // Garment pixel art — each defined as array of [dx, dy, color] from anchor (cx, cy)
+    // These are miniature outfits hanging on the rack
+
+    function drawHanger(cx, y) {
+      // Hook
+      wpx(cx, y, BRASS.mid); wpx(cx, y - 1, BRASS.light);
+      // Shoulders
+      for (let i = 1; i <= 4; i++) { wpx(cx - i, y + 1, BRASS.mid); wpx(cx + i, y + 1, BRASS.mid); }
+      wpx(cx - 4, y + 2, BRASS.dark); wpx(cx + 4, y + 2, BRASS.dark);
+      wpx(cx, y + 1, BRASS.light);
+    }
+
+    // Fitness Coach: headband + sneakers + watch
+    function drawGarmentAthletic(cx, y, bright) {
+      const cH = bright ? '#34d399' : '#2a5c48';
+      const cHd = bright ? '#059669' : '#1e4a38';
+      const cS = bright ? '#f8f8f8' : '#5a5248';
+      const cSd = bright ? '#ddd' : '#4a4238';
+      const cSr = bright ? '#e94560' : '#5a2830';
+      const cW = bright ? '#e2e4ea' : '#5a5248';
+      const cWd = bright ? '#333' : '#3a3228';
+      const cWr = bright ? '#e94560' : '#5a2830';
+      // Headband
+      wrect(cx - 4, y + 3, 9, 2, cH);
+      wrect(cx - 4, y + 3, 9, 1, cHd);
+      wpx(cx + 4, y + 4, cHd); wpx(cx + 5, y + 3, cH);
+      // Watch
+      wrect(cx - 1, y + 7, 3, 1, cWd);
+      wrect(cx - 1, y + 8, 3, 2, cW);
+      wpx(cx, y + 8, cWd); wpx(cx, y + 9, cWr);
+      wrect(cx - 1, y + 10, 3, 1, cWd);
+      // Sneakers
+      wrect(cx - 4, y + 13, 4, 2, cS);
+      wrect(cx + 1, y + 13, 4, 2, cS);
+      wpx(cx - 3, y + 13, cSr); wpx(cx + 2, y + 13, cSr);
+      wrect(cx - 4, y + 15, 4, 1, cSd);
+      wrect(cx + 1, y + 15, 4, 1, cSd);
+    }
+
+    // Daily Journal: glasses + scarf + bowtie
+    function drawGarmentCozy(cx, y, bright) {
+      const cG = bright ? '#3b82f6' : '#2a3e60';
+      const cGl = bright ? '#93c5fd' : '#3a5070';
+      const cSc = bright ? '#fbbf24' : '#5a4820';
+      const cScd = bright ? '#f59e0b' : '#4a3a18';
+      const cB = bright ? '#a78bfa' : '#4a3868';
+      const cBd = bright ? '#7c5cbf' : '#3a2a50';
+      const cBl = bright ? '#c4b5fd' : '#5a4878';
+      // Glasses
+      wrect(cx - 4, y + 3, 3, 2, cG);
+      wrect(cx + 2, y + 3, 3, 2, cG);
+      wpx(cx - 3, y + 3, cGl); wpx(cx + 3, y + 3, cGl);
+      wpx(cx, y + 3, cG); wpx(cx + 1, y + 3, cG); // bridge
+      // Scarf
+      wrect(cx - 3, y + 7, 7, 2, cSc);
+      wrect(cx - 3, y + 7, 7, 1, cScd);
+      wpx(cx - 3, y + 9, cSc); wpx(cx - 3, y + 10, cSc); wpx(cx - 3, y + 11, cScd);
+      // Bowtie
+      wpx(cx - 2, y + 13, cB); wpx(cx - 3, y + 13, cBd);
+      wpx(cx - 1, y + 13, cBl); wpx(cx, y + 13, cBl);
+      wpx(cx + 1, y + 13, cBl); wpx(cx + 2, y + 13, cB);
+      wpx(cx + 3, y + 13, cBd);
+      wpx(cx - 2, y + 14, cB); wpx(cx - 1, y + 14, cBl);
+      wpx(cx, y + 14, cBl); wpx(cx + 1, y + 14, cBl); wpx(cx + 2, y + 14, cB);
+    }
+
+    // Sleeping Coach: crown + glasses + bowtie + sneakers + watch
+    // skip = Set of clothing keys to hide (already flew to lobster)
+    function drawGarmentSleep(cx, y, bright, skip) {
+      const s = skip || new Set();
+      const cC = bright ? '#fbbf24' : '#5a4820';
+      const cCd = bright ? '#d97706' : '#4a3a18';
+      const cCr = bright ? '#ff4d6a' : '#5a2830';
+      const cG = bright ? '#3b82f6' : '#2a3e60';
+      const cGl = bright ? '#93c5fd' : '#3a5070';
+      const cB = bright ? '#a78bfa' : '#4a3868';
+      const cBd = bright ? '#7c5cbf' : '#3a2a50';
+      const cBl = bright ? '#c4b5fd' : '#5a4878';
+      const cW = bright ? '#e2e4ea' : '#5a5248';
+      const cWd = bright ? '#333' : '#3a3228';
+      const cWr = bright ? '#e94560' : '#5a2830';
+      const cSn = bright ? '#f8f8f8' : '#5a5248';
+      const cSnd = bright ? '#ddd' : '#4a4238';
+      if (!s.has('crown')) {
+        wrect(cx - 3, y + 1, 7, 2, cC);
+        wrect(cx - 2, y + 1, 5, 1, cCd);
+        wpx(cx - 3, y + 0, cC); wpx(cx, y - 1, cCr);
+        wpx(cx + 3, y + 0, cC); wpx(cx, y + 2, cCr);
+      }
+      if (!s.has('glasses')) {
+        wrect(cx - 4, y + 5, 3, 2, cG);
+        wrect(cx + 2, y + 5, 3, 2, cG);
+        wpx(cx - 3, y + 5, cGl); wpx(cx + 3, y + 5, cGl);
+        wpx(cx, y + 6, cG); wpx(cx + 1, y + 6, cG);
+      }
+      if (!s.has('bowtie')) {
+        wpx(cx - 2, y + 9, cBd); wpx(cx - 1, y + 9, cB);
+        wpx(cx, y + 9, cBl); wpx(cx + 1, y + 9, cB);
+        wpx(cx + 2, y + 9, cBd);
+        wpx(cx - 1, y + 10, cB); wpx(cx, y + 10, cBl); wpx(cx + 1, y + 10, cB);
+      }
+      if (!s.has('watch')) {
+        wrect(cx - 1, y + 13, 3, 1, cWd);
+        wrect(cx - 1, y + 14, 3, 1, cW);
+        wpx(cx, y + 14, cWr);
+        wrect(cx - 1, y + 15, 3, 1, cWd);
+      }
+      if (!s.has('sneakers')) {
+        wrect(cx - 4, y + 18, 4, 1, cSn); wrect(cx + 1, y + 18, 4, 1, cSn);
+        wrect(cx - 4, y + 19, 4, 1, cSnd); wrect(cx + 1, y + 19, 4, 1, cSnd);
+      }
+    }
+
+    const GARMENT_DRAW = [drawGarmentAthletic, drawGarmentCozy, drawGarmentSleep];
+    const GARMENT_CX = [16, 39, 62]; // center x positions for 3 garments
+
+    let wardrobeSkip = new Set(); // items that flew away from wardrobe
+
+    function drawWardrobe(activeIdx) {
+      wCtx.clearRect(0, 0, wCanvas.width, wCanvas.height);
+
+      // Wardrobe frame — open closet / clothes rack style
+      // Left pillar
+      wrect(0, 0, 2, 48, WOOD.dark);
+      wrect(2, 0, 1, 48, WOOD.mid);
+      // Right pillar
+      wrect(75, 0, 1, 48, WOOD.mid);
+      wrect(76, 0, 2, 48, WOOD.dark);
+      // Top beam
+      wrect(0, 0, 78, 2, WOOD.dark);
+      wrect(1, 0, 76, 1, WOOD.mid);
+      wrect(2, 1, 74, 1, WOOD.highlight);
+      // Bottom shelf
+      wrect(0, 44, 78, 2, WOOD.dark);
+      wrect(1, 44, 76, 1, WOOD.mid);
+      // Decorative corners
+      wpx(0, 0, WOOD.light); wpx(77, 0, WOOD.light);
+      wpx(0, 45, WOOD.light); wpx(77, 45, WOOD.light);
+
+      // Interior background — warm linen tone for contrast
+      wrect(3, 2, 72, 42, '#2a2218');
+      // Subtle vertical gradient: slightly lighter at top
+      wCtx.fillStyle = 'rgba(196, 166, 125, 0.06)';
+      wCtx.fillRect(3 * W, 2 * W, 72 * W, 10 * W);
+
+      // Brass rod
+      wrect(5, 5, 68, 1, BRASS.dark);
+      wrect(5, 4, 68, 1, BRASS.mid);
+      wrect(6, 3, 66, 1, BRASS.light);
+      // Rod end caps
+      wpx(4, 4, BRASS.light); wpx(73, 4, BRASS.light);
+      wpx(4, 5, BRASS.dark); wpx(73, 5, BRASS.dark);
+
+      // Draw a spotlight behind the active garment (skip during install to avoid ghost glow)
+      if (activeIdx >= 0 && activeIdx < GARMENT_DRAW.length && wardrobeSkip.size === 0) {
+        const glowCx = GARMENT_CX[activeIdx];
+        wCtx.fillStyle = 'rgba(255, 200, 140, 0.08)';
+        wCtx.fillRect((glowCx - 7) * W, 6 * W, 15 * W, 38 * W);
+        wCtx.fillStyle = 'rgba(255, 220, 160, 0.06)';
+        wCtx.fillRect((glowCx - 6) * W, 8 * W, 13 * W, 34 * W);
+      }
+
+      // Selection cursor — pixel arrow pointing down at active garment
+      if (activeIdx >= 0 && activeIdx < GARMENT_DRAW.length) {
+        const acx = GARMENT_CX[activeIdx];
+        wpx(acx, 1, '#ff4d6a');
+        wpx(acx - 1, 0, '#ff4d6a');
+        wpx(acx + 1, 0, '#ff4d6a');
+      }
+
+      // Draw hangers and garments
+      for (let i = 0; i < GARMENT_DRAW.length; i++) {
+        const cx = GARMENT_CX[i];
+        const bright = (i === activeIdx);
+        drawHanger(cx, 7);
+        // Pass skip set to the chosen garment so removed items disappear
+        if (GARMENT_DRAW[i] === drawGarmentSleep) {
+          GARMENT_DRAW[i](cx, 10, bright, wardrobeSkip);
+        } else {
+          GARMENT_DRAW[i](cx, 10, bright);
+        }
+      }
+
+      // Floor shadow
+      wCtx.fillStyle = 'rgba(0,0,0,0.12)';
+      for (let x = 5; x < 73; x++) {
+        wCtx.fillRect(x * W, 43 * W, W, 2);
+      }
+    }
+
+    // ═══ DRESSES ═══
+    const DRESSES = [
+      {
+        id: 'fitness-coach', name: 'Fitness Coach', version: '1.0.0',
+        previewClothes: ['headband', 'sneakers', 'watch'],
+        installLines: [
+          { text: '  + skill: workout-planner', cloth: 'headband', color: '#a78bfa' },
+          { text: '  + cron: Daily workout (0 8 * * 1-5 UTC)', cloth: 'sneakers', color: '#60a5fa' },
+          { text: '  + memory: ## Fitness', cloth: 'watch', color: '#fbbf24' },
+          { text: '  + guide: dresses/fitness-coach/GUIDE.md', cloth: null, color: '#34d399' },
+        ],
+      },
+      {
+        id: 'journaling', name: 'Daily Journal', version: '0.8.0',
+        previewClothes: ['glasses', 'scarf', 'bowtie'],
+        installLines: [
+          { text: '  + skill: mood-tracker', cloth: 'glasses', color: '#a78bfa' },
+          { text: '  + cron: Evening reflection (0 21 * * * UTC)', cloth: 'scarf', color: '#60a5fa' },
+          { text: '  + memory: ## Journal', cloth: 'bowtie', color: '#fbbf24' },
+          { text: '  + guide: dresses/journaling/GUIDE.md', cloth: null, color: '#34d399' },
+        ],
+      },
+      {
+        id: 'sleeping-coach', name: 'Sleeping Coach', version: '1.0.0',
+        previewClothes: ['crown', 'glasses', 'bowtie', 'sneakers', 'watch'],
+        installLines: [
+          { text: '  + skill: sleep-report', cloth: 'crown', color: '#a78bfa' },
+          { text: '  + skill: wind-down', cloth: 'glasses', color: '#a78bfa' },
+          { text: '  + skill: readiness-check', cloth: 'bowtie', color: '#a78bfa' },
+          { text: '  + cron: Morning report (0 7 * * * UTC)', cloth: 'sneakers', color: '#60a5fa' },
+          { text: '  + memory: ## Sleep', cloth: 'watch', color: '#fbbf24' },
+        ],
+      },
+    ];
+
+    // ═══ CELEBRATION ═══
+    function spawnSparkles() {
+      const colors = ['#fbbf24', '#ff4d6a', '#a78bfa', '#34d399', '#60a5fa', '#ff8a4c'];
+      for (let i = 0; i < 14; i++) {
+        const s = document.createElement('div');
+        s.className = 'sparkle';
+        s.style.background = colors[i % colors.length];
+        s.style.left = '50%';
+        s.style.top = '45%';
+        canvasContainer.appendChild(s);
+        const angle = (i / 14) * Math.PI * 2;
+        const dist = 55 + Math.random() * 50;
+        requestAnimationFrame(() => {
+          s.style.transform = `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist}px) scale(0)`;
+          s.style.opacity = '0';
+        });
+        setTimeout(() => s.remove(), 1000);
+      }
+    }
+
+    const runwayBackdrop = document.getElementById('runwayBackdrop');
+
+    function showRunway() {
+      runwayBackdrop.classList.add('visible');
+    }
+
+    function hideRunway() {
+      runwayBackdrop.classList.remove('visible');
+      // Remove any lingering twinkles
+      for (const t of document.querySelectorAll('.twinkle')) t.remove();
+    }
+
+    function spawnTwinkles() {
+      const stage = document.getElementById('demoStage');
+      for (let i = 0; i < 18; i++) {
+        const t = document.createElement('div');
+        const isCross = Math.random() > 0.5;
+        t.className = isCross ? 'twinkle cross' : 'twinkle';
+        t.style.left = `${10 + Math.random() * 80}%`;
+        t.style.top = `${5 + Math.random() * 85}%`;
+        const size = isCross ? 4 : (3 + Math.floor(Math.random() * 2));
+        t.style.width = `${size}px`;
+        t.style.height = `${size}px`;
+        stage.appendChild(t);
+        setTimeout(() => t.classList.add('on'), 100 + Math.random() * 800);
+      }
+    }
+
+    function celebrateLobster() {
+      showRunway();
+      spawnTwinkles();
+      canvasContainer.classList.add('celebrating');
+      spawnSparkles();
+      setTimeout(() => {
+        canvasContainer.classList.remove('celebrating');
+        spawnSparkles();
+        // Second wave of twinkles
+        spawnTwinkles();
+      }, 1400);
+    }
+
+    // ═══ FLY FROM WARDROBE — item flies from wardrobe garment down to lobster ═══
+    function flyFromWardrobe(garmentIdx, clothingKey, label, color) {
+      return new Promise(resolve => {
+        if (!clothingKey) { resolve(); return; }
+        const stage = document.getElementById('demoStage');
+        const stageRect = stage.getBoundingClientRect();
+        const wRect = wCanvas.getBoundingClientRect();
+        const cRect = canvasContainer.getBoundingClientRect();
+
+        // Start: center of the garment in the wardrobe
+        const sx = wRect.left - stageRect.left + GARMENT_CX[garmentIdx] * W;
+        const sy = wRect.top - stageRect.top + 22 * W;
+
+        // End: target on the lobster (scaled)
+        const scale = 0.8;
+        // Canvas container is now 252px wide, same as canvas
+        const ex = cRect.left - stageRect.left + PIECES[clothingKey].tx * scale;
+        const ey = cRect.top - stageRect.top + PIECES[clothingKey].ty * scale;
+
+        const el = document.createElement('div');
+        el.className = 'fly-item';
+        el.textContent = label;
+        el.style.border = `1px solid ${color}`;
+        el.style.color = color;
+        el.style.position = 'absolute';
+        el.style.zIndex = '20';
+        el.style.left = `${sx}px`;
+        el.style.top = `${sy}px`;
+        el.style.opacity = '1';
+        el.style.transform = 'translate(-50%, -50%)';
+        stage.appendChild(el);
+
+        el.offsetHeight;
+        el.style.transition = 'left 0.8s cubic-bezier(0.22,1,0.36,1), top 0.8s cubic-bezier(0.22,1,0.36,1), opacity 0.2s ease';
+        el.style.left = `${ex}px`;
+        el.style.top = `${ey}px`;
+
+        function onLand(e) {
+          if (e.propertyName !== 'left') return;
+          el.removeEventListener('transitionend', onLand);
+          activeClothes.add(clothingKey);
+          renderLobster();
+          canvasContainer.classList.add('flash');
+          setTimeout(() => canvasContainer.classList.remove('flash'), 350);
+          // Linger a moment so user can read the label
+          setTimeout(() => {
+            el.style.transition = 'opacity 0.25s ease';
+            el.style.opacity = '0';
+            setTimeout(() => { el.remove(); resolve(); }, 300);
+          }, 400);
+        }
+        el.addEventListener('transitionend', onLand);
+        setTimeout(() => { if (el.parentNode) { activeClothes.add(clothingKey); renderLobster(); el.remove(); resolve(); } }, 1400);
+      });
+    }
+
+    // ═══ STAGE TRANSITIONS ═══
+    function showWardrobe() {
+      wardrobeContainer.classList.remove('hidden');
+      canvasContainer.classList.add('browsing');
+      canvasContainer.classList.remove('dressing', 'centered');
+    }
+
+    function enterDressing() {
+      // Keep lobster small while wardrobe is still visible
+      canvasContainer.classList.remove('browsing', 'centered');
+      canvasContainer.classList.add('dressing');
+    }
+
+    function hideWardrobeAndCenter() {
+      wardrobeContainer.classList.add('hidden');
+      canvasContainer.classList.remove('browsing', 'dressing');
+      canvasContainer.classList.add('centered');
+      return new Promise(r => setTimeout(r, 600));
+    }
+
+    // ═══ TERMINAL ═══
+    const termBody = document.getElementById('termBody');
+    let animating = false;
+
+    function addLine(html) { const d = document.createElement('div'); d.className = 'term-line'; d.innerHTML = html; termBody.appendChild(d); termBody.scrollTop = termBody.scrollHeight; return d }
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)) }
+    async function typeText(text, el, speed = 35) { for (let i = 0; i <= text.length; i++) { el.textContent = text.slice(0, i) + (i < text.length ? '\u2588' : ''); await sleep(speed) } }
+
+    // ═══ MAIN SEQUENCE ═══
+    async function runDressSequence() {
+      if (animating) return;
+      animating = true;
+      termBody.innerHTML = '';
+      activeClothes.clear();
+      wardrobeSkip = new Set();
+      renderLobster();
+      hideRunway();
+
+      // Start: lobster naked and centered, wardrobe hidden
+      wardrobeContainer.classList.add('hidden');
+      canvasContainer.classList.remove('browsing', 'dressing');
+      canvasContainer.classList.add('centered');
+
+      // Type command
+      addLine('<span class="t-prompt">$ </span><span id="typingCmd"></span>');
+      await typeText('clawtique dress', document.getElementById('typingCmd'), 55);
+      document.getElementById('typingCmd').textContent = 'clawtique dress';
+      await sleep(400);
+
+      // Wardrobe appears, lobster shrinks to bottom
+      drawWardrobe(-1);
+      showWardrobe();
+      await sleep(600);
+
+      addLine('');
+      addLine('<span class="t-output">? Select a dress to install</span> <span class="t-dim">(\u2191\u2193 to browse)</span>');
+      addLine('');
+
+      const menuEls = DRESSES.map(d => addLine(`<span class="menu-item">  ${d.name} <span class="t-dim">v${d.version}</span></span>`));
+
+      await sleep(500);
+
+      // ═══ PHASE 1: BROWSING — scroll all dresses, then go back to pick one ═══
+      function highlightDress(target) {
+        menuEls.forEach((m, i) => {
+          const mi = m.querySelector('.menu-item');
+          if (i === target) {
+            mi.classList.add('active');
+            mi.innerHTML = `<span style="color:var(--green)">\u276F</span> ${DRESSES[i].name} <span class="t-dim">v${DRESSES[i].version}</span>`;
+          } else {
+            mi.classList.remove('active');
+            mi.innerHTML = `  ${DRESSES[i].name} <span class="t-dim">v${DRESSES[i].version}</span>`;
+          }
+        });
+        drawWardrobe(target);
+        activeClothes.clear();
+        for (const c of DRESSES[target].previewClothes) activeClothes.add(c);
+        renderLobster();
+      }
+
+      // Scroll through all dresses
+      for (let target = 0; target < DRESSES.length; target++) {
+        highlightDress(target);
+        await sleep(1200);
+      }
+
+      // She picks the last — Sleeping Coach
+      const chosenIdx = DRESSES.length - 1;
+      const chosen = DRESSES[chosenIdx];
+
+      // Reset lobster but keep wardrobe visible, switch to dressing mode
+      activeClothes.clear();
+      renderLobster();
+      enterDressing();
+
+      addLine('');
+      addLine(`<span class="t-output">Installing </span><span class="t-highlight">${chosen.name}</span><span class="t-output"> v${chosen.version}...</span>`);
+      addLine('');
+
+      // Each install line: item disappears from wardrobe, flies to lobster
+      for (const line of chosen.installLines) {
+        addLine(`<span class="t-success">${line.text}</span>`);
+        if (line.cloth) {
+          // Remove item from wardrobe display before flying
+          wardrobeSkip.add(line.cloth);
+          drawWardrobe(chosenIdx);
+          await flyFromWardrobe(chosenIdx, line.cloth, line.text.trim(), line.color);
+        }
+        await sleep(400);
+      }
+
+      addLine('');
+      addLine('<span class="t-success">\u2713 Dressed successfully!</span>');
+
+      // Hide wardrobe, scale up lobster to full center
+      await hideWardrobeAndCenter();
+
+      // Celebration!
+      celebrateLobster();
+      await sleep(2000);
+
+      addLine('');
+      addLine('<span class="t-prompt">$ </span><span class="cursor-blink"></span>');
+
+      await sleep(4500);
+      animating = false;
+      setTimeout(runDressSequence, 2000);
+    }
+
+    // ═══ START ═══
+    const demoObs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting && !animating) {
+          demoObs.disconnect();
+          setTimeout(runDressSequence, 400);
+        }
+      });
+    }, { threshold: .2 });
+    demoObs.observe(document.querySelector('.demo-wrapper'));
+    wardrobeContainer.classList.add('hidden');
+    renderLobster();
+    drawWardrobe(-1);
+
+  </script>
+</body>
+
+</html>

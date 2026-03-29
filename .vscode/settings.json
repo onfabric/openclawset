@@ -12,5 +12,8 @@
     "editor.defaultFormatter": "biomejs.biome"
   },
   "prettier.enable": false,
-  "eslint.enable": false
+  "eslint.enable": false,
+  "json.schemaDownload.trustedDomains": {
+    "https://openapi.vercel.sh/": true
+  }
 }

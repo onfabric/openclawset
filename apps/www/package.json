@@ -1,0 +1,5 @@
+{
+  "name": "@repo/www",
+  "private": true,
+  "type": "module"
+}
