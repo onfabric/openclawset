@@ -17,6 +17,8 @@ export interface ClawtiquePaths {
   lock: string;
   /** Cache directory for fetched registry data: ~/.clawtique/cache/ */
   cache: string;
+  /** Backup of original personality files: ~/.clawtique/personality-backup/ */
+  personalityBackup: string;
 }
 
 export function getClawtiquePaths(root?: string): ClawtiquePaths {
@@ -28,6 +30,7 @@ export function getClawtiquePaths(root?: string): ClawtiquePaths {
     dresses: join(base, 'dresses'),
     lock: join(base, 'clawtique.lock'),
     cache: join(base, 'cache'),
+    personalityBackup: join(base, 'personality-backup'),
   };
 }
 

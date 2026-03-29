@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-03-28T21:25:02.030Z",
+  "generatedAt": "2026-03-29T14:33:32.795Z",
   "dresses": {
     "sleeping-coach": {
       "name": "Sleeping Coach",
@@ -87,5 +87,6 @@
       "description": "WhatsApp channel plugin via waclaw proxy — shared across dresses that need WhatsApp messaging.",
       "path": "lingerie/waclaw"
     }
-  }
+  },
+  "personalities": {}
 }

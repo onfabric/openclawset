@@ -13,6 +13,7 @@ const EMPTY_STATE: StateFile = {
   openclawDir: '',
   dresses: {},
   lingerie: {},
+  personality: null,
 };
 
 export class StateManager {

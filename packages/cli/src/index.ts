@@ -8,6 +8,8 @@ import LingerieListCommand from '#commands/lingerie/list.ts';
 import LingerieRemoveCommand from '#commands/lingerie/remove.ts';
 import LogCommand from '#commands/log.ts';
 import ParamsCommand from '#commands/params.ts';
+import PersonalityCommand from '#commands/personality/index.ts';
+import PersonalitySetCommand from '#commands/personality/set.ts';
 import RollbackCommand from '#commands/rollback.ts';
 import StatusCommand from '#commands/status.ts';
 import UndressCommand from '#commands/undress.ts';
@@ -24,6 +26,8 @@ export const COMMANDS = {
   'lingerie remove': LingerieRemoveCommand,
   log: LogCommand,
   params: ParamsCommand,
+  personality: PersonalityCommand,
+  'personality set': PersonalitySetCommand,
   rollback: RollbackCommand,
   status: StatusCommand,
   undress: UndressCommand,

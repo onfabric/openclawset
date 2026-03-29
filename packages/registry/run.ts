@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * Validates all dresses and lingerie in registry/, then generates registry.json.
+ * Validates dresses, lingerie, and personalities in registry/, then generates registry.json.
  *
  * Validation:
  *  - dress.json / lingerie.json parse against Zod schemas
@@ -15,13 +15,19 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { RegistryIndex } from '@repo/cli/core';
-import { type DressJson, dressJsonSchema, lingerieJsonSchema } from '@repo/cli/core';
+import {
+  type DressJson,
+  dressJsonSchema,
+  lingerieJsonSchema,
+  personalityJsonSchema,
+} from '@repo/cli/core';
 
 const ROOT_DIR = join(import.meta.dir, '../..');
 
 const REGISTRY_DIR = join(ROOT_DIR, 'registry');
 const DRESSES_DIR = join(REGISTRY_DIR, 'dresses');
 const LINGERIE_DIR = join(REGISTRY_DIR, 'lingerie');
+const PERSONALITIES_DIR = join(REGISTRY_DIR, 'personalities');
 
 // Auto-vars injected by the CLI — not declared as params
 const AUTO_VARS = new Set([
@@ -182,6 +188,45 @@ for (const dir of uwDirs) {
 }
 
 // ---------------------------------------------------------------------------
+// Validate personalities
+// ---------------------------------------------------------------------------
+
+const personalityIndex: RegistryIndex['personalities'] = {};
+
+const personalityDirs = existsSync(PERSONALITIES_DIR) ? readdirSync(PERSONALITIES_DIR) : [];
+for (const dir of personalityDirs) {
+  const pPath = join(PERSONALITIES_DIR, dir, 'personality.json');
+  if (!existsSync(pPath)) continue;
+
+  console.log(`personality: ${dir}`);
+
+  try {
+    const raw = JSON.parse(readFileSync(pPath, 'utf-8'));
+    const result = personalityJsonSchema.safeParse(raw);
+    if (!result.success) {
+      for (const issue of result.error.issues) {
+        error(`${issue.path.join('.')}: ${issue.message}`);
+      }
+      continue;
+    }
+    const p = result.data;
+
+    if (p.id !== dir) {
+      error(`personality.id "${p.id}" does not match directory name "${dir}"`);
+    }
+
+    personalityIndex[p.id] = {
+      name: p.name,
+      version: p.version,
+      description: p.description,
+      path: `personalities/${dir}`,
+    };
+  } catch (e) {
+    error(`Failed to parse personality.json: ${e}`);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Cross-validate: dress lingerie refs exist in registry
 // ---------------------------------------------------------------------------
 
@@ -207,13 +252,14 @@ const registry: RegistryIndex = {
   generatedAt: new Date().toISOString(),
   dresses: dressIndex,
   lingerie: lingerieIndex,
+  personalities: personalityIndex,
 };
 
 const outPath = join(REGISTRY_DIR, 'registry.json');
 writeFileSync(outPath, `${JSON.stringify(registry, null, 2)}\n`);
 
 console.log(
-  `\n✓ registry.json generated (${Object.keys(dressIndex).length} dresses, ${Object.keys(lingerieIndex).length} lingerie)`,
+  `\n✓ registry.json generated (${Object.keys(dressIndex).length} dresses, ${Object.keys(lingerieIndex).length} lingerie, ${Object.keys(personalityIndex).length} personalities)`,
 );
 if (warnings > 0) {
   console.warn(`  ${warnings} warning(s)`);

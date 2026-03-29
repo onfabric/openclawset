@@ -180,12 +180,19 @@ export const dressEntrySchema = z.object({
   applied: appliedStateSchema,
 });
 
+const personalityEntrySchema = z.object({
+  id: z.string(),
+  version: z.string(),
+  installedAt: z.string().datetime(),
+});
+
 export const stateFileSchema = z.object({
   version: z.literal(1),
   serial: z.number().int().nonnegative(),
   openclawDir: z.string(),
   dresses: z.record(dressIdSchema, dressEntrySchema).default({}),
   lingerie: z.record(dressIdSchema, lingerieEntrySchema).default({}),
+  personality: personalityEntrySchema.nullable().default(null),
 });
 
 // ---------------------------------------------------------------------------

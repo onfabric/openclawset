@@ -23,6 +23,8 @@ export {
 } from '#core/schemas/dress-json.ts';
 export type { LingerieJson } from '#core/schemas/lingerie-json.ts';
 export { lingerieJsonSchema } from '#core/schemas/lingerie-json.ts';
+export type { PersonalityJson } from '#core/schemas/personality-json.ts';
+export { PERSONALITY_FILES, personalityJsonSchema } from '#core/schemas/personality-json.ts';
 export type {
   RegistryDressEntry,
   RegistryIndex,
@@ -36,6 +38,7 @@ export type {
   DressEntry,
   LingerieApplied,
   LingerieEntry,
+  PersonalityEntry,
   StateFile,
 } from '#core/schemas/state.ts';
 export {
@@ -45,5 +48,6 @@ export {
   dressEntrySchema,
   lingerieAppliedSchema,
   lingerieEntrySchema,
+  personalityEntrySchema,
   stateFileSchema,
 } from '#core/schemas/state.ts';

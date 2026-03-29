@@ -6,6 +6,8 @@ import {
   dressJsonSchema,
   type LingerieJson,
   lingerieJsonSchema,
+  type PersonalityJson,
+  personalityJsonSchema,
   type RegistryIndex,
   registryIndexSchema,
 } from '#core/index.ts';
@@ -29,6 +31,9 @@ export interface RegistryProvider {
 
   /** List all available skill .md files for a dress. */
   listSkills(dressId: string): Promise<string[]>;
+
+  /** Fetch a personality definition by ID. */
+  getPersonalityJson(personalityId: string): Promise<PersonalityJson>;
 }
 
 // ---------------------------------------------------------------------------
@@ -66,6 +71,12 @@ export class LocalRegistryProvider implements RegistryProvider {
     if (!existsSync(skillsDir)) return [];
     const files = await readdir(skillsDir);
     return files.filter((f) => f.endsWith('.md')).map((f) => f.replace(/\.md$/, ''));
+  }
+
+  async getPersonalityJson(personalityId: string): Promise<PersonalityJson> {
+    const path = join(this.registryDir, 'personalities', personalityId, 'personality.json');
+    const raw = JSON.parse(await readFile(path, 'utf-8'));
+    return personalityJsonSchema.parse(raw);
   }
 }
 
@@ -135,6 +146,14 @@ export class GitHubRegistryProvider implements RegistryProvider {
     // Derive skill names from the dress.json skills field instead.
     const dress = await this.getDressJson(dressId);
     return Object.keys(dress.skills ?? {});
+  }
+
+  async getPersonalityJson(personalityId: string): Promise<PersonalityJson> {
+    const raw = await this.fetchJson(
+      `${this.baseUrl}/personalities/${personalityId}/personality.json`,
+      `personalities/${personalityId}/personality.json`,
+    );
+    return personalityJsonSchema.parse(raw);
   }
 
   // ---- internal helpers ----------------------------------------------------

@@ -87,6 +87,7 @@ export default class Init extends Command {
       openclawDir,
       dresses: {},
       lingerie: {},
+      personality: null,
     };
     await writeFile(paths.state, `${JSON.stringify(state, null, 2)}\n`);
 

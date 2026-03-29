@@ -23,11 +23,19 @@ const registryLingerieEntrySchema = z.object({
   path: z.string(),
 });
 
+const registryPersonalityEntrySchema = z.object({
+  name: z.string(),
+  version: z.string(),
+  description: z.string().default(''),
+  path: z.string(),
+});
+
 export const registryIndexSchema = z.object({
   version: z.literal(1),
   generatedAt: z.string().datetime(),
   dresses: z.record(z.string(), registryDressEntrySchema).default({}),
   lingerie: z.record(z.string(), registryLingerieEntrySchema).default({}),
+  personalities: z.record(z.string(), registryPersonalityEntrySchema).default({}),
 });
 
 // ---------------------------------------------------------------------------

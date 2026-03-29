@@ -77,6 +77,16 @@ export const lingerieEntrySchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Personality entry — active personality in state
+// ---------------------------------------------------------------------------
+
+export const personalityEntrySchema = z.object({
+  id: z.string(),
+  version: z.string(),
+  installedAt: z.string().datetime(),
+});
+
+// ---------------------------------------------------------------------------
 // State file — the full ~/.clawtique/state.json
 // ---------------------------------------------------------------------------
 
@@ -86,6 +96,7 @@ export const stateFileSchema = z.object({
   openclawDir: z.string(),
   dresses: z.record(dressIdSchema, dressEntrySchema).default({}),
   lingerie: z.record(dressIdSchema, lingerieEntrySchema).default({}),
+  personality: personalityEntrySchema.nullable().default(null),
 });
 
 // ---------------------------------------------------------------------------
@@ -107,5 +118,6 @@ export type AppliedState = z.infer<typeof appliedStateSchema>;
 export type DressEntry = z.infer<typeof dressEntrySchema>;
 export type LingerieApplied = z.infer<typeof lingerieAppliedSchema>;
 export type LingerieEntry = z.infer<typeof lingerieEntrySchema>;
+export type PersonalityEntry = z.infer<typeof personalityEntrySchema>;
 export type StateFile = z.infer<typeof stateFileSchema>;
 export type ClawtiqueConfig = z.infer<typeof clawtiqueConfigSchema>;
