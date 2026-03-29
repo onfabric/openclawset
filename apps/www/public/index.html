@@ -577,6 +577,146 @@
       background: var(--red);
       color: #fff
     }
+
+    /* ═══ BROWSE CTA ═══ */
+    .browse-cta {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--red);
+      text-decoration: none;
+      border: 1px solid var(--red-dim);
+      padding: 10px 24px;
+      transition: background .2s, color .2s;
+    }
+
+    .browse-cta:hover {
+      background: var(--red);
+      color: #fff;
+    }
+
+    /* ═══ BROWSE SECTION ═══ */
+    .browse-section {
+      padding: 80px 0 60px;
+    }
+
+    .browse-heading {
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      font-size: clamp(22px, 3.5vw, 34px);
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .browse-sub {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 24px;
+      line-height: 1.7;
+    }
+
+    .browse-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .browse-tab {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 20px;
+      color: var(--text-dim);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: color .2s, border-color .2s;
+    }
+
+    .browse-tab:hover {
+      color: var(--text);
+    }
+
+    .browse-tab.active {
+      color: var(--red);
+      border-bottom-color: var(--red);
+    }
+
+    .browse-tab-count {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-left: 6px;
+    }
+
+    .browse-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .browse-card {
+      display: block;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      padding: 24px;
+      transition: border-color .2s;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .browse-card:hover {
+      border-color: var(--border-focus);
+    }
+
+    .browse-card-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      gap: 12px;
+    }
+
+    .browse-card-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text);
+    }
+
+    .browse-card-version {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .browse-card-desc {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .browse-card-install {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 14px;
+      padding: 8px 12px;
+      background: var(--terminal-bg);
+      border: 1px solid var(--terminal-border);
+      cursor: pointer;
+      transition: border-color .2s, color .2s;
+      user-select: all;
+    }
+
+    .browse-card-install:hover {
+      border-color: var(--border-focus);
+      color: var(--text-dim);
+    }
   </style>
 </head>
 
@@ -586,6 +726,7 @@
       <div class="nav-logo"><span>&#x1F457;</span> clawtique</div>
       <ul class="nav-links">
         <li><a href="#demo">Demo</a></li>
+        <li><a href="#dresses">Dresses</a></li>
         <li><a href="https://github.com/onfabric/clawtique" target="_blank">Docs</a></li>
       </ul>
       <a href="https://github.com/onfabric/clawtique" class="gh-btn" target="_blank"><svg width="14" height="14"
@@ -599,6 +740,7 @@
       <h1>Your <em>OpenClaw</em>&#x2019;s<br> favorite boutique</h1>
       <p class="hero-sub">Skills, cron jobs, memory and plugins — bundled into installable dresses.
         One command to dress up, one to take it off. No mess left behind.</p>
+      <a href="#dresses" class="browse-cta">Enter the boutique</a>
     </section>
     <section class="demo-section" id="demo">
       <div class="demo-wrapper">
@@ -622,6 +764,12 @@
           </div>
         </div>
       </div>
+    </section>
+    <section class="browse-section" id="dresses">
+      <h2 class="browse-heading">What the boutique offers</h2>
+      <p class="browse-sub">Try something on — one command to dress up, one to take it off.</p>
+      <div class="browse-tabs" id="browseTabs"></div>
+      <div class="browse-grid" id="browseGrid"></div>
     </section>
   </div>
   <footer>
@@ -723,7 +871,7 @@
     // ═══ PIXEL ART WARDROBE ═══
     // Colors
     const WOOD = { dark: '#3d2b1f', mid: '#5c3d2e', light: '#7a5240', highlight: '#96654a' };
-    const BRASS = { dark: '#8b7355', mid: '#c4a67d', light: '#dcc9a3' };
+    const BRASS = { dark: '#9a7b3c', mid: '#d4a94e', light: '#f0d078' };
 
     // Garment pixel art — each defined as array of [dx, dy, color] from anchor (cx, cy)
     // These are miniature outfits hanging on the rack
@@ -1209,6 +1357,81 @@
     wardrobeContainer.classList.add('hidden');
     renderLobster();
     drawWardrobe(-1);
+
+    // ═══ REGISTRY ═══
+    const REPO = 'https://github.com/onfabric/clawtique/tree/main/registry';
+    const categories = {
+      dresses: {
+        label: 'Dresses',
+        command: (slug) => `clawtique dress add ${slug}`,
+        items: {
+          "sleeping-coach": { name: "Sleeping Coach", version: "1.0.0", description: "Sleep coaching powered by Oura Ring — morning reports and evening wind-down advice.", path: "dresses/sleeping-coach" },
+          "fitness-coach": { name: "Fitness Coach", version: "2.0.0", description: "Sends workout schedule and collects post-training feedback.", path: "dresses/fitness-coach" },
+          "ontology": { name: "Knowledge Graph", version: "1.0.0", description: "Maintains a personal knowledge graph via the ontology skill from ClawHub.", path: "dresses/ontology" },
+          "daily-reflection": { name: "Daily Reflection", version: "1.0.0", description: "End-of-day reflection — capture what mattered and set tomorrow's intentions.", path: "dresses/daily-reflection" },
+          "tech-bro-digest": { name: "Tech Bro Digest", version: "1.0.0", description: "Daily digest of tech news from configurable sources and topics.", path: "dresses/tech-bro-digest" },
+          "daily-pill": { name: "Daily Pill", version: "1.0.0", description: "One bookmark a day — the most relevant link for what you're working on right now.", path: "dresses/daily-pill" },
+          "fabric": { name: "Fabric Memory", version: "1.0.0", description: "Portable AI memory powered by Fabric — proactive check-ins, memory retrieval, and user profiling.", path: "dresses/fabric" }
+        }
+      },
+      lingerie: {
+        label: 'Lingerie',
+        command: (slug) => `clawtique lingerie add ${slug}`,
+        items: {
+          "waclaw": { name: "WhatsApp (waclaw)", version: "1.0.0", description: "WhatsApp channel plugin via waclaw proxy — shared across dresses that need WhatsApp messaging.", path: "lingerie/waclaw" }
+        }
+      },
+      personalities: {
+        label: 'Personalities',
+        command: (slug) => `clawtique personality set ${slug}`,
+        items: {
+          "clawdia": { name: "Clawdia", version: "1.0.0", description: "Your personal concierge — helps you live your best life with warmth, initiative, and taste.", path: "personalities/clawdia" }
+        }
+      }
+    };
+
+    const tabsEl = document.getElementById('browseTabs');
+    const gridEl = document.getElementById('browseGrid');
+    let activeTab = 'dresses';
+
+    function renderTabs() {
+      tabsEl.innerHTML = '';
+      Object.entries(categories).forEach(([key, cat]) => {
+        const btn = document.createElement('button');
+        btn.className = `browse-tab${key === activeTab ? ' active' : ''}`;
+        const count = Object.keys(cat.items).length;
+        btn.innerHTML = `${cat.label}<span class="browse-tab-count">${count}</span>`;
+        btn.addEventListener('click', () => { activeTab = key; renderTabs(); renderGrid(); });
+        tabsEl.appendChild(btn);
+      });
+    }
+
+    function renderGrid() {
+      gridEl.innerHTML = '';
+      const cat = categories[activeTab];
+      Object.entries(cat.items).forEach(([slug, item]) => {
+        const card = document.createElement('a');
+        card.className = 'browse-card';
+        card.href = `${REPO}/${item.path}`;
+        card.target = '_blank';
+        card.innerHTML = `
+          <div class="browse-card-header">
+            <span class="browse-card-name">${item.name}</span>
+            <span class="browse-card-version">v${item.version}</span>
+          </div>
+          <p class="browse-card-desc">${item.description}</p>
+          <div class="browse-card-install">${cat.command(slug)}</div>
+        `;
+        card.querySelector('.browse-card-install').addEventListener('click', e => {
+          e.preventDefault();
+          e.stopPropagation();
+        });
+        gridEl.appendChild(card);
+      });
+    }
+
+    renderTabs();
+    renderGrid();
 
   </script>
 </body>
