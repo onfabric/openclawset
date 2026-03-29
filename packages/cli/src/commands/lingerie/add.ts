@@ -5,7 +5,7 @@ import chalk from 'chalk';
 import { Listr } from 'listr2';
 import { BaseCommand } from '#base.ts';
 import type { LingerieJson, StateFile } from '#core/index.ts';
-import { createRegistryProvider, type RegistryProvider } from '#lib/registry.ts';
+import { createRegistryProvider } from '#lib/registry.ts';
 
 export default class LingerieAdd extends BaseCommand {
   static override summary = 'Install lingerie independently of a dress';

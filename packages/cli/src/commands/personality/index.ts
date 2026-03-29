@@ -64,9 +64,7 @@ export default class PersonalityList extends BaseCommand {
     this.log(`    ${chalk.dim('Restore original personality files.')}`);
 
     this.log('');
-    this.log(
-      chalk.dim(`  ${entries.length + 1} personalities | active: ${activeId ?? 'default'}`),
-    );
+    this.log(chalk.dim(`  ${entries.length + 1} personalities | active: ${activeId ?? 'default'}`));
     this.log('');
   }
 }

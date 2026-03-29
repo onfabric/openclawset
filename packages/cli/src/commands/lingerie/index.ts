@@ -70,11 +70,7 @@ export default class LingerieList extends BaseCommand {
     }
 
     this.log('');
-    this.log(
-      chalk.dim(
-        `  ${entries.length} lingerie | ${activeIds.size} active`,
-      ),
-    );
+    this.log(chalk.dim(`  ${entries.length} lingerie | ${activeIds.size} active`));
     this.log('');
   }
 }

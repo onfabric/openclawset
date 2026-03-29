@@ -2,13 +2,13 @@ import { execute } from '@oclif/core';
 
 import DiffCommand from '#commands/diff.ts';
 import DoctorCommand from '#commands/doctor.ts';
-import DressListCommand from '#commands/dress/index.ts';
 import DressAddCommand from '#commands/dress/add.ts';
+import DressListCommand from '#commands/dress/index.ts';
 import DressParamsCommand from '#commands/dress/params.ts';
 import DressRemoveCommand from '#commands/dress/remove.ts';
 import InitCommand from '#commands/init.ts';
-import LingerieListCommand from '#commands/lingerie/index.ts';
 import LingerieAddCommand from '#commands/lingerie/add.ts';
+import LingerieListCommand from '#commands/lingerie/index.ts';
 import LingerieRemoveCommand from '#commands/lingerie/remove.ts';
 import LogCommand from '#commands/log.ts';
 import PersonalityListCommand from '#commands/personality/index.ts';
