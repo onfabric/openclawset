@@ -252,8 +252,6 @@ export default class DressAdd extends BaseCommand {
     // Phase: Prompts — collect schedule + skill params
     // -----------------------------------------------------------------------
 
-    const timezone = config.timezone ?? 'UTC';
-
     // Cron schedules
     const cronSchedules: Record<string, CronScheduleChoice> = {};
     if (dress.crons.length > 0) {
@@ -366,7 +364,7 @@ export default class DressAdd extends BaseCommand {
       skillContents,
       cronSchedules,
       skillParams,
-      timezone,
+      timezone: config.timezone,
     });
 
     // -----------------------------------------------------------------------
