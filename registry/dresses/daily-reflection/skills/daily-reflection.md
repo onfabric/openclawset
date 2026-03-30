@@ -24,7 +24,7 @@ Keep it lightweight, practical, and easy to answer. The goal is a quick capture,
 
 ## After the user responds
 
-- Save the user's reflection and tomorrow's priorities under the `## {{memory.dailySections}}` section in today's daily memory file
+- Save the user's reflection and tomorrow's priorities under the `## {{memory.dailyMemorySection}}` section in today's daily memory file
 
 ## Style
 

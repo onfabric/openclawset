@@ -384,7 +384,9 @@ export default class DressRemove extends BaseCommand {
     }
 
     const lines = ['# Active Dresses\n'];
-    lines.push('Read each DRESSCODE.md for details on skills, crons, and memory conventions.\n');
+    lines.push(
+      'You MUST read each DRESSCODE.md listed below. They define your skills, schedules, daily memory sections, and workspace files.\n',
+    );
 
     if (allUserSkills.length > 0) {
       lines.push('## User Skills');
@@ -406,10 +408,8 @@ export default class DressRemove extends BaseCommand {
       lines.push(`DRESSCODE: ~/.openclaw/workspace/dresses/${id}/DRESSCODE.md\n`);
     }
 
-    if (
-      allUserSkills.length === 0 &&
-      Object.keys(state.dresses).filter((id) => id !== excludeId).length === 0
-    ) {
+    const remainingDresses = Object.keys(state.dresses).filter((id) => id !== excludeId);
+    if (remainingDresses.length === 0) {
       lines.push('No dresses active.\n');
     }
 

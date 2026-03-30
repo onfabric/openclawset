@@ -16,7 +16,7 @@ Ask the user via Telegram:
 
 ## Context
 
-- Read today's **## {{memory.dailySections}}** section from daily memory to see what plan was sent
+- Read today's **## {{memory.dailyMemorySection}}** section from daily memory to see what plan was sent
 - Reference the specific workout so the user knows you're paying attention
 
 ## Communication style
@@ -28,4 +28,4 @@ Ask the user via Telegram:
 
 ## After collecting feedback
 
-Update the **## {{memory.dailySections}}** section in today's daily memory with their feedback: completion status, how they felt, and any adjustments for next time.
+Update the **## {{memory.dailyMemorySection}}** section in today's daily memory with their feedback: completion status, how they felt, and any adjustments for next time.

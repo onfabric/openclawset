@@ -25,5 +25,5 @@
     }
   },
 
-  "memory": { "dailySections": ["Reflections"] }
+  "dailyMemorySection": "Reflections"
 }

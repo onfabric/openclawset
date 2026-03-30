@@ -42,5 +42,5 @@
     }
   },
 
-  "memory": { "dailySections": ["Fitness"] }
+  "dailyMemorySection": "Fitness"
 }

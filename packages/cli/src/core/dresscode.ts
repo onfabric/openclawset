@@ -75,16 +75,11 @@ export function generateDresscode(
     lines.push('');
   }
 
-  // Memory
-  if (dress.memory.dailySections.length > 0 || dress.memory.reads.length > 0) {
-    lines.push('## Memory');
+  // Daily memory section
+  if (dress.dailyMemorySection) {
+    lines.push('## Daily Memory');
     lines.push('');
-    for (const section of dress.memory.dailySections) {
-      lines.push(`- Owns section: **## ${section}** in daily notes`);
-    }
-    for (const read of dress.memory.reads) {
-      lines.push(`- Reads: **## ${read}**`);
-    }
+    lines.push(`- Owns section: **## ${dress.dailyMemorySection}** in daily memory`);
     lines.push('');
   }
 

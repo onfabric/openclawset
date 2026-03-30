@@ -1,7 +1,6 @@
 export type {
   CronJson,
   DressJson,
-  MemoryContract,
   PluginDef,
   Requires,
   SecretDef,
@@ -14,7 +13,6 @@ export {
   cronJsonSchema,
   dressIdSchema,
   dressJsonSchema,
-  memoryContractSchema,
   pluginDefSchema,
   requiresSchema,
   secretDefSchema,

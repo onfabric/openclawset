@@ -20,7 +20,7 @@ Send the user their workout plan for today via Telegram. Keep it concise, motiva
 
 ## Context
 
-- Read today's and yesterday's daily memory under **## {{memory.dailySections}}** for recent history
+- Read today's and yesterday's daily memory under **## {{memory.dailyMemorySection}}** for recent history
 - Reference previous days when relevant (e.g., "yesterday you reported sore legs")
 - Note any patterns (skipped days, energy trends, recurring pain)
 
@@ -32,4 +32,4 @@ Send the user their workout plan for today via Telegram. Keep it concise, motiva
 
 ## After sending
 
-Write a brief summary in today's daily memory under the **## {{memory.dailySections}}** section: what plan was sent and any notes.
+Write a brief summary in today's daily memory under the **## {{memory.dailyMemorySection}}** section: what plan was sent and any notes.

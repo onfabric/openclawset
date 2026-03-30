@@ -50,15 +50,6 @@ export const cronDefSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Memory contract
-// ---------------------------------------------------------------------------
-
-export const memoryContractSchema = z.object({
-  dailySections: z.array(z.string()).default([]),
-  reads: z.array(z.string()).default([]),
-});
-
-// ---------------------------------------------------------------------------
 // Plugin definition — a required openclaw plugin
 // ---------------------------------------------------------------------------
 
@@ -116,7 +107,7 @@ export const resolvedDressSchema = z.object({
   }),
   secrets: z.record(z.string(), secretDefSchema).default({}),
   crons: z.array(cronDefSchema).default([]),
-  memory: memoryContractSchema.default({ dailySections: [], reads: [] }),
+  dailyMemorySection: z.string().optional(),
   files: dressFilesSchema.default({ skills: {}, templates: [] }),
   // Workspace files: paths relative to workspace dir
   // Created on dress if missing, preserved on undress (user data)
@@ -217,7 +208,6 @@ export type AppliedCron = z.infer<typeof appliedCronSchema>;
 export type CronDef = z.infer<typeof cronDefSchema>;
 export type PluginDef = z.infer<typeof pluginDefSchema>;
 export type SkillFileDef = z.infer<typeof skillFileDefSchema>;
-export type MemoryContract = z.infer<typeof memoryContractSchema>;
 export type Requires = z.infer<typeof requiresSchema>;
 export type SecretDef = z.infer<typeof secretDefSchema>;
 export type DressFiles = z.infer<typeof dressFilesSchema>;

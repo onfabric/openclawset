@@ -44,5 +44,5 @@
     }
   },
 
-  "memory": { "dailySections": ["Fabric"] }
+  "dailyMemorySection": "Fabric"
 }

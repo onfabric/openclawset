@@ -7,12 +7,6 @@ description: Picks the most relevant bookmark for today based on current project
 
 Pick one bookmark from the user's reading list — the one that is most relevant to what they're doing or thinking about right now.
 
-## Workspace files
-
-All data lives in `{{workspace.root}}/`:
-- `bookmarks.md` — saved links with metadata
-- `pill-history.md` — log of past pills sent
-
 ## Step 1: Understand current context
 
 1. Read `~/.openclaw/workspace/USER.md` for the user's profile and interests
@@ -22,13 +16,14 @@ All data lives in `{{workspace.root}}/`:
 
 ## Step 2: Pick the best bookmark
 
-1. Read `{{workspace.root}}/bookmarks.md` and `{{workspace.root}}/pill-history.md`
-2. For each bookmark not recently sent (check pill history):
+1. Read `{{workspace.root}}/bookmarks.md`
+2. Check recent daily memory files under **## {{memory.dailyMemorySection}}** to see which bookmarks were sent recently
+3. For each bookmark not recently sent:
    - Score by relevance to the user's *current* context — not general interests, but what's top of mind right now
    - Prefer bookmarks never sent over those already featured
    - Prefer recently added bookmarks if relevance is similar
-3. Select the single best candidate
-4. Fetch the page and verify it's actually worth reading
+4. Select the single best candidate
+5. Fetch the page and verify it's actually worth reading
 
 ## Step 3: Send or skip
 
@@ -37,9 +32,9 @@ All data lives in `{{workspace.root}}/`:
 - The link title and URL
 - Keep it to 2-3 lines max — this is a nudge, not a summary
 
-**If nothing fits**, skip entirely. Don't force a pill just to fill the slot. Log the skip to pill history.
+**If nothing fits**, skip entirely. Don't force a pill just to fill the slot.
 
 ## Step 4: Update state
 
-- In `{{workspace.root}}/pill-history.md`: append an entry with the date, link sent (or skip reason)
-- In `{{workspace.root}}/bookmarks.md`: update `last_sent` date for the bookmark if one was sent
+- In today's daily memory under **## {{memory.dailyMemorySection}}**: log which bookmark was sent (or that it was skipped and why)
+- In `{{workspace.root}}/bookmarks.md`: update `last_sent` date and increment `times_sent` for the bookmark

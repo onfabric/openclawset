@@ -125,17 +125,6 @@ export const skillJsonSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Memory contract
-// ---------------------------------------------------------------------------
-
-export const memoryContractSchema = z
-  .object({
-    dailySections: z.array(z.string()).default([]),
-    reads: z.array(z.string()).default([]),
-  })
-  .default({ dailySections: [], reads: [] });
-
-// ---------------------------------------------------------------------------
 // Secret definition
 // ---------------------------------------------------------------------------
 
@@ -160,7 +149,7 @@ export const dressJsonSchema = z.object({
   skills: z.record(z.string(), skillJsonSchema).default({}),
   secrets: z.record(z.string(), secretDefSchema).default({}),
 
-  memory: memoryContractSchema,
+  dailyMemorySection: z.string().optional(),
   workspace: z.array(z.string()).default([]),
 });
 
@@ -175,6 +164,5 @@ export type SkillTrigger = z.infer<typeof skillTriggerSchema>;
 export type SkillParam = z.infer<typeof skillParamSchema>;
 export type PluginDef = z.infer<typeof pluginDefSchema>;
 export type Requires = z.infer<typeof requiresSchema>;
-export type MemoryContract = z.infer<typeof memoryContractSchema>;
 export type SecretDef = z.infer<typeof secretDefSchema>;
 export type Weekday = z.infer<typeof weekdaySchema>;

@@ -9,7 +9,7 @@ Check whether the daily workout schedule has been sent. If not, and workout time
 
 ## When to nudge
 
-- Only nudge if no workout schedule was sent today (check **## {{memory.dailySections}}** in today's daily memory)
+- Only nudge if no workout schedule was sent today (check **## {{memory.dailyMemorySection}}** in today's daily memory)
 - Only nudge within 1 hour before the scheduled workout time
 - Never nudge more than once per day
 - Skip if the user is clearly busy or has indicated they're resting today
@@ -23,4 +23,4 @@ A short, motivating message via WhatsApp:
 
 ## After nudging
 
-Note in today's **## {{memory.dailySections}}** section that a nudge was sent, so you don't repeat it.
+Note in today's **## {{memory.dailyMemorySection}}** section that a nudge was sent, so you don't repeat it.
