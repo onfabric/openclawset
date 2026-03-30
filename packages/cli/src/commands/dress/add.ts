@@ -252,20 +252,6 @@ export default class DressAdd extends BaseCommand {
     // Phase: Prompts — collect schedule + skill params
     // -----------------------------------------------------------------------
 
-    // Timezone (once, saved to config)
-    let timezone = config.timezone ?? 'UTC';
-    if (!config.timezone || config.timezone === 'UTC') {
-      const tz = await input({
-        message: 'Your timezone (IANA format)',
-        default: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
-      });
-      timezone = tz;
-      // Save timezone to config for future dresses
-      const configData = JSON.parse(await readFile(this.clawtiquePaths.config, 'utf-8'));
-      configData.timezone = timezone;
-      await writeFile(this.clawtiquePaths.config, `${JSON.stringify(configData, null, 2)}\n`);
-    }
-
     // Cron schedules
     const cronSchedules: Record<string, CronScheduleChoice> = {};
     if (dress.crons.length > 0) {
@@ -378,7 +364,7 @@ export default class DressAdd extends BaseCommand {
       skillContents,
       cronSchedules,
       skillParams,
-      timezone,
+      timezone: config.timezone,
     });
 
     // -----------------------------------------------------------------------
