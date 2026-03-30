@@ -1,137 +1,79 @@
 # clawtique
 
-A boutique for your OpenClaw. Dress it up, take it off, no mess left behind.
+A dress manager for [OpenClaw](https://openclaw.ai). Install capabilities, take them off, no mess left behind.
 
-Setting up OpenClaw for a specific goal means installing skills, wiring cron jobs, defining memory sections, configuring plugins, and hoping nothing breaks when you update or remove one. Clawtique fixes this. A **dress** bundles everything OpenClaw needs for a job into a single installable package. The CLI handles installation, personalization, and clean removal.
+A **dress** bundles everything OpenClaw needs for a specific job — skills, cron schedules, plugins, heartbeat rules, workspace files — into one installable package. Clawtique handles installation, personalization, and clean removal.
 
 ## Quick start
 
 ```bash
-# Initialize — point at your OpenClaw instance
 clawtique init
-
-# Put on a dress (or run without args to browse)
-clawtique dress fitness-coach
-
-# See what's active
+clawtique dress add fitness-coach
 clawtique status
-
-# Take it off (your data stays)
-clawtique undress fitness-coach
+clawtique dress remove fitness-coach
 ```
 
-## What's a dress?
+## How it works
 
-A JSON package that bundles everything needed for a goal:
+### What OpenClaw loads
 
-- **Skills** — what OpenClaw can do (e.g. plan workouts, read Oura data)
-- **Crons** — when it does it (e.g. every weekday at 6pm)
-- **Memory sections** — where it tracks what it learns (e.g. `## Fitness` in daily notes)
-- **Heartbeat rules** — when to proactively check in
-- **Secrets** — API keys, prompted at install time
+OpenClaw always loads these files at session start: `AGENTS.md`, `SOUL.md`, `USER.md`, `TOOLS.md`, `IDENTITY.md`. It also auto-discovers all installed skills from `~/.openclaw/workspace/skills/` and injects their name and description into every turn.
 
-```json
-{
-  "id": "fitness-coach",
-  "name": "Fitness Coach",
-  "version": "2.0.0",
-  "requires": { "lingerie": ["waclaw"] },
-  "crons": [
-    {
-      "id": "workout-schedule",
-      "skill": "workout-schedule",
-      "defaults": { "time": "18:00", "days": ["mon", "tue", "wed", "thu", "fri"] }
-    }
-  ],
-  "skills": { "workout-schedule": {} },
-  "memory": { "dailySections": ["Fitness"] }
-}
-```
-
-## Lingerie
-
-Some dresses share infrastructure — like a WhatsApp channel. These shared plugins are called **lingerie**. They're installed once automatically when a dress needs them, and removed only when nothing depends on them anymore.
-
-```bash
-clawtique lingerie list
-```
-
-## Personalization
-
-When you put on a dress, clawtique prompts you to customize schedules and parameters. Times are converted to UTC automatically based on your timezone.
+Clawtique hooks into this by injecting a reference to `DRESSES.md` in `AGENTS.md`. This creates the discovery chain:
 
 ```
-$ clawtique dress fitness-coach
-
-  ? When should "Daily workout schedule" run? (18:00) › 17:30
-  ? Which days? (mon-fri) › mon, wed, fri
-
-  + cron: Daily workout schedule (30 15 * * 1,3,5 UTC)
-  + cron: Post-workout check-in (0 17 * * 1,3,5 UTC)
-  + memory section: Fitness
+AGENTS.md (always loaded)
+  → DRESSES.md (lists active dresses)
+      → DRESSCODE.md (per dress — skills, schedules, workspace files)
 ```
 
-Update parameters later:
+### What a dress contains
 
-```bash
-clawtique params fitness-coach --set workout-schedule.time=18:00
-```
+- **Skills** — markdown files installed to `~/.openclaw/workspace/skills/<id>/SKILL.md`
+- **Crons** — scheduled tasks bound to skills
+- **Plugins** — OpenClaw plugins required by the dress
+- **Heartbeat rules** — proactive behaviors appended to `HEARTBEAT.md`
+- **Workspace files** — templates copied to `~/.openclaw/workspace/`
+- **Daily memory section** — a named section the agent owns in daily notes
 
-## The rules
+### What each command does
 
-**Config is removed. Data stays.** When you undress, clawtique removes cron jobs, skills, and config. Everything OpenClaw wrote while wearing that dress — daily notes, logs, generated files — stays untouched.
+**`clawtique init`** — Creates `~/.clawtique/` (config, state, git repo). Writes an initial `DRESSES.md` to the OpenClaw workspace. Injects the DRESSES.md reference into `AGENTS.md`.
 
-**Dresses compose safely.** Shared plugins are reference-counted. Conflicting memory sections are caught before anything is applied.
+**`clawtique personality set <id>`** — Overwrites personality files (`AGENTS.md`, `SOUL.md`, `IDENTITY.md`, `TOOLS.md`), then re-injects the DRESSES.md reference since the overwrite removes it.
 
-**Everything is tracked.** Every operation is a git commit. `clawtique log` shows the history. `clawtique rollback` undoes the last change.
+**`clawtique dress add <id>`** — Installs skills, plugins, crons, heartbeat rules, and workspace files. Generates a `DRESSCODE.md` describing everything the dress provides. Updates `DRESSES.md` with the new dress. All changes are tracked in state and committed to git.
 
-## CLI reference
+**`clawtique dress remove <id>`** — Removes crons, skills (only those clawtique installed), plugins (only if no other dress needs them), heartbeat rules, and dress files. Workspace files are preserved by default. Rebuilds `DRESSES.md`. Data the agent created while the dress was active stays untouched.
+
+### Lingerie
+
+Some dresses need shared plugins — like a messaging channel. These are called **lingerie**. They're installed automatically when a dress requires them and only removed when nothing depends on them.
+
+## CLI
 
 | Command | Description |
 |---------|-------------|
 | `clawtique init` | Initialize clawtique for an OpenClaw instance |
-| `clawtique dress <id>` | Install a dress (interactive picker if no id) |
-| `clawtique undress <id>` | Remove a dress's config, keep its data |
-| `clawtique status` | List active dresses and their components |
-| `clawtique params <id>` | View or update a dress's parameters |
-| `clawtique diff` | Show everything clawtique has applied |
-| `clawtique doctor` | Verify files, crons, and connections |
-| `clawtique log` | History of all operations |
+| `clawtique dress add <id>` | Install and activate a dress |
+| `clawtique dress remove <id>` | Deactivate a dress, keep its data |
+| `clawtique dress` | List dresses interactively |
+| `clawtique dress params <id>` | View or update dress parameters |
+| `clawtique personality set <id>` | Apply a personality |
+| `clawtique status` | Show active dresses and components |
+| `clawtique diff` | Show applied vs current OpenClaw state |
+| `clawtique doctor` | Verify all active dresses are healthy |
+| `clawtique log` | History of operations |
 | `clawtique rollback` | Undo the last operation |
-| `clawtique lingerie list` | Show installed lingerie and dependents |
+| `clawtique lingerie` | List lingerie interactively |
+| `clawtique lingerie add <id>` | Install lingerie independently |
 | `clawtique lingerie remove <id>` | Remove unused lingerie |
 
-Mutating commands support `--dry-run`. Read commands support `--json`.
-
-## Available dresses
-
-| Dress | Description |
-|-------|-------------|
-| `sleeping-coach` | Sleep coaching via Oura Ring |
-| `fitness-coach` | Workout scheduling and feedback |
-| `ontology` | Personal knowledge graph maintenance |
-| `daily-reflection` | End-of-day reflection and intentions |
-| `tech-bro-digest` | Daily tech news digest |
-| `daily-pill` | One curated link per day |
-| `fabric` | Portable AI memory via Fabric |
-
-## Project structure
-
-```
-clawtique/
-├── packages/
-│   ├── cli/          # The clawtique CLI (oclif)
-│   ├── core/         # Types, schemas, merge logic
-│   ├── pack-utils/   # Build utilities
-│   └── registry/     # Registry build script
-└── registry/
-    ├── dresses/      # Available dresses (JSON + skills)
-    └── lingerie/     # Shared plugin packages
-```
+Mutating commands support `--dry-run`.
 
 ## Development
 
 ```bash
 bun install
-bun run build    # builds all packages via turbo
+bun run build
 ```
