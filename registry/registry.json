@@ -57,16 +57,16 @@
       },
       "path": "dresses/fabric"
     },
-    "url-bookmark": {
-      "name": "URL Bookmark",
+    "notetaker": {
+      "name": "Notetaker",
       "version": "1.0.0",
-      "description": "Save and manage bookmarks — get one relevant link delivered daily.",
+      "description": "Capture thoughts, links, and ideas — get the most relevant one surfaced daily.",
       "requires": {
         "lingerie": [
           "waclaw"
         ]
       },
-      "path": "dresses/url-bookmark"
+      "path": "dresses/notetaker"
     }
   },
   "lingerie": {
