@@ -6,7 +6,7 @@ import { Args, Flags } from '@oclif/core';
 import chalk from 'chalk';
 import { Listr } from 'listr2';
 import { BaseCommand } from '#base.ts';
-import { removeSection, type StateFile } from '#core/index.ts';
+import { INITIAL_DRESSES_MD, removeSection, type StateFile } from '#core/index.ts';
 
 export default class DressRemove extends BaseCommand {
   static override summary = 'Deactivate a dress and remove its config (data persists)';
@@ -353,20 +353,21 @@ export default class DressRemove extends BaseCommand {
   }
 
   private async rebuildDressesIndex(state: StateFile, excludeId: string): Promise<void> {
+    const remainingDresses = Object.keys(state.dresses).filter((id) => id !== excludeId);
+
+    if (remainingDresses.length === 0) {
+      await writeFile(this.openclawPaths.dressesIndex, INITIAL_DRESSES_MD);
+      return;
+    }
+
     const lines = ['# Active Dresses\n'];
     lines.push(
       'You MUST read each DRESSCODE.md listed below. They define your skills, schedules, daily memory sections, and workspace files.\n',
     );
 
-    for (const [id] of Object.entries(state.dresses)) {
-      if (id === excludeId) continue;
+    for (const id of remainingDresses) {
       lines.push(`## ${id}`);
       lines.push(`DRESSCODE: ~/.openclaw/workspace/dresses/${id}/DRESSCODE.md\n`);
-    }
-
-    const remainingDresses = Object.keys(state.dresses).filter((id) => id !== excludeId);
-    if (remainingDresses.length === 0) {
-      lines.push('No dresses active.\n');
     }
 
     await writeFile(this.openclawPaths.dressesIndex, lines.join('\n'));

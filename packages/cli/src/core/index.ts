@@ -1,7 +1,7 @@
 // Old schemas (still used by merge.ts, dresscode.ts, state.ts, openclaw.ts)
 
 // AGENTS.md reference injection
-export { ensureDressesReference } from '#core/agents-md.ts';
+export { ensureDressesReference, INITIAL_DRESSES_MD } from '#core/agents-md.ts';
 // Cron utilities
 export { addHours, cronFromTime } from '#core/cron-utils.ts';
 // DRESSCODE generation

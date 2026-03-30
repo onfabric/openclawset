@@ -5,7 +5,7 @@ import { confirm, input } from '@inquirer/prompts';
 import { Command, Flags } from '@oclif/core';
 import chalk from 'chalk';
 import type { ClawtiqueConfig, StateFile } from '#core/index.ts';
-import { ensureDressesReference } from '#core/index.ts';
+import { ensureDressesReference, INITIAL_DRESSES_MD } from '#core/index.ts';
 import { GitManager } from '#lib/git.ts';
 import { getClawtiquePaths, getOpenClawPaths } from '#lib/paths.ts';
 
@@ -73,13 +73,20 @@ export default class Init extends Command {
       message: "What's your name?",
     });
 
-    // Create clawtique directory structure
+    // Create directory structure (mkdir recursive is idempotent)
     await mkdir(paths.root, { recursive: true });
     await mkdir(paths.dresses, { recursive: true });
-    await mkdir(join(openclawDir, 'workspace', 'dresses'), { recursive: true });
+    const ocWorkspace = join(openclawDir, 'workspace');
+    await mkdir(join(ocWorkspace, 'dresses'), { recursive: true });
 
-    // Ensure AGENTS.md references DRESSES.md so dresses are discoverable
-    await ensureDressesReference(join(openclawDir, 'workspace'));
+    // Copy initial DRESSES.md template (only if not already present)
+    const dressesIndexPath = join(ocWorkspace, 'DRESSES.md');
+    if (!existsSync(dressesIndexPath)) {
+      await writeFile(dressesIndexPath, INITIAL_DRESSES_MD);
+    }
+
+    // Ensure AGENTS.md references DRESSES.md (idempotent — skips if marker present)
+    await ensureDressesReference(ocWorkspace);
 
     // Write config
     const config: ClawtiqueConfig = {
@@ -101,7 +108,7 @@ export default class Init extends Command {
     };
     await writeFile(paths.state, `${JSON.stringify(state, null, 2)}\n`);
 
-    // Initialize git repo
+    // Initialize git repo (idempotent — skips if .git exists)
     const git = new GitManager(paths.root);
     await git.init();
     await git.commit('feat', 'clawtique', 'initialize clawtique');

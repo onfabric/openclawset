@@ -9,6 +9,12 @@ import { existsSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
+/** Initial DRESSES.md content — written during `clawtique init`. */
+export const INITIAL_DRESSES_MD = `# Active Dresses
+
+No dresses active yet.
+`;
+
 const MARKER_START = '<!-- clawtique:dresses:start -->';
 const MARKER_END = '<!-- clawtique:dresses:end -->';
 
