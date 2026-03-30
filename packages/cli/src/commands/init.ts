@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { confirm, input } from '@inquirer/prompts';
+import { confirm, input, search } from '@inquirer/prompts';
 import { Command, Flags } from '@oclif/core';
 import chalk from 'chalk';
 import type { ClawtiqueConfig, StateFile } from '#core/index.ts';
@@ -73,6 +73,28 @@ export default class Init extends Command {
       message: "What's your name?",
     });
 
+    // Timezone
+    const gmtOffset = (tz: string): string =>
+      new Intl.DateTimeFormat('en', { timeZone: tz, timeZoneName: 'shortOffset' })
+        .formatToParts(new Date())
+        .find((p) => p.type === 'timeZoneName')!.value;
+
+    const sorted = Intl.supportedValuesOf('timeZone');
+    const pivot = sorted.indexOf('Europe/London');
+    const allTimezones = pivot > 0 ? [...sorted.slice(pivot), ...sorted.slice(0, pivot)] : sorted;
+
+    const timezone = await search({
+      message: 'Search for your timezone',
+      source: (term) => {
+        const q = (term ?? '').toLowerCase();
+        if (!q) return allTimezones.map((v) => ({ name: `${v} (${gmtOffset(v)})`, value: v }));
+        return allTimezones
+          .filter((v) => v.toLowerCase().includes(q))
+          .map((v) => ({ name: `${v} (${gmtOffset(v)})`, value: v }));
+      },
+    });
+    this.log(`  ${chalk.dim(`Using ${timezone} (${gmtOffset(timezone)})`)}`);
+
     // Create directory structure (mkdir recursive is idempotent)
     await mkdir(paths.root, { recursive: true });
     await mkdir(paths.dresses, { recursive: true });
@@ -91,7 +113,7 @@ export default class Init extends Command {
     // Write config
     const config: ClawtiqueConfig = {
       openclawDir,
-      timezone: 'UTC',
+      timezone,
       version: '0.1.0',
       user: { name: userName },
     };

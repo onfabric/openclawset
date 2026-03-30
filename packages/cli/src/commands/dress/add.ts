@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { checkbox, confirm, input, search, select } from '@inquirer/prompts';
+import { checkbox, confirm, input, select } from '@inquirer/prompts';
 import { Args, Flags } from '@oclif/core';
 import chalk from 'chalk';
 import { Listr } from 'listr2';
@@ -31,11 +31,6 @@ import {
 import { createRegistryProvider, type RegistryProvider } from '#lib/registry.ts';
 
 const ALL_DAYS: Weekday[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-
-const gmtOffset = (tz: string): string =>
-  new Intl.DateTimeFormat('en', { timeZone: tz, timeZoneName: 'shortOffset' })
-    .formatToParts(new Date())
-    .find((p) => p.type === 'timeZoneName')!.value;
 
 export default class DressAdd extends BaseCommand {
   static override summary = 'Install and activate a dress';
@@ -257,31 +252,7 @@ export default class DressAdd extends BaseCommand {
     // Phase: Prompts — collect schedule + skill params
     // -----------------------------------------------------------------------
 
-    // Timezone (once, saved to config)
-    let timezone = config.timezone ?? 'UTC';
-    if (!config.timezone || config.timezone === 'UTC') {
-      const sorted = Intl.supportedValuesOf('timeZone');
-      const pivot = sorted.indexOf('Europe/London');
-      const allTimezones = pivot > 0 ? [...sorted.slice(pivot), ...sorted.slice(0, pivot)] : sorted;
-
-      const tz = await search({
-        message: 'Search for your timezone',
-        source: (term) => {
-          const q = (term ?? '').toLowerCase();
-          if (!q) return allTimezones.map((v) => ({ name: `${v} (${gmtOffset(v)})`, value: v }));
-          return allTimezones
-            .filter((v) => v.toLowerCase().includes(q))
-            .map((v) => ({ name: `${v} (${gmtOffset(v)})`, value: v }));
-        },
-      });
-
-      timezone = tz;
-      // Save timezone to config for future dresses
-      this.log(`  ${chalk.dim(`Using ${timezone} (${gmtOffset(timezone)})`)}`);
-      const configData = JSON.parse(await readFile(this.clawtiquePaths.config, 'utf-8'));
-      configData.timezone = timezone;
-      await writeFile(this.clawtiquePaths.config, `${JSON.stringify(configData, null, 2)}\n`);
-    }
+    const timezone = config.timezone ?? 'UTC';
 
     // Cron schedules
     const cronSchedules: Record<string, CronScheduleChoice> = {};
