@@ -1,5 +1,7 @@
 // Old schemas (still used by merge.ts, dresscode.ts, state.ts, openclaw.ts)
 
+// AGENTS.md reference injection
+export { ensureDressesReference } from '#core/agents-md.ts';
 // Cron utilities
 export { addHours, cronFromTime } from '#core/cron-utils.ts';
 // DRESSCODE generation
@@ -9,14 +11,7 @@ export type { CronListEntry, OpenClawDriver, PluginConfigSchema } from '#core/dr
 // Dependency graph
 export { DependencyGraph } from '#core/graph.ts';
 // Memory utilities
-export {
-  buildMemoryScaffold,
-  extractSections,
-  findDressMarkers,
-  removeSection,
-  stripMarkers,
-  wrapSection,
-} from '#core/memory.ts';
+export { removeSection, wrapSection } from '#core/memory.ts';
 export type { DesiredState, MergeConflict, StateDiff } from '#core/merge.ts';
 // Merge and diff
 export { diffState, mergeDresses } from '#core/merge.ts';

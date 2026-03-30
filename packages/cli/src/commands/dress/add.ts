@@ -12,6 +12,7 @@ import {
   type AppliedCron,
   type DressEntry,
   diffState,
+  ensureDressesReference,
   generateDresscode,
   mergeDresses,
   type PluginDef,
@@ -671,6 +672,9 @@ export default class DressAdd extends BaseCommand {
             title: 'Updating DRESSES.md',
             task: async () => {
               await this.updateDressesIndex(state, dress.id, compiled);
+              // Ensure AGENTS.md references DRESSES.md (self-heal if missing)
+              const workspaceDir = join(this.openclawPaths.root, 'workspace');
+              await ensureDressesReference(workspaceDir);
             },
           },
           {

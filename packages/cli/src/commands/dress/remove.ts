@@ -6,7 +6,7 @@ import { Args, Flags } from '@oclif/core';
 import chalk from 'chalk';
 import { Listr } from 'listr2';
 import { BaseCommand } from '#base.ts';
-import { removeSection, type StateFile, stripMarkers } from '#core/index.ts';
+import { removeSection, type StateFile } from '#core/index.ts';
 
 export default class DressRemove extends BaseCommand {
   static override summary = 'Deactivate a dress and remove its config (data persists)';
@@ -230,13 +230,6 @@ export default class DressRemove extends BaseCommand {
             },
           },
           {
-            title: 'Stripping memory markers',
-            skip: () => entry.applied.memorySections.length === 0,
-            task: async () => {
-              await this.stripMemoryMarkers(dressId);
-            },
-          },
-          {
             title: 'Stripping heartbeat rules',
             skip: () => (entry.applied.heartbeatSkills ?? []).length === 0,
             task: async () => {
@@ -348,20 +341,6 @@ export default class DressRemove extends BaseCommand {
       for (const p of entry.applied.plugins) plugins.add(p);
     }
     return { plugins, skills };
-  }
-
-  private async stripMemoryMarkers(dressId: string): Promise<void> {
-    if (!existsSync(this.openclawPaths.memory)) return;
-    const files = await readdir(this.openclawPaths.memory);
-    for (const file of files) {
-      if (!file.endsWith('.md')) continue;
-      const filePath = join(this.openclawPaths.memory, file);
-      const content = await readFile(filePath, 'utf-8');
-      if (content.includes(`clawtique:${dressId}`)) {
-        const cleaned = stripMarkers(dressId, content);
-        await writeFile(filePath, cleaned);
-      }
-    }
   }
 
   private async stripHeartbeatRules(dressId: string): Promise<void> {

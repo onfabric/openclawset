@@ -42,7 +42,6 @@ export interface OpenClawPaths {
   config: string;
   dresses: string;
   skills: string;
-  memory: string;
   heartbeat: string;
   dressesIndex: string;
 }
@@ -53,8 +52,7 @@ export function getOpenClawPaths(root: string): OpenClawPaths {
     config: join(root, 'openclaw.json'),
     dresses: join(root, 'workspace', 'dresses'),
     skills: join(root, 'workspace', 'skills'),
-    memory: join(root, 'memory'),
     heartbeat: join(root, 'workspace', 'HEARTBEAT.md'),
-    dressesIndex: join(root, 'DRESSES.md'),
+    dressesIndex: join(root, 'workspace', 'DRESSES.md'),
   };
 }

@@ -6,7 +6,7 @@ import { Args, Flags } from '@oclif/core';
 import chalk from 'chalk';
 import { BaseCommand } from '#base.ts';
 import type { PersonalityFile, ResolvedPersonality } from '#core/index.ts';
-import { PERSONALITY_FILES } from '#core/index.ts';
+import { ensureDressesReference, PERSONALITY_FILES } from '#core/index.ts';
 import { compilePersonality } from '#lib/compile.ts';
 import { createRegistryProvider } from '#lib/registry.ts';
 
@@ -133,6 +133,9 @@ export default class PersonalitySet extends BaseCommand {
         const content = fileContents[file] ?? '';
         await writeFile(join(workspaceDir, file), content);
       }
+
+      // Re-inject DRESSES.md reference (personality overwrites AGENTS.md entirely)
+      await ensureDressesReference(workspaceDir);
 
       state.personality = {
         id: personalityId,
