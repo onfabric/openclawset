@@ -33,7 +33,7 @@ AGENTS.md (always loaded)
 - **Crons** — scheduled tasks bound to skills
 - **Plugins** — OpenClaw plugins required by the dress
 - **Heartbeat rules** — proactive behaviors appended to `HEARTBEAT.md`
-- **Workspace files** — templates copied to `~/.openclaw/workspace/`
+- **Workspace files** — templates copied to `~/.openclaw/workspace/dresses/<dress-id>/`
 - **Daily memory section** — a named section the agent owns in daily notes
 
 ### What each command does
