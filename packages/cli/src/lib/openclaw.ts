@@ -8,6 +8,7 @@ import type {
   CronListEntry,
   OpenClawDriver,
   PluginConfigSchema,
+  SessionListEntry,
 } from '#core/index.ts';
 import type { ExecFn } from '#lib/exec-recorder.ts';
 
@@ -250,6 +251,36 @@ export class LocalOpenClawDriver implements OpenClawDriver {
       return JSON.parse(stdout);
     } catch {
       return stdout.trim();
+    }
+  }
+
+  async sessionList(): Promise<SessionListEntry[]> {
+    const { stdout, exitCode } = await this.exec(['sessions', '--json']);
+    if (exitCode !== 0) return [];
+    try {
+      const data = JSON.parse(stdout);
+      const sessions: Record<string, unknown>[] = Array.isArray(data)
+        ? data
+        : (data.sessions ?? []);
+      return sessions.map((s) => ({
+        key: String(s.key ?? ''),
+        sessionId: String(s.sessionId ?? ''),
+        updatedAt: Number(s.updatedAt ?? 0),
+        agentId: String(s.agentId ?? ''),
+        kind: String(s.kind ?? ''),
+      }));
+    } catch {
+      return [];
+    }
+  }
+
+  async sessionReset(sessionId: string): Promise<void> {
+    const { exitCode, stderr } = await this.exec(
+      ['agent', '--message', '/reset', '--session-id', sessionId, '--json'],
+      { timeout: 60_000 },
+    );
+    if (exitCode !== 0) {
+      throw new Error(`Failed to reset session "${sessionId}": ${stderr}`);
     }
   }
 

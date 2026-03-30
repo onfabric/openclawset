@@ -31,6 +31,10 @@ export interface OpenClawDriver {
   // Gateway
   gatewayRestart(): Promise<void>;
 
+  // Session management
+  sessionList(): Promise<SessionListEntry[]>;
+  sessionReset(sessionId: string): Promise<void>;
+
   // Health checks
   health(): Promise<{ ok: boolean; message: string }>;
 
@@ -44,6 +48,14 @@ export interface CronListEntry {
   schedule: string;
   enabled: boolean;
   status: string;
+}
+
+export interface SessionListEntry {
+  key: string;
+  sessionId: string;
+  updatedAt: number;
+  agentId: string;
+  kind: string;
 }
 
 export interface PluginConfigSchema {

@@ -7,7 +7,12 @@ export { addHours, cronFromTime } from '#core/cron-utils.ts';
 // DRESSCODE generation
 export { generateDresscode } from '#core/dresscode.ts';
 // Driver interface
-export type { CronListEntry, OpenClawDriver, PluginConfigSchema } from '#core/driver.ts';
+export type {
+  CronListEntry,
+  OpenClawDriver,
+  PluginConfigSchema,
+  SessionListEntry,
+} from '#core/driver.ts';
 // Dependency graph
 export { DependencyGraph } from '#core/graph.ts';
 // Memory utilities

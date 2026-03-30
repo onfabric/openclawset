@@ -312,6 +312,23 @@ export default class DressRemove extends BaseCommand {
 
       await this.gitManager.commit('revert', dressId, 'dress remove', body);
 
+      // Reset waclaw session so the removed dress/dresscode is no longer loaded
+      const resetTask = new Listr(
+        [
+          {
+            title: 'Resetting waclaw session',
+            task: async () => {
+              const sessions = await this.openclawDriver.sessionList();
+              const waclawSession = sessions.find((s) => s.key.includes(':waclaw:'));
+              if (!waclawSession) return;
+              await this.openclawDriver.sessionReset(waclawSession.sessionId);
+            },
+          },
+        ],
+        { concurrent: false },
+      );
+      await resetTask.run();
+
       this.log(`\n${chalk.green('✓')} Removed dress "${dressId}". Data preserved.`);
     } catch (err) {
       if (snapshot) await this.gitManager.rollback(snapshot);
