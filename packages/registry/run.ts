@@ -105,9 +105,13 @@ for (const dir of dressDirs) {
     const trigger = skillDef.trigger;
     if (trigger.type === 'cron') {
       if (!cronIds.has(trigger.cronId)) {
-        error(`skill "${skillId}" has trigger.cronId "${trigger.cronId}" which does not match any cron`);
+        error(
+          `skill "${skillId}" has trigger.cronId "${trigger.cronId}" which does not match any cron`,
+        );
       } else if (boundCrons.has(trigger.cronId)) {
-        error(`cron "${trigger.cronId}" is bound to both "${boundCrons.get(trigger.cronId)}" and "${skillId}"`);
+        error(
+          `cron "${trigger.cronId}" is bound to both "${boundCrons.get(trigger.cronId)}" and "${skillId}"`,
+        );
       } else {
         boundCrons.set(trigger.cronId, skillId);
       }

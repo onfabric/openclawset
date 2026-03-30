@@ -1,4 +1,10 @@
-import type { ClawtiqueConfig, DressJson, PersonalityFile, SkillTrigger, Weekday } from '#core/index.ts';
+import type {
+  ClawtiqueConfig,
+  DressJson,
+  PersonalityFile,
+  SkillTrigger,
+  Weekday,
+} from '#core/index.ts';
 import { cronFromTime, PERSONALITY_FILES } from '#core/index.ts';
 
 // ---------------------------------------------------------------------------

@@ -1,5 +1,5 @@
-import type { SkillTrigger } from '#core/schemas/index.ts';
 import type { ResolvedDress } from '#core/schema.ts';
+import type { SkillTrigger } from '#core/schemas/index.ts';
 
 /**
  * Generate a DRESSCODE.md from a resolved dress definition.
@@ -52,7 +52,7 @@ export function generateDresscode(
     lines.push('## User Skills');
     lines.push('');
     lines.push(
-      'When the user\'s request matches one of these, read the skill file and follow its instructions.',
+      "When the user's request matches one of these, read the skill file and follow its instructions.",
     );
     lines.push('');
     for (const [skillId, trigger] of userSkills) {

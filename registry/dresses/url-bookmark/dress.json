@@ -28,8 +28,5 @@
     }
   },
 
-  "workspace": [
-    "url-bookmark/bookmarks.md",
-    "url-bookmark/pill-history.md"
-  ]
+  "workspace": ["url-bookmark/bookmarks.md", "url-bookmark/pill-history.md"]
 }

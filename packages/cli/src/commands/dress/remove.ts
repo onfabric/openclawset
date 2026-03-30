@@ -128,7 +128,9 @@ export default class DressRemove extends BaseCommand {
       this.log(`  ${chalk.dim('~')} plugin: ${p} ${chalk.dim(`(retained — ${reason})`)}`);
     }
     if ((entry.applied.heartbeatSkills ?? []).length > 0) {
-      this.log(`  ${chalk.red('-')} heartbeat skills: ${entry.applied.heartbeatSkills!.join(', ')}`);
+      this.log(
+        `  ${chalk.red('-')} heartbeat skills: ${entry.applied.heartbeatSkills!.join(', ')}`,
+      );
     }
     if ((entry.applied.userSkills ?? []).length > 0) {
       this.log(`  ${chalk.red('-')} user skills: ${entry.applied.userSkills!.join(', ')}`);
@@ -404,7 +406,10 @@ export default class DressRemove extends BaseCommand {
       lines.push(`DRESSCODE: ~/.openclaw/workspace/dresses/${id}/DRESSCODE.md\n`);
     }
 
-    if (allUserSkills.length === 0 && Object.keys(state.dresses).filter((id) => id !== excludeId).length === 0) {
+    if (
+      allUserSkills.length === 0 &&
+      Object.keys(state.dresses).filter((id) => id !== excludeId).length === 0
+    ) {
       lines.push('No dresses active.\n');
     }
 
