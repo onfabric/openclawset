@@ -1,8 +1,8 @@
 {
-  "id": "url-bookmark",
-  "name": "URL Bookmark",
+  "id": "notetaker",
+  "name": "Notetaker",
   "version": "1.0.0",
-  "description": "Save and manage bookmarks — get one relevant link delivered daily.",
+  "description": "Capture thoughts, links, and ideas — get the most relevant one surfaced daily.",
 
   "requires": {
     "lingerie": ["waclaw"]
@@ -20,15 +20,15 @@
     "daily-pill": {
       "trigger": { "type": "cron", "cronId": "daily-pill" }
     },
-    "save-bookmark": {
+    "notes": {
       "trigger": {
         "type": "user",
-        "description": "User wants to save, bookmark, or share a link/URL to read later"
+        "description": "User wants to add, remove, update, search, or review their notes, bookmarks, or thoughts"
       }
     }
   },
 
-  "dailyMemorySection": "Bookmarks",
+  "dailyMemorySection": "Notes",
 
-  "workspace": ["bookmarks.md"]
+  "workspace": ["notes.md"]
 }
