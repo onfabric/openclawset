@@ -61,9 +61,14 @@ export default class Doctor extends BaseCommand {
         this.log(`    ${chalk.yellow('!')} No local dress definition (may need reinstall)`);
       }
 
-      // Report crons
-      if (entry.applied.crons.length > 0) {
-        this.log(`    ${chalk.green('✓')} ${entry.applied.crons.length} cron(s) registered`);
+      // Check skills exist on disk
+      for (const skill of entry.applied.skills) {
+        if (await this.openclawDriver.skillExists(skill)) {
+          this.log(`    ${chalk.green('✓')} skill: ${skill}`);
+        } else {
+          this.log(`    ${chalk.red('✗')} Missing skill: ${skill}`);
+          allHealthy = false;
+        }
       }
 
       // Report memory sections
@@ -76,18 +81,37 @@ export default class Doctor extends BaseCommand {
       this.log('');
     }
 
-    // OpenClaw health
+    // OpenClaw health + cron verification
     this.log(`  ${chalk.bold('OpenClaw:')}`);
+    let openclawReachable = false;
     try {
       const health = await this.openclawDriver.health();
       if (health.ok) {
         this.log(`    ${chalk.green('✓')} ${health.message || 'Healthy'}`);
+        openclawReachable = true;
       } else {
         this.log(`    ${chalk.red('✗')} ${health.message}`);
         allHealthy = false;
       }
     } catch {
       this.log(`    ${chalk.yellow('!')} Could not reach openclaw CLI`);
+    }
+
+    // Verify crons exist in OpenClaw
+    if (openclawReachable) {
+      const liveCrons = await this.openclawDriver.cronList();
+      const liveCronNames = new Set(liveCrons.map((c) => c.name));
+
+      for (const [id, entry] of entries) {
+        for (const cron of entry.applied.crons) {
+          if (liveCronNames.has(cron.displayName)) {
+            this.log(`    ${chalk.green('✓')} cron: ${cron.displayName}`);
+          } else {
+            this.log(`    ${chalk.red('✗')} Missing cron: ${cron.displayName} (dress: ${id})`);
+            allHealthy = false;
+          }
+        }
+      }
     }
 
     this.log('');
