@@ -10,15 +10,24 @@ export const configEntrySchema = z.object({
   value: z.union([z.string(), z.number(), z.boolean()]),
 });
 
-export const configPropertySchema = z.object({
+export const configParamSchema = z.object({
   description: z.string().min(1),
   required: z.boolean().default(true),
   default: z.string().optional(),
 });
 
+export const configPropertySchema = z.object({
+  description: z.string().min(1),
+  required: z.boolean().default(true),
+  default: z.string().optional(),
+  params: z.array(z.string()).default([]),
+  build: z.string().optional(),
+});
+
 export const configSetupSchema = z.object({
   configs: z.array(configEntrySchema).default([]),
   configPrefix: z.string().min(1).optional(),
+  params: z.record(z.string(), configParamSchema).default({}),
   properties: z.record(z.string(), configPropertySchema).default({}),
 });
 
