@@ -175,28 +175,6 @@ export default class LingerieAdd extends BaseCommand {
       await this.setupPlugin(plugin, true);
     }
 
-    // Restart gateway if we installed plugins
-    if (installedPlugins.length > 0) {
-      const restartTask = new Listr(
-        [
-          {
-            title: 'Restarting gateway',
-            task: async () => {
-              await this.openclawDriver.gatewayRestart();
-              for (let i = 0; i < 10; i++) {
-                await new Promise((r) => setTimeout(r, 2_000));
-                const h = await this.openclawDriver.health();
-                if (h.ok) return;
-              }
-              throw new Error('Gateway did not become healthy after restart');
-            },
-          },
-        ],
-        { concurrent: false },
-      );
-      await restartTask.run();
-    }
-
     // Process configSetup — set static configs and prompt for properties
     const configKeys: string[] = [];
     if (uw.configSetup) {
@@ -262,6 +240,28 @@ export default class LingerieAdd extends BaseCommand {
         await this.openclawDriver.configSet(configPrefix, JSON.stringify(obj));
         configKeys.push(configPrefix);
       }
+    }
+
+    // Restart gateway if anything changed
+    if (installedPlugins.length > 0 || configKeys.length > 0) {
+      const restartTask = new Listr(
+        [
+          {
+            title: 'Restarting gateway',
+            task: async () => {
+              await this.openclawDriver.gatewayRestart();
+              for (let i = 0; i < 10; i++) {
+                await new Promise((r) => setTimeout(r, 2_000));
+                const h = await this.openclawDriver.health();
+                if (h.ok) return;
+              }
+              throw new Error('Gateway did not become healthy after restart');
+            },
+          },
+        ],
+        { concurrent: false },
+      );
+      await restartTask.run();
     }
 
     // Save lingerie to state
