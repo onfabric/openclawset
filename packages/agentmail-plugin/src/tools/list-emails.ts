@@ -57,7 +57,6 @@ export function registerListEmailsTool(
           content: [{ type: 'text' as const, text }],
           details: {
             emails: result.items,
-            has_more: !!result.next_page_token,
           },
         };
       } catch (err) {

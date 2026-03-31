@@ -29,15 +29,17 @@ export function registerReadEmailTool(
         const body = msg.extracted_text ?? msg.text ?? msg.html ?? '(no content)';
         const date = new Date(msg.timestamp).toLocaleString();
 
+        const attachments = msg.attachments ?? [];
+        const cc = msg.cc ?? [];
         const attachmentList =
-          msg.attachments.length > 0
-            ? `\nAttachments:\n${msg.attachments.map((a) => `  - ${a.filename} (${a.content_type}, ${a.size} bytes)`).join('\n')}`
+          attachments.length > 0
+            ? `\nAttachments:\n${attachments.map((a) => `  - ${a.filename} (${a.content_type}, ${a.size} bytes)`).join('\n')}`
             : '';
 
         const text = [
           `From: ${msg.from}`,
-          `To: ${msg.to.join(', ')}`,
-          msg.cc.length > 0 ? `CC: ${msg.cc.join(', ')}` : '',
+          `To: ${(msg.to ?? []).join(', ')}`,
+          cc.length > 0 ? `CC: ${cc.join(', ')}` : '',
           `Date: ${date}`,
           `Subject: ${msg.subject}`,
           `Message ID: ${msg.message_id}`,
@@ -55,6 +57,7 @@ export function registerReadEmailTool(
           details: msg,
         };
       } catch (err) {
+        api.logger.error(`agentmail: error reading email: ${String(err)}`);
         return {
           content: [{ type: 'text' as const, text: `Error reading email: ${String(err)}` }],
           details: { error: String(err) },

@@ -31,14 +31,15 @@ export function createAgentMailClient(apiKey: string) {
       }>('POST', '/inboxes', options ?? {});
     },
 
-    listInboxes(options?: { limit?: number }) {
+    async listInboxes(options?: { limit?: number }) {
       const params = new URLSearchParams();
       if (options?.limit) params.set('limit', String(options.limit));
       const qs = params.toString();
-      return request<{
-        items: Array<{ inbox_id: string; email: string; display_name: string | null }>;
-        next_page_token: string | null;
+      const raw = await request<{
+        inboxes: Array<{ inbox_id: string; email: string; display_name: string | null }>;
+        count: number;
       }>('GET', `/inboxes${qs ? `?${qs}` : ''}`);
+      return { items: raw.inboxes, count: raw.count };
     },
 
     sendMessage(
@@ -47,12 +48,15 @@ export function createAgentMailClient(apiKey: string) {
     ) {
       return request<{ message_id: string; thread_id: string }>(
         'POST',
-        `/inboxes/${inboxId}/messages/send`,
+        `/inboxes/${encodeURIComponent(inboxId)}/messages/send`,
         message,
       );
     },
 
-    listMessages(inboxId: string, options?: { limit?: number; after?: string; labels?: string[] }) {
+    async listMessages(
+      inboxId: string,
+      options?: { limit?: number; after?: string; labels?: string[] },
+    ) {
       const params = new URLSearchParams();
       if (options?.limit) params.set('limit', String(options.limit));
       if (options?.after) params.set('after', options.after);
@@ -60,8 +64,8 @@ export function createAgentMailClient(apiKey: string) {
         for (const label of options.labels) params.append('labels', label);
       }
       const qs = params.toString();
-      return request<{
-        items: Array<{
+      const raw = await request<{
+        messages: Array<{
           message_id: string;
           thread_id: string;
           inbox_id: string;
@@ -73,8 +77,9 @@ export function createAgentMailClient(apiKey: string) {
           timestamp: string;
           labels: string[];
         }>;
-        next_page_token: string | null;
-      }>('GET', `/inboxes/${inboxId}/messages${qs ? `?${qs}` : ''}`);
+        count: number;
+      }>('GET', `/inboxes/${encodeURIComponent(inboxId)}/messages${qs ? `?${qs}` : ''}`);
+      return { items: raw.messages, count: raw.count };
     },
 
     getMessage(inboxId: string, messageId: string) {
@@ -83,9 +88,9 @@ export function createAgentMailClient(apiKey: string) {
         thread_id: string;
         inbox_id: string;
         from: string;
-        to: string[];
-        cc: string[];
-        bcc: string[];
+        to: string[] | null;
+        cc: string[] | null;
+        bcc: string[] | null;
         subject: string;
         text: string | null;
         html: string | null;
@@ -99,8 +104,8 @@ export function createAgentMailClient(apiKey: string) {
           filename: string;
           size: number;
           content_type: string;
-        }>;
-      }>('GET', `/inboxes/${inboxId}/messages/${messageId}`);
+        }> | null;
+      }>('GET', `/inboxes/${encodeURIComponent(inboxId)}/messages/${encodeURIComponent(messageId)}`);
     },
   };
 }
