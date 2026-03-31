@@ -22,7 +22,12 @@ export {
   skillTriggerSchema,
 } from '#core/schemas/dress-json.ts';
 export type { LingerieJson } from '#core/schemas/lingerie-json.ts';
-export { lingerieJsonSchema } from '#core/schemas/lingerie-json.ts';
+export {
+  configEntrySchema,
+  configPromptSchema,
+  configSetupSchema,
+  lingerieJsonSchema,
+} from '#core/schemas/lingerie-json.ts';
 export type {
   PersonalityFile,
   PersonalityJson,

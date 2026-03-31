@@ -1,10 +1,26 @@
-import { confirm, select } from '@inquirer/prompts';
+import { confirm, input, select } from '@inquirer/prompts';
 import { Args, Flags } from '@oclif/core';
 import chalk from 'chalk';
 import { Listr } from 'listr2';
 import { BaseCommand } from '#base.ts';
 import type { LingerieJson, StateFile } from '#core/index.ts';
 import { createRegistryProvider } from '#lib/registry.ts';
+
+/**
+ * Replace `{{id}}` placeholders in a template string with prompt answers.
+ * Cleans up empty URL query params left by optional prompts.
+ */
+function resolveTemplate(template: string, answers: Record<string, string>): string {
+  let result = template.replaceAll(/\{\{(\w+)\}\}/g, (_, id: string) => answers[id] ?? '');
+
+  // Clean up empty query-string params (e.g. "&profileId=&" or "&profileId=" at end)
+  result = result.replaceAll(/[&?]\w+=(?=&)/g, '');
+  result = result.replaceAll(/[&?]\w+=$/g, '');
+  // Fix leading ampersand after question mark if first param was removed
+  result = result.replace('?&', '?');
+
+  return result;
+}
 
 export default class LingerieAdd extends BaseCommand {
   static override summary = 'Install lingerie independently of a dress';
@@ -92,6 +108,11 @@ export default class LingerieAdd extends BaseCommand {
         this.log(`  ${chalk.green('+')} plugin: ${plugin.id}`);
       }
     }
+    if (uw.configSetup) {
+      for (const cfg of uw.configSetup.configs) {
+        this.log(`  ${chalk.green('+')} config: ${cfg.key}`);
+      }
+    }
     this.log('');
 
     if (flags['dry-run']) {
@@ -123,11 +144,18 @@ export default class LingerieAdd extends BaseCommand {
     try {
       await this.installLingerie(lingerieId, uw, state);
 
+      const commitParts: string[] = [];
+      if (uw.plugins.length > 0) {
+        commitParts.push(`plugins: ${uw.plugins.map((p) => p.id).join(', ')}`);
+      }
+      if (uw.configSetup?.configs.length) {
+        commitParts.push(`config keys: ${uw.configSetup.configs.map((c) => c.key).join(', ')}`);
+      }
       await this.gitManager.commit(
         'feat',
         lingerieId,
         'lingerie add',
-        `plugins: ${uw.plugins.map((p) => p.id).join(', ')}`,
+        commitParts.join('\n') || lingerieId,
       );
 
       this.log(`\n${chalk.green('✓')} Lingerie "${uw.name}" installed.`);
@@ -182,6 +210,38 @@ export default class LingerieAdd extends BaseCommand {
       await restartTask.run();
     }
 
+    // Process configSetup — prompt for values and set config keys
+    const configKeys: string[] = [];
+    if (uw.configSetup) {
+      const answers: Record<string, string> = {};
+
+      if (uw.configSetup.prompts.length > 0) {
+        this.log(`\n${chalk.bold(`Configuring ${uw.name}...`)}\n`);
+
+        for (const prompt of uw.configSetup.prompts) {
+          const suffix = prompt.required ? '' : ' (optional)';
+          const value = await input({
+            message: `  ${prompt.description}${suffix}:`,
+            default: prompt.default,
+          });
+
+          if (!value && prompt.required) {
+            this.error(`Required config "${prompt.id}" was not provided.`);
+          }
+
+          answers[prompt.id] = value;
+        }
+      }
+
+      for (const cfg of uw.configSetup.configs) {
+        const resolved =
+          typeof cfg.value === 'string' ? resolveTemplate(cfg.value, answers) : String(cfg.value);
+
+        await this.openclawDriver.configSet(cfg.key, resolved);
+        configKeys.push(cfg.key);
+      }
+    }
+
     // Save lingerie to state
     state.lingerie[lingerieId] = {
       package: lingerieId,
@@ -190,6 +250,7 @@ export default class LingerieAdd extends BaseCommand {
       applied: {
         plugins: uw.plugins.map((p) => p.id),
         installedPlugins,
+        configKeys,
       },
     };
     await this.stateManager.save(state);

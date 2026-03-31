@@ -237,6 +237,13 @@ export class LocalOpenClawDriver implements OpenClawDriver {
     }
   }
 
+  async configDelete(key: string): Promise<void> {
+    const { exitCode, stderr } = await this.exec(['config', 'delete', key]);
+    if (exitCode !== 0) {
+      throw new Error(`Failed to delete config "${key}": ${stderr}`);
+    }
+  }
+
   async gatewayRestart(): Promise<void> {
     const { exitCode, stderr } = await this.exec(['gateway', 'restart']);
     if (exitCode !== 0) {

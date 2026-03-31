@@ -84,6 +84,7 @@ export default class LingerieRemove extends BaseCommand {
     const installedPluginSet = new Set(entry.applied.installedPlugins ?? []);
     const pluginsToRemove = entry.applied.plugins.filter((p) => installedPluginSet.has(p));
     const pluginsRetained = entry.applied.plugins.filter((p) => !installedPluginSet.has(p));
+    const configKeys = entry.applied.configKeys ?? [];
 
     // Show what will happen
     this.log(chalk.bold(`\nRemoving lingerie "${lingerieId}":\n`));
@@ -95,6 +96,9 @@ export default class LingerieRemove extends BaseCommand {
       this.log(
         `  ${chalk.dim('~')} plugin: ${p} ${chalk.dim('(not installed by clawtique — retained)')}`,
       );
+    }
+    for (const k of configKeys) {
+      this.log(`  ${chalk.red('-')} config: ${k}`);
     }
     this.log('');
 
@@ -141,8 +145,21 @@ export default class LingerieRemove extends BaseCommand {
             },
           },
           {
+            title: 'Removing config keys',
+            skip: () => configKeys.length === 0,
+            task: async () => {
+              for (const key of configKeys) {
+                try {
+                  await this.openclawDriver.configDelete(key);
+                } catch {
+                  // Config key may have been manually removed
+                }
+              }
+            },
+          },
+          {
             title: 'Restarting gateway',
-            skip: () => pluginsToRemove.length === 0,
+            skip: () => pluginsToRemove.length === 0 && configKeys.length === 0,
             task: async () => {
               await this.openclawDriver.gatewayRestart();
             },
@@ -163,6 +180,7 @@ export default class LingerieRemove extends BaseCommand {
       const body = [
         pluginsToRemove.length > 0 ? `removed plugins: ${pluginsToRemove.join(', ')}` : '',
         pluginsRetained.length > 0 ? `retained plugins: ${pluginsRetained.join(', ')}` : '',
+        configKeys.length > 0 ? `removed config keys: ${configKeys.join(', ')}` : '',
       ]
         .filter(Boolean)
         .join('\n');
