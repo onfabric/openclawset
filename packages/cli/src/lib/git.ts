@@ -42,7 +42,7 @@ export class GitManager {
     await this.git.add('-A');
 
     const status = await this.git.status();
-    if (status.staged.length === 0 && status.created.length === 0) {
+    if (status.isClean()) {
       return ''; // Nothing to commit
     }
 
