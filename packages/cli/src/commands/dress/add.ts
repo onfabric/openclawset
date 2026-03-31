@@ -657,7 +657,7 @@ export default class DressAdd extends BaseCommand {
           {
             title: 'Updating DRESSES.md',
             task: async () => {
-              await this.updateDressesIndex(state, dress.id, compiled);
+              await this.updateDressesIndex(state, dress.id);
               // Ensure AGENTS.md references DRESSES.md (self-heal if missing)
               const workspaceDir = join(this.openclawPaths.root, 'workspace');
               await ensureDressesReference(workspaceDir);
@@ -911,21 +911,16 @@ export default class DressAdd extends BaseCommand {
   private async updateDressesIndex(
     state: StateFile,
     newDressId: string,
-    compiled: CompiledDress,
   ): Promise<void> {
     const lines = ['# Active Dresses\n'];
     lines.push(
       'You MUST read each DRESSCODE.md listed below. They define your skills, schedules, daily memory sections, and workspace files.\n',
     );
 
-    for (const [id] of Object.entries(state.dresses)) {
+    for (const id of [...Object.keys(state.dresses), newDressId]) {
       lines.push(`## ${id}`);
       lines.push(`DRESSCODE: ~/.openclaw/workspace/dresses/${id}/DRESSCODE.md\n`);
     }
-
-    lines.push(`## ${newDressId}`);
-    lines.push(compiled.description || compiled.name);
-    lines.push(`DRESSCODE: ~/.openclaw/workspace/dresses/${newDressId}/DRESSCODE.md\n`);
 
     await writeFile(this.openclawPaths.dressesIndex, lines.join('\n'));
   }
