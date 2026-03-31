@@ -1,15 +1,13 @@
 {
   "version": 1,
-  "generatedAt": "2026-03-30T10:46:38.335Z",
+  "generatedAt": "2026-03-31T14:33:07.468Z",
   "dresses": {
     "sleeping-coach": {
       "name": "Sleeping Coach",
       "version": "1.0.0",
       "description": "Sleep coaching powered by Oura Ring — morning reports and evening wind-down advice.",
       "requires": {
-        "lingerie": [
-          "waclaw"
-        ]
+        "lingerie": ["waclaw"]
       },
       "path": "dresses/sleeping-coach"
     },
@@ -18,9 +16,7 @@
       "version": "2.0.0",
       "description": "Sends workout schedule and collects post-training feedback.",
       "requires": {
-        "lingerie": [
-          "waclaw"
-        ]
+        "lingerie": ["waclaw"]
       },
       "path": "dresses/fitness-coach"
     },
@@ -29,9 +25,7 @@
       "version": "1.0.0",
       "description": "End-of-day reflection — capture what mattered and set tomorrow's intentions.",
       "requires": {
-        "lingerie": [
-          "waclaw"
-        ]
+        "lingerie": ["waclaw"]
       },
       "path": "dresses/daily-reflection"
     },
@@ -40,33 +34,27 @@
       "version": "1.0.0",
       "description": "Daily digest of tech news from configurable sources and topics.",
       "requires": {
-        "lingerie": [
-          "waclaw"
-        ]
+        "lingerie": ["waclaw"]
       },
       "path": "dresses/tech-bro-digest"
-    },
-    "fabric": {
-      "name": "Fabric Memory",
-      "version": "1.0.0",
-      "description": "Portable AI memory powered by Fabric — proactive check-ins, memory retrieval, and user profiling.",
-      "requires": {
-        "lingerie": [
-          "waclaw"
-        ]
-      },
-      "path": "dresses/fabric"
     },
     "notetaker": {
       "name": "Notetaker",
       "version": "1.0.0",
       "description": "Capture thoughts, links, and ideas — get the most relevant one surfaced daily.",
       "requires": {
-        "lingerie": [
-          "waclaw"
-        ]
+        "lingerie": ["waclaw"]
       },
       "path": "dresses/notetaker"
+    },
+    "fabric": {
+      "name": "Fabric Memory",
+      "version": "1.0.0",
+      "description": "Portable AI memory powered by Fabric — proactive check-ins, memory retrieval, and user profiling.",
+      "requires": {
+        "lingerie": ["waclaw"]
+      },
+      "path": "dresses/fabric"
     }
   },
   "lingerie": {
@@ -75,6 +63,12 @@
       "version": "1.0.0",
       "description": "WhatsApp channel plugin via waclaw proxy — shared across dresses that need WhatsApp messaging.",
       "path": "lingerie/waclaw"
+    },
+    "browser-use": {
+      "name": "Browser Use",
+      "version": "1.0.0",
+      "description": "Cloud browser via CDP — connects OpenClaw to Browser Use for web browsing capabilities.",
+      "path": "lingerie/browser-use"
     }
   },
   "personalities": {

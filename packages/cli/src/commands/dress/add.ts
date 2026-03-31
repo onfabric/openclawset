@@ -809,6 +809,7 @@ export default class DressAdd extends BaseCommand {
       applied: {
         plugins: uw.plugins.map((p) => p.id),
         installedPlugins,
+        configKeys: [],
       },
     };
     await this.stateManager.save(state);
