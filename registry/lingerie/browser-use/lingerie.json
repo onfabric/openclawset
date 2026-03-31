@@ -22,11 +22,11 @@
       { "key": "browser.defaultProfile", "value": "browser-use" },
       { "key": "browser.remoteCdpTimeoutMs", "value": 3000 },
       { "key": "browser.remoteCdpHandshakeTimeoutMs", "value": 5000 },
+      { "key": "browser.profiles.browser-use.color", "value": "#ff750e" },
       {
         "key": "browser.profiles.browser-use.cdpUrl",
         "value": "wss://connect.browser-use.com?apiKey={{apiKey}}&profileId={{profileId}}"
-      },
-      { "key": "browser.profiles.browser-use.color", "value": "#ff750e" }
+      }
     ]
   }
 }
