@@ -205,10 +205,30 @@ export default class LingerieAdd extends BaseCommand {
         configKeys.push(cfg.key);
       }
 
-      const { configPrefix, properties } = uw.configSetup;
-      if (configPrefix && Object.keys(properties).length > 0) {
+      const { configPrefix, params, properties } = uw.configSetup;
+      const hasParams = Object.keys(params).length > 0;
+      const hasProperties = Object.keys(properties).length > 0;
+
+      if (configPrefix && (hasParams || hasProperties)) {
         this.log(`\n${chalk.bold(`Configuring ${uw.name}...`)}\n`);
 
+        // Collect param answers (prompt-only inputs, not stored in config)
+        const answers: Record<string, string> = {};
+        for (const [id, param] of Object.entries(params)) {
+          const suffix = param.required ? '' : ' (optional)';
+          const value = await input({
+            message: `  ${param.description}${suffix}:`,
+            default: param.default,
+          });
+
+          if (!value && param.required) {
+            this.error(`Required param "${id}" was not provided.`);
+          }
+
+          if (value) answers[id] = value;
+        }
+
+        // Collect property values (these become config keys)
         const obj: Record<string, string> = {};
         for (const [key, prop] of Object.entries(properties)) {
           const suffix = prop.required ? '' : ' (optional)';
@@ -221,7 +241,20 @@ export default class LingerieAdd extends BaseCommand {
             this.error(`Required config "${key}" was not provided.`);
           }
 
-          if (value) {
+          if (!value) continue;
+
+          if (prop.build) {
+            // Build the final value by substituting {value} and {paramId}
+            let built = prop.build.replace('{value}', value);
+            for (const paramId of prop.params) {
+              built = built.replace(`{${paramId}}`, answers[paramId] ?? '');
+            }
+            // Clean up empty query params
+            built = built.replaceAll(/[&?]\w+=(?=&)/g, '');
+            built = built.replaceAll(/[&?]\w+=$/g, '');
+            built = built.replace('?&', '?');
+            obj[key] = built;
+          } else {
             obj[key] = value;
           }
         }
