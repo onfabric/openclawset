@@ -97,9 +97,7 @@ export default class LingerieAdd extends BaseCommand {
         this.log(`  ${chalk.green('+')} config: ${cfg.key}`);
       }
       if (uw.configSetup.configPrefix) {
-        for (const key of Object.keys(uw.configSetup.properties)) {
-          this.log(`  ${chalk.green('+')} config: ${uw.configSetup.configPrefix}.${key}`);
-        }
+        this.log(`  ${chalk.green('+')} config: ${uw.configSetup.configPrefix}`);
       }
     }
     this.log('');
@@ -211,6 +209,7 @@ export default class LingerieAdd extends BaseCommand {
       if (configPrefix && Object.keys(properties).length > 0) {
         this.log(`\n${chalk.bold(`Configuring ${uw.name}...`)}\n`);
 
+        const obj: Record<string, string> = {};
         for (const [key, prop] of Object.entries(properties)) {
           const suffix = prop.required ? '' : ' (optional)';
           const value = await input({
@@ -223,11 +222,12 @@ export default class LingerieAdd extends BaseCommand {
           }
 
           if (value) {
-            const fullKey = `${configPrefix}.${key}`;
-            await this.openclawDriver.configSet(fullKey, value);
-            configKeys.push(fullKey);
+            obj[key] = value;
           }
         }
+
+        await this.openclawDriver.configSet(configPrefix, JSON.stringify(obj));
+        configKeys.push(configPrefix);
       }
     }
 
