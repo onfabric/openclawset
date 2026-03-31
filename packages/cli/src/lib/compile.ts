@@ -2,6 +2,7 @@ import type {
   ClawtiqueConfig,
   DressJson,
   PersonalityFile,
+  ResolvedDress,
   SkillTrigger,
   Weekday,
 } from '#core/index.ts';
@@ -370,4 +371,36 @@ export function compilePersonality(
   }
 
   return compiled;
+}
+
+// ---------------------------------------------------------------------------
+// Convert CompiledDress → ResolvedDress (for merge checks and DRESSCODE generation)
+// ---------------------------------------------------------------------------
+
+export function compiledToResolved(compiled: CompiledDress): ResolvedDress {
+  const allSkills = [...compiled.bundledSkills.keys(), ...compiled.clawHubSkills];
+  return {
+    id: compiled.id,
+    name: compiled.name,
+    version: compiled.version,
+    description: compiled.description,
+    requires: {
+      plugins: compiled.plugins,
+      skills: allSkills,
+      dresses: {},
+      optionalDresses: {},
+      lingerie: compiled.lingerie,
+    },
+    secrets: compiled.secrets,
+    crons: compiled.crons.map((c) => ({
+      id: c.id,
+      name: c.name,
+      schedule: c.schedule,
+      skill: c.skill,
+      channel: c.channel === 'last' ? undefined : c.channel,
+    })),
+    dailyMemorySection: compiled.dailyMemorySection,
+    files: { skills: {}, templates: [] },
+    workspace: compiled.workspace,
+  };
 }

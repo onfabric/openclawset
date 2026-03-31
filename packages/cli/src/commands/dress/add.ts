@@ -20,7 +20,7 @@ import {
   wrapSection,
 } from '#core/index.ts';
 import {
-  type CompiledDress,
+  compiledToResolved,
   type CronScheduleChoice,
   compileDress,
   parseSkillMeta,
@@ -374,7 +374,7 @@ export default class DressAdd extends BaseCommand {
     for (const [id, entry] of Object.entries(state.dresses)) {
       allDresses.set(id, this.reconstructResolved(id, entry));
     }
-    allDresses.set(dress.id, this.compiledToResolved(compiled));
+    allDresses.set(dress.id, compiledToResolved(compiled));
 
     const { state: desired, conflicts } = mergeDresses(allDresses);
 
@@ -590,7 +590,7 @@ export default class DressAdd extends BaseCommand {
             task: async () => {
               const dressDir = join(this.openclawPaths.dresses, dress.id);
               await mkdir(dressDir, { recursive: true });
-              const resolved = this.compiledToResolved(compiled);
+              const resolved = compiledToResolved(compiled);
               const dresscode = generateDresscode(resolved, compiled.skillTriggers);
               const dresscodePath = join(dressDir, 'DRESSCODE.md');
               await writeFile(dresscodePath, dresscode);
@@ -630,6 +630,7 @@ export default class DressAdd extends BaseCommand {
                 params: Object.fromEntries(
                   Object.entries(skillParams).filter(([, v]) => Object.keys(v).length > 0),
                 ),
+                schedules: cronSchedules,
                 applied: {
                   crons: appliedCrons,
                   skills: allSkills,
@@ -768,34 +769,6 @@ export default class DressAdd extends BaseCommand {
     };
     await this.stateManager.save(state);
     this.log(`  ${chalk.green('✓')} Lingerie "${uw.name}" installed.\n`);
-  }
-
-  private compiledToResolved(compiled: CompiledDress): ResolvedDress {
-    const allSkills = [...compiled.bundledSkills.keys(), ...compiled.clawHubSkills];
-    return {
-      id: compiled.id,
-      name: compiled.name,
-      version: compiled.version,
-      description: compiled.description,
-      requires: {
-        plugins: compiled.plugins,
-        skills: allSkills,
-        dresses: {},
-        optionalDresses: {},
-        lingerie: compiled.lingerie,
-      },
-      secrets: compiled.secrets,
-      crons: compiled.crons.map((c) => ({
-        id: c.id,
-        name: c.name,
-        schedule: c.schedule,
-        skill: c.skill,
-        channel: c.channel === 'last' ? undefined : c.channel,
-      })),
-      dailyMemorySection: compiled.dailyMemorySection,
-      files: { skills: {}, templates: [] },
-      workspace: compiled.workspace,
-    };
   }
 
   private reconstructResolved(id: string, entry: DressEntry): ResolvedDress {

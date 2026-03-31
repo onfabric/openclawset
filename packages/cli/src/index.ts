@@ -6,6 +6,7 @@ import DressAddCommand from '#commands/dress/add.ts';
 import DressListCommand from '#commands/dress/index.ts';
 import DressParamsCommand from '#commands/dress/params.ts';
 import DressRemoveCommand from '#commands/dress/remove.ts';
+import DressUpdateCommand from '#commands/dress/update.ts';
 import InitCommand from '#commands/init.ts';
 import LingerieAddCommand from '#commands/lingerie/add.ts';
 import LingerieListCommand from '#commands/lingerie/index.ts';
@@ -26,6 +27,7 @@ export const COMMANDS = {
   'dress:add': DressAddCommand,
   'dress:params': DressParamsCommand,
   'dress:remove': DressRemoveCommand,
+  'dress:update': DressUpdateCommand,
   init: InitCommand,
   lingerie: LingerieListCommand,
   'lingerie:add': LingerieAddCommand,
