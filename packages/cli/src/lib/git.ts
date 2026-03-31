@@ -15,7 +15,7 @@ export class GitManager {
     if (!existsSync(join(this.repoDir, '.git'))) {
       await this.git.init();
       await this.git.addConfig('user.name', 'clawtique');
-      await this.git.addConfig('user.email', 'clawtique@local');
+      await this.git.addConfig('user.email', 'noreply@clawtique.dev');
     }
   }
 
