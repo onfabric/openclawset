@@ -57,6 +57,12 @@ export default class DressAdd extends BaseCommand {
       description: 'Skip confirmation prompts',
       default: false,
     }),
+    schedules: Flags.string({
+      description: 'Cron schedules as JSON: {"cronId": {"time":"HH:MM","days":["mon",...]}}',
+    }),
+    params: Flags.string({
+      description: 'Skill params as JSON: {"skillId": {"paramName": "value"}}',
+    }),
   };
 
   async run(): Promise<void> {
@@ -251,107 +257,145 @@ export default class DressAdd extends BaseCommand {
     // Phase: Prompts — collect schedule + skill params
     // -----------------------------------------------------------------------
 
-    // Cron schedules
+    // Cron schedules — from flag or interactive prompts
+    const presetSchedules = flags.schedules
+      ? (JSON.parse(flags.schedules) as Record<string, CronScheduleChoice>)
+      : undefined;
+
     const cronSchedules: Record<string, CronScheduleChoice> = {};
-    if (dress.crons.length > 0) {
-      this.log(chalk.bold(`  Scheduling ${dress.crons.length} cron(s):\n`));
-    }
 
-    for (const cron of dress.crons) {
-      const defaultTime = cron.defaults.time ?? '09:00';
-      const defaultDays = cron.defaults.days ?? ALL_DAYS;
-
-      // Find the skill bound to this cron via trigger
-      const cronSkillId = Object.entries(dress.skills).find(
-        ([, s]) => s.trigger.type === 'cron' && s.trigger.cronId === cron.id,
-      )?.[0];
-      this.log(`  ${chalk.cyan(cron.name)}${cronSkillId ? ` → skill: ${cronSkillId}` : ''}`);
-
-      const time = await input({
-        message: `  Time (HH:MM)`,
-        default: defaultTime,
-        validate: (v) => /^\d{2}:\d{2}$/.test(v) || 'Use HH:MM format',
-      });
-
-      const days = (await checkbox({
-        message: `  Days`,
-        choices: ALL_DAYS.map((d) => ({
-          name: d,
-          value: d as Weekday,
-          checked: defaultDays.includes(d),
-        })),
-      })) as Weekday[];
-
-      if (days.length === 0) {
-        this.error('Must select at least one day.');
-      }
-
-      // Channel — auto-select if only one lingerie, prompt if multiple
-      let channel: string | undefined;
-      if (cron.channel) {
-        channel = cron.channel;
-      } else if (dress.requires.lingerie.length === 1) {
-        channel = dress.requires.lingerie[0];
-      } else if (dress.requires.lingerie.length > 1) {
-        channel = await select({
-          message: `  Channel`,
-          choices: dress.requires.lingerie.map((id) => ({ name: id, value: id })),
-        });
-      }
-
-      cronSchedules[cron.id] = { time, days, channel };
-      this.log('');
-    }
-
-    // Skill params
-    const skillParams: Record<string, Record<string, unknown>> = {};
-    for (const [skillId, skillDef] of Object.entries(dress.skills)) {
-      const paramEntries = Object.entries(skillDef.params);
-      if (paramEntries.length === 0) continue;
-
-      const meta = skillMetaMap.get(skillId);
-      const trigger = skillDef.trigger;
-      const relatedCron =
-        trigger.type === 'cron' ? dress.crons.find((c) => c.id === trigger.cronId) : undefined;
-      const cronInfo = relatedCron ? ` ${chalk.dim(`(used by: ${relatedCron.name})`)}` : '';
-      this.log(`  ${chalk.bold(meta?.name ?? skillId)}${cronInfo}`);
-      if (meta?.description) {
-        this.log(`  ${chalk.dim(meta.description)}`);
-      }
-      this.log('');
-
-      const values: Record<string, unknown> = {};
-
-      for (const [paramName, paramDef] of paramEntries) {
-        this.log(
-          `    ${chalk.cyan(paramName)} ${chalk.dim(`(${paramDef.type}, default: ${JSON.stringify(paramDef.default)})`)}`,
-        );
-        if (paramDef.type === 'number') {
-          const raw = await input({
-            message: `    ${paramDef.description}`,
-            default: String(paramDef.default),
-          });
-          values[paramName] = Number(raw);
-        } else if (paramDef.type === 'string[]') {
-          const raw = await input({
-            message: `    ${paramDef.description}`,
-            default: (paramDef.default as string[]).join(', '),
-          });
-          values[paramName] = raw
-            .split(',')
-            .map((s: string) => s.trim())
-            .filter(Boolean);
+    if (presetSchedules) {
+      // Non-interactive: validate that all crons have schedules
+      for (const cron of dress.crons) {
+        const preset = presetSchedules[cron.id];
+        if (!preset) {
+          // Fall back to dress defaults
+          const defaultTime = cron.defaults.time ?? '09:00';
+          const defaultDays = cron.defaults.days ?? ALL_DAYS;
+          let channel: string | undefined;
+          if (cron.channel) channel = cron.channel;
+          else if (dress.requires.lingerie.length === 1) channel = dress.requires.lingerie[0];
+          cronSchedules[cron.id] = { time: defaultTime, days: defaultDays, channel };
         } else {
-          const raw = await input({
-            message: `    ${paramDef.description}`,
-            default: String(paramDef.default),
-          });
-          values[paramName] = raw;
+          cronSchedules[cron.id] = preset;
         }
       }
+    } else if (dress.crons.length > 0) {
+      this.log(chalk.bold(`  Scheduling ${dress.crons.length} cron(s):\n`));
 
-      skillParams[skillId] = values;
-      this.log('');
+      for (const cron of dress.crons) {
+        const defaultTime = cron.defaults.time ?? '09:00';
+        const defaultDays = cron.defaults.days ?? ALL_DAYS;
+
+        const cronSkillId = Object.entries(dress.skills).find(
+          ([, s]) => s.trigger.type === 'cron' && s.trigger.cronId === cron.id,
+        )?.[0];
+        this.log(`  ${chalk.cyan(cron.name)}${cronSkillId ? ` → skill: ${cronSkillId}` : ''}`);
+
+        const time = await input({
+          message: `  Time (HH:MM)`,
+          default: defaultTime,
+          validate: (v) => /^\d{2}:\d{2}$/.test(v) || 'Use HH:MM format',
+        });
+
+        const days = (await checkbox({
+          message: `  Days`,
+          choices: ALL_DAYS.map((d) => ({
+            name: d,
+            value: d as Weekday,
+            checked: defaultDays.includes(d),
+          })),
+        })) as Weekday[];
+
+        if (days.length === 0) {
+          this.error('Must select at least one day.');
+        }
+
+        let channel: string | undefined;
+        if (cron.channel) {
+          channel = cron.channel;
+        } else if (dress.requires.lingerie.length === 1) {
+          channel = dress.requires.lingerie[0];
+        } else if (dress.requires.lingerie.length > 1) {
+          channel = await select({
+            message: `  Channel`,
+            choices: dress.requires.lingerie.map((id) => ({ name: id, value: id })),
+          });
+        }
+
+        cronSchedules[cron.id] = { time, days, channel };
+        this.log('');
+      }
+    }
+
+    // Skill params — from flag or interactive prompts
+    const presetParams = flags.params
+      ? (JSON.parse(flags.params) as Record<string, Record<string, unknown>>)
+      : undefined;
+
+    const skillParams: Record<string, Record<string, unknown>> = {};
+
+    if (presetParams) {
+      // Non-interactive: merge presets with defaults
+      for (const [skillId, skillDef] of Object.entries(dress.skills)) {
+        const paramEntries = Object.entries(skillDef.params);
+        if (paramEntries.length === 0) continue;
+        const preset = presetParams[skillId] ?? {};
+        const values: Record<string, unknown> = {};
+        for (const [paramName, paramDef] of paramEntries) {
+          values[paramName] = preset[paramName] ?? paramDef.default;
+        }
+        skillParams[skillId] = values;
+      }
+    } else {
+      for (const [skillId, skillDef] of Object.entries(dress.skills)) {
+        const paramEntries = Object.entries(skillDef.params);
+        if (paramEntries.length === 0) continue;
+
+        const meta = skillMetaMap.get(skillId);
+        const trigger = skillDef.trigger;
+        const relatedCron =
+          trigger.type === 'cron' ? dress.crons.find((c) => c.id === trigger.cronId) : undefined;
+        const cronInfo = relatedCron ? ` ${chalk.dim(`(used by: ${relatedCron.name})`)}` : '';
+        this.log(`  ${chalk.bold(meta?.name ?? skillId)}${cronInfo}`);
+        if (meta?.description) {
+          this.log(`  ${chalk.dim(meta.description)}`);
+        }
+        this.log('');
+
+        const values: Record<string, unknown> = {};
+
+        for (const [paramName, paramDef] of paramEntries) {
+          this.log(
+            `    ${chalk.cyan(paramName)} ${chalk.dim(`(${paramDef.type}, default: ${JSON.stringify(paramDef.default)})`)}`,
+          );
+          if (paramDef.type === 'number') {
+            const raw = await input({
+              message: `    ${paramDef.description}`,
+              default: String(paramDef.default),
+            });
+            values[paramName] = Number(raw);
+          } else if (paramDef.type === 'string[]') {
+            const raw = await input({
+              message: `    ${paramDef.description}`,
+              default: (paramDef.default as string[]).join(', '),
+            });
+            values[paramName] = raw
+              .split(',')
+              .map((s: string) => s.trim())
+              .filter(Boolean);
+          } else {
+            const raw = await input({
+              message: `    ${paramDef.description}`,
+              default: String(paramDef.default),
+            });
+            values[paramName] = raw;
+          }
+        }
+
+        skillParams[skillId] = values;
+        this.log('');
+      }
     }
 
     // -----------------------------------------------------------------------
