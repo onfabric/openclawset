@@ -1,10 +1,9 @@
-import { confirm, input, select } from '@inquirer/prompts';
+import { confirm, select } from '@inquirer/prompts';
 import { Args, Flags } from '@oclif/core';
 import chalk from 'chalk';
-import { Listr } from 'listr2';
 import { BaseCommand } from '#base.ts';
-import type { LingerieJson, StateFile } from '#core/index.ts';
-import { createRegistryProvider, type RegistryProvider } from '#lib/registry.ts';
+import type { LingerieJson } from '#core/index.ts';
+import { createRegistryProvider } from '#lib/registry.ts';
 
 export default class LingerieAdd extends BaseCommand {
   static override summary = 'Install lingerie independently of a dress';
@@ -132,7 +131,7 @@ export default class LingerieAdd extends BaseCommand {
     const snapshot = await this.gitManager.snapshot();
 
     try {
-      await this.installLingerie(registry, lingerieId, uw, state);
+      await this.installLingerie(registry, lingerieId!, uw, state);
 
       const commitParts: string[] = [];
       if (uw.plugins.length > 0) {
@@ -156,140 +155,5 @@ export default class LingerieAdd extends BaseCommand {
     } finally {
       await this.stateManager.unlock();
     }
-  }
-
-  private async installLingerie(
-    registry: RegistryProvider,
-    lingerieId: string,
-    uw: LingerieJson,
-    state: StateFile,
-  ): Promise<void> {
-    const installedPlugins: string[] = [];
-
-    for (const plugin of uw.plugins) {
-      if (await this.openclawDriver.pluginIsInstalled(plugin.id)) {
-        this.log(`  ${chalk.dim('~')} plugin: ${plugin.id} (already installed)`);
-        continue;
-      }
-
-      this.log(`  ${chalk.green('+')} plugin: ${plugin.id}`);
-      await this.openclawDriver.pluginInstall(plugin.spec);
-      installedPlugins.push(plugin.id);
-
-      await this.setupPlugin(plugin, true);
-    }
-
-    // Process configSetup — set static configs and prompt for properties
-    const configKeys: string[] = [];
-    if (uw.configSetup) {
-      for (const cfg of uw.configSetup.configs) {
-        await this.openclawDriver.configSet(cfg.key, String(cfg.value));
-        configKeys.push(cfg.key);
-      }
-
-      const { configPrefix, params, properties } = uw.configSetup;
-      const hasParams = Object.keys(params).length > 0;
-      const hasProperties = Object.keys(properties).length > 0;
-
-      if (configPrefix && (hasParams || hasProperties)) {
-        this.log(`\n${chalk.bold(`Configuring ${uw.name}...`)}\n`);
-
-        // Collect param answers (prompt-only inputs, not stored in config)
-        const answers: Record<string, string> = {};
-        for (const [id, param] of Object.entries(params)) {
-          const suffix = param.required ? '' : ' (optional)';
-          const value = await input({
-            message: `  ${param.description}${suffix}:`,
-            default: param.default,
-          });
-
-          if (!value && param.required) {
-            this.error(`Required param "${id}" was not provided.`);
-          }
-
-          if (value) answers[id] = value;
-        }
-
-        // Collect property values (these become config keys)
-        const obj: Record<string, string> = {};
-        for (const [key, prop] of Object.entries(properties)) {
-          const suffix = prop.required ? '' : ' (optional)';
-          const value = await input({
-            message: `  ${prop.description}${suffix}:`,
-            default: prop.default,
-          });
-
-          if (!value && prop.required) {
-            this.error(`Required config "${key}" was not provided.`);
-          }
-
-          if (!value) continue;
-
-          if (prop.build) {
-            // Build the final value by substituting {value} and {paramId}
-            let built = prop.build.replace('{value}', value);
-            for (const paramId of prop.params) {
-              built = built.replace(`{${paramId}}`, answers[paramId] ?? '');
-            }
-            // Clean up empty query params
-            built = built.replaceAll(/[&?]\w+=(?=&)/g, '');
-            built = built.replaceAll(/[&?]\w+=$/g, '');
-            built = built.replace('?&', '?');
-            obj[key] = built;
-          } else {
-            obj[key] = value;
-          }
-        }
-
-        await this.openclawDriver.configSet(configPrefix, JSON.stringify(obj));
-        configKeys.push(configPrefix);
-      }
-    }
-
-    // Install bundled skills
-    const installedSkills: string[] = [];
-    for (const skillName of uw.skills) {
-      const content = await registry.getLingerieSkillContent(lingerieId, skillName);
-      await this.openclawDriver.skillCopyBundled(skillName, content);
-      installedSkills.push(skillName);
-      this.log(`  ${chalk.green('+')} skill: ${skillName}`);
-    }
-
-    // Restart gateway if anything changed
-    if (installedPlugins.length > 0 || configKeys.length > 0) {
-      const restartTask = new Listr(
-        [
-          {
-            title: 'Restarting gateway',
-            task: async () => {
-              await this.openclawDriver.gatewayRestart();
-              for (let i = 0; i < 10; i++) {
-                await new Promise((r) => setTimeout(r, 2_000));
-                const h = await this.openclawDriver.health();
-                if (h.ok) return;
-              }
-              throw new Error('Gateway did not become healthy after restart');
-            },
-          },
-        ],
-        { concurrent: false },
-      );
-      await restartTask.run();
-    }
-
-    // Save lingerie to state
-    state.lingerie[lingerieId] = {
-      package: lingerieId,
-      version: uw.version,
-      installedAt: new Date().toISOString(),
-      applied: {
-        plugins: uw.plugins.map((p) => p.id),
-        installedPlugins,
-        configKeys,
-        skills: uw.skills,
-        installedSkills,
-      },
-    };
-    await this.stateManager.save(state);
   }
 }

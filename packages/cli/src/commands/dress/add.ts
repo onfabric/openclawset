@@ -27,7 +27,7 @@ import {
   type SkillMeta,
   validateDress,
 } from '#lib/compile.ts';
-import { createRegistryProvider, type RegistryProvider } from '#lib/registry.ts';
+import { createRegistryProvider } from '#lib/registry.ts';
 
 const ALL_DAYS: Weekday[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
@@ -232,7 +232,15 @@ export default class DressAdd extends BaseCommand {
               `Install it separately with: clawtique lingerie add ${uwId}`,
           );
         }
-        await this.installLingerie(registry, uwId, state);
+        let uw: LingerieJson;
+        try {
+          uw = await registry.getLingerieJson(uwId);
+        } catch {
+          this.error(`Lingerie "${uwId}" not found in the registry.`);
+        }
+        this.log(`\n  Installing lingerie: ${chalk.bold(uw.name)}`);
+        await this.installLingerie(registry, uwId, uw, state);
+        this.log(`  ${chalk.green('✓')} Lingerie "${uw.name}" installed.\n`);
       }
     }
 
@@ -749,83 +757,6 @@ export default class DressAdd extends BaseCommand {
   // -------------------------------------------------------------------------
   // Helpers
   // -------------------------------------------------------------------------
-
-  private async installLingerie(
-    registry: RegistryProvider,
-    lingerieId: string,
-    state: StateFile,
-  ): Promise<void> {
-    let uw: LingerieJson;
-    try {
-      uw = await registry.getLingerieJson(lingerieId);
-    } catch {
-      this.error(`Lingerie "${lingerieId}" not found in the registry.`);
-    }
-
-    this.log(`\n  Installing lingerie: ${chalk.bold(uw.name)}`);
-
-    const installedPlugins: string[] = [];
-
-    for (const plugin of uw.plugins) {
-      if (await this.openclawDriver.pluginIsInstalled(plugin.id)) {
-        this.log(`  ${chalk.dim('~')} plugin: ${plugin.id} (already installed)`);
-        continue;
-      }
-
-      this.log(`  ${chalk.green('+')} plugin: ${plugin.id}`);
-      await this.openclawDriver.pluginInstall(plugin.spec);
-      installedPlugins.push(plugin.id);
-
-      await this.setupPlugin(plugin, true);
-    }
-
-    // Install bundled lingerie skills
-    const installedSkills: string[] = [];
-    for (const skillName of uw.skills) {
-      const content = await registry.getLingerieSkillContent(lingerieId, skillName);
-      await this.openclawDriver.skillCopyBundled(skillName, content);
-      installedSkills.push(skillName);
-      this.log(`  ${chalk.green('+')} skill: ${skillName}`);
-    }
-
-    // Restart gateway if we installed plugins
-    if (installedPlugins.length > 0) {
-      const restartTask = new Listr(
-        [
-          {
-            title: 'Restarting gateway',
-            task: async () => {
-              await this.openclawDriver.gatewayRestart();
-              for (let i = 0; i < 10; i++) {
-                await new Promise((r) => setTimeout(r, 2_000));
-                const h = await this.openclawDriver.health();
-                if (h.ok) return;
-              }
-              throw new Error('Gateway did not become healthy after restart');
-            },
-          },
-        ],
-        { concurrent: false },
-      );
-      await restartTask.run();
-    }
-
-    // Save lingerie to state
-    state.lingerie[lingerieId] = {
-      package: lingerieId,
-      version: uw.version,
-      installedAt: new Date().toISOString(),
-      applied: {
-        plugins: uw.plugins.map((p) => p.id),
-        installedPlugins,
-        configKeys: [],
-        skills: uw.skills,
-        installedSkills,
-      },
-    };
-    await this.stateManager.save(state);
-    this.log(`  ${chalk.green('✓')} Lingerie "${uw.name}" installed.\n`);
-  }
 
   private reconstructResolved(id: string, entry: DressEntry): ResolvedDress {
     return {
