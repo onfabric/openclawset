@@ -186,9 +186,34 @@ export class LocalOpenClawDriver implements OpenClawDriver {
   }
 
   async pluginUninstall(id: string): Promise<void> {
+    // Grab installPath before uninstalling so we can clean up extension files.
+    // openclaw plugins uninstall only removes config/install records, not the
+    // extension directory itself.
+    let installPath: string | undefined;
+    try {
+      const { stdout } = await this.exec(['plugins', 'inspect', id, '--json']);
+      const info = this.parseJsonOutput(stdout) as
+        | { install?: { installPath?: string } }
+        | undefined;
+      installPath = info?.install?.installPath;
+    } catch {
+      // If inspect fails, we still proceed with uninstall
+    }
+
     const { exitCode, stderr } = await this.exec(['plugins', 'uninstall', id, '--force']);
     if (exitCode !== 0) {
       throw new Error(`Failed to uninstall plugin "${id}": ${stderr}`);
+    }
+
+    // Remove extension files left behind by openclaw plugins uninstall
+    if (installPath) {
+      try {
+        await rm(installPath, { recursive: true, force: true });
+      } catch (err) {
+        console.error(`[clawtique] failed to remove extension dir ${installPath}: ${err}`);
+      }
+    } else {
+      console.error(`[clawtique] pluginUninstall: no installPath found for plugin "${id}"`);
     }
   }
 
