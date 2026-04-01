@@ -321,9 +321,7 @@ export default class LingerieUpgrade extends BaseCommand {
         `lingerie upgrade v${entry.version} → v${latest.version}`,
       );
 
-      this.log(
-        `\n${chalk.green('✓')} Upgraded lingerie "${lingerieId}" to v${latest.version}.`,
-      );
+      this.log(`\n${chalk.green('✓')} Upgraded lingerie "${lingerieId}" to v${latest.version}.`);
     } catch (err) {
       if (snapshot) await this.gitManager.rollback(snapshot);
       throw err;

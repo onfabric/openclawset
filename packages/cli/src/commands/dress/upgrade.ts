@@ -194,11 +194,15 @@ export default class DressUpgrade extends BaseCommand {
     const oldWorkspaceFiles = new Set(
       (entry.applied.workspaceFiles ?? []).map((w) => w.replace(`${dressId}/`, '')),
     );
-    const newWorkspaceFiles = new Set(dress.workspace);
+    const _newWorkspaceFiles = new Set(dress.workspace);
     const workspaceAdded = dress.workspace.filter((w) => !oldWorkspaceFiles.has(w));
 
     // New params that need user input
-    const newParamsNeeded: { skillId: string; paramName: string; paramDef: DressJson['skills'][string]['params'][string] }[] = [];
+    const newParamsNeeded: {
+      skillId: string;
+      paramName: string;
+      paramDef: DressJson['skills'][string]['params'][string];
+    }[] = [];
     const currentParams = (entry.params ?? {}) as Record<string, Record<string, unknown>>;
     for (const [skillId, skillDef] of Object.entries(dress.skills)) {
       for (const [paramName, paramDef] of Object.entries(skillDef.params)) {
@@ -237,7 +241,9 @@ export default class DressUpgrade extends BaseCommand {
     }
     for (const s of skillsKept) {
       const meta = skillMetaMap.get(s);
-      this.log(`  ${chalk.yellow('~')} skill: ${meta?.name ?? s} ${chalk.dim('(content updated)')}`);
+      this.log(
+        `  ${chalk.yellow('~')} skill: ${meta?.name ?? s} ${chalk.dim('(content updated)')}`,
+      );
     }
     for (const c of cronsAdded) {
       this.log(`  ${chalk.green('+')} cron: ${c.name} ${chalk.dim('(schedule needed)')}`);
@@ -250,18 +256,20 @@ export default class DressUpgrade extends BaseCommand {
     }
     if (newParamsNeeded.length > 0) {
       for (const { skillId, paramName } of newParamsNeeded) {
-        this.log(`  ${chalk.green('+')} param: ${skillId}.${paramName} ${chalk.dim('(input needed)')}`);
+        this.log(
+          `  ${chalk.green('+')} param: ${skillId}.${paramName} ${chalk.dim('(input needed)')}`,
+        );
       }
     }
     if (lingerieRemoved.length > 0) {
       for (const id of lingerieRemoved) {
-        this.log(`  ${chalk.dim('~')} lingerie dependency removed: ${id} ${chalk.dim('(lingerie kept)')}`);
+        this.log(
+          `  ${chalk.dim('~')} lingerie dependency removed: ${id} ${chalk.dim('(lingerie kept)')}`,
+        );
       }
     }
     for (const w of workspaceAdded) {
-      this.log(
-        `  ${chalk.green('+')} workspace: ~/.openclaw/workspace/dresses/${dress.id}/${w}`,
-      );
+      this.log(`  ${chalk.green('+')} workspace: ~/.openclaw/workspace/dresses/${dress.id}/${w}`);
     }
     this.log('');
 
@@ -396,7 +404,7 @@ export default class DressUpgrade extends BaseCommand {
       const existingSkillParams = currentParams[skillId] ?? {};
       let hasNewParam = false;
 
-      for (const [paramName, paramDef] of paramEntries) {
+      for (const [paramName, _paramDef] of paramEntries) {
         const existingValue = existingSkillParams[paramName];
         if (existingValue !== undefined) {
           values[paramName] = existingValue;
@@ -728,9 +736,7 @@ export default class DressUpgrade extends BaseCommand {
                   installedSkills,
                   plugins: compiled.plugins.map((p) => p.id),
                   installedPlugins,
-                  memorySections: compiled.dailyMemorySection
-                    ? [compiled.dailyMemorySection]
-                    : [],
+                  memorySections: compiled.dailyMemorySection ? [compiled.dailyMemorySection] : [],
                   files: appliedFiles,
                   heartbeatSkills: Object.entries(compiled.skillTriggers)
                     .filter(([, t]) => t.type === 'heartbeat')
@@ -783,9 +789,7 @@ export default class DressUpgrade extends BaseCommand {
       );
       await resetTask.run();
 
-      this.log(
-        `\n${chalk.green('✓')} Upgraded ${chalk.bold(dress.name)} to v${dress.version}!`,
-      );
+      this.log(`\n${chalk.green('✓')} Upgraded ${chalk.bold(dress.name)} to v${dress.version}!`);
     } catch (err) {
       if (snapshot) {
         await this.gitManager.rollback(snapshot);
@@ -801,7 +805,10 @@ export default class DressUpgrade extends BaseCommand {
   // -------------------------------------------------------------------------
 
   private collectOthersNeeds(
-    state: { dresses: Record<string, DressEntry>; lingerie: Record<string, { applied: { plugins: string[] } }> },
+    state: {
+      dresses: Record<string, DressEntry>;
+      lingerie: Record<string, { applied: { plugins: string[] } }>;
+    },
     excludeId: string,
   ): { plugins: Set<string>; skills: Set<string> } {
     const plugins = new Set<string>();
