@@ -28,7 +28,7 @@
         "required": true,
         "default": "wss://connect.browser-use.com",
         "params": ["apiKey", "profileId"],
-        "build": "{value}?apiKey={apiKey}&profileId={profileId}"
+        "build": "{value}?apiKey={apiKey}&profileId={profileId}&proxyCountryCode=uk"
       },
       "color": {
         "description": "Profile display color",
