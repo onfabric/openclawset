@@ -15,7 +15,10 @@
   "configSetup": {
     "configs": [
       { "key": "tools.media.audio.enabled", "value": true },
-      { "key": "tools.media.audio.models", "value": "[{\"provider\":\"openai\",\"model\":\"gpt-4o-mini-transcribe\"}]" }
+      {
+        "key": "tools.media.audio.models",
+        "value": "[{\"provider\":\"openai\",\"model\":\"gpt-4o-mini-transcribe\"}]"
+      }
     ]
   }
 }
