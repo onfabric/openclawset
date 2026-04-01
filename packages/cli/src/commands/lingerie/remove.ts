@@ -84,8 +84,12 @@ export default class LingerieRemove extends BaseCommand {
     const installedPluginSet = new Set(entry.applied.installedPlugins ?? []);
     const pluginsToRemove = entry.applied.plugins.filter((p) => installedPluginSet.has(p));
     const pluginsRetained = entry.applied.plugins.filter((p) => !installedPluginSet.has(p));
-    const configKeys = entry.applied.configKeys ?? [];
     const skillsToRemove = entry.applied.installedSkills ?? [];
+
+    // Derive top-level config roots from the stored keys (e.g. "browser.enabled" → "browser")
+    // and delete those instead of individual leaf keys, so the entire config tree is wiped.
+    const storedKeys = entry.applied.configKeys ?? [];
+    const configKeys = [...new Set(storedKeys.map((k) => k.split('.')[0]))];
 
     // Show what will happen
     this.log(chalk.bold(`\nRemoving lingerie "${lingerieId}":\n`));
