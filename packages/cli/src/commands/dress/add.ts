@@ -27,7 +27,7 @@ import {
   type SkillMeta,
   validateDress,
 } from '#lib/compile.ts';
-import { createRegistryProvider, type RegistryProvider } from '#lib/registry.ts';
+import { createRegistryProvider } from '#lib/registry.ts';
 
 const ALL_DAYS: Weekday[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 

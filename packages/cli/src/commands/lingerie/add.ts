@@ -156,5 +156,4 @@ export default class LingerieAdd extends BaseCommand {
       await this.stateManager.unlock();
     }
   }
-
 }
