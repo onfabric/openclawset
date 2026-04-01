@@ -7,10 +7,12 @@ import DressListCommand from '#commands/dress/index.ts';
 import DressParamsCommand from '#commands/dress/params.ts';
 import DressRemoveCommand from '#commands/dress/remove.ts';
 import DressUpdateCommand from '#commands/dress/update.ts';
+import DressUpgradeCommand from '#commands/dress/upgrade.ts';
 import InitCommand from '#commands/init.ts';
 import LingerieAddCommand from '#commands/lingerie/add.ts';
 import LingerieListCommand from '#commands/lingerie/index.ts';
 import LingerieRemoveCommand from '#commands/lingerie/remove.ts';
+import LingerieUpgradeCommand from '#commands/lingerie/upgrade.ts';
 import LogCommand from '#commands/log.ts';
 import PersonalityListCommand from '#commands/personality/index.ts';
 import PersonalitySetCommand from '#commands/personality/set.ts';
@@ -28,10 +30,12 @@ export const COMMANDS = {
   'dress:params': DressParamsCommand,
   'dress:remove': DressRemoveCommand,
   'dress:update': DressUpdateCommand,
+  'dress:upgrade': DressUpgradeCommand,
   init: InitCommand,
   lingerie: LingerieListCommand,
   'lingerie:add': LingerieAddCommand,
   'lingerie:remove': LingerieRemoveCommand,
+  'lingerie:upgrade': LingerieUpgradeCommand,
   log: LogCommand,
   personality: PersonalityListCommand,
   'personality:set': PersonalitySetCommand,
