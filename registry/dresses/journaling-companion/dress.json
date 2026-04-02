@@ -1,0 +1,29 @@
+{
+  "id": "journaling-companion",
+  "name": "Journaling Companion",
+  "version": "1.0.0",
+  "description": "Surprise photo prompts at random times — helps you stay mindful and lets the agent get to know you better.",
+
+  "requires": {
+    "lingerie": ["waclaw"]
+  },
+
+  "crons": [],
+
+  "skills": {
+    "snap-prompt": {
+      "trigger": {
+        "type": "heartbeat",
+        "description": "Once per day at a varying time (based on recent prompt history), ask the user to share a photo of what they're doing right now"
+      }
+    },
+    "snap-react": {
+      "trigger": {
+        "type": "user",
+        "description": "User sends a photo in response to a journaling companion prompt"
+      }
+    }
+  },
+
+  "dailyMemorySection": "Journal"
+}

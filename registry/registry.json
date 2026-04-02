@@ -1,7 +1,18 @@
 {
   "version": 1,
-  "generatedAt": "2026-04-01T08:48:09.304Z",
+  "generatedAt": "2026-04-01T22:32:57.586Z",
   "dresses": {
+    "journaling-companion": {
+      "name": "Journaling Companion",
+      "version": "1.0.0",
+      "description": "Surprise photo prompts at random times — helps you stay mindful and lets the agent get to know you better.",
+      "requires": {
+        "lingerie": [
+          "waclaw"
+        ]
+      },
+      "path": "dresses/journaling-companion"
+    },
     "sleeping-coach": {
       "name": "Sleeping Coach",
       "version": "1.0.0",
