@@ -250,7 +250,7 @@ for (const dir of personalityDirs) {
       error(`personality.id "${p.id}" does not match directory name "${dir}"`);
     }
 
-    // Check that all 4 .md files exist and validate placeholders
+    // Check that all .md files exist and validate placeholders
     for (const file of PERSONALITY_FILES) {
       const filePath = join(PERSONALITIES_DIR, dir, file);
       if (!existsSync(filePath)) {

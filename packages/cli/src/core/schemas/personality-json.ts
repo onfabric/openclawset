@@ -5,7 +5,13 @@ import { dressIdSchema, semverSchema } from '#core/schemas/dress-json.ts';
 // The fixed set of personality files — always all written
 // ---------------------------------------------------------------------------
 
-export const PERSONALITY_FILES = ['IDENTITY.md', 'SOUL.md', 'AGENTS.md', 'TOOLS.md'] as const;
+export const PERSONALITY_FILES = [
+  'IDENTITY.md',
+  'SOUL.md',
+  'AGENTS.md',
+  'TOOLS.md',
+  'BOOTSTRAP.md',
+] as const;
 
 export type PersonalityFile = (typeof PERSONALITY_FILES)[number];
 
