@@ -8,8 +8,8 @@
     "configs": [
       { "key": "browser.enabled", "value": true },
       { "key": "browser.defaultProfile", "value": "browser-use" },
-      { "key": "browser.remoteCdpTimeoutMs", "value": 10000 },
-      { "key": "browser.remoteCdpHandshakeTimeoutMs", "value": 15000 },
+      { "key": "browser.remoteCdpTimeoutMs", "value": 30000 },
+      { "key": "browser.remoteCdpHandshakeTimeoutMs", "value": 45000 },
       { "key": "tools.web.fetch.enabled", "value": true },
       { "key": "tools.web.search.enabled", "value": true },
       { "key": "tools.web.search.provider", "value": "duckduckgo" },
@@ -32,7 +32,7 @@
         "required": true,
         "default": "wss://connect.browser-use.com",
         "params": ["apiKey", "profileId"],
-        "build": "{value}?apiKey={apiKey}&profileId={profileId}&proxyCountryCode=uk&timeout=10"
+        "build": "{value}?apiKey={apiKey}&profileId={profileId}&proxyCountryCode=uk&timeout=30"
       },
       "color": {
         "description": "Profile display color",
