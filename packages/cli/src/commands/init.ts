@@ -146,8 +146,8 @@ export default class Init extends Command {
     };
     await writeFile(paths.config, `${JSON.stringify(config, null, 2)}\n`);
 
-    // Write initial state
-    const state: StateFile = {
+    // Write initial state (preserve existing entries on re-init)
+    let state: StateFile = {
       version: 1,
       serial: 0,
       openclawDir,
@@ -155,6 +155,16 @@ export default class Init extends Command {
       lingerie: {},
       personality: null,
     };
+    if (existsSync(paths.state)) {
+      const existing: StateFile = JSON.parse(await readFile(paths.state, 'utf-8'));
+      state = {
+        ...state,
+        dresses: existing.dresses,
+        lingerie: existing.lingerie,
+        personality: existing.personality,
+        serial: existing.serial,
+      };
+    }
     await writeFile(paths.state, `${JSON.stringify(state, null, 2)}\n`);
 
     // Initialize git repo (idempotent — skips if .git exists)
@@ -167,8 +177,9 @@ export default class Init extends Command {
     this.log(`${chalk.green('✓')} OpenClaw directory: ${chalk.cyan(openclawDir)}`);
     this.log(`${chalk.green('✓')} Git repo initialized`);
     this.log('');
-    this.log('Ready. Try:');
-    this.log(`  ${chalk.cyan('clawtique dress add')} <id>`);
-    this.log(`  ${chalk.cyan('clawtique status')}`);
+    this.log('Ready. Next steps:');
+    this.log(`  1. ${chalk.cyan('clawtique personality set')} <id>  — set up your personality`);
+    this.log(`  2. ${chalk.cyan('clawtique lingerie add')} <id>     — add lingerie`);
+    this.log(`  3. ${chalk.cyan('clawtique dress add')} <id>        — add a dress`);
   }
 }
