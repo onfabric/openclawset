@@ -1,6 +1,6 @@
 ---
 name: Manage reminders
-description: Lists, removes, or edits existing personal reminders created by this dress.
+description: Lists, removes, or edits existing personal reminders.
 ---
 
 # Manage Reminders
@@ -9,9 +9,12 @@ The user wants to see, remove, or modify their existing reminders. All reminders
 
 ## Step 1: List current reminders
 
-Run:
-```
-openclaw cron list --json
+Call the `cron` tool with `action: "list"`:
+
+```json
+{
+  "action": "list"
+}
 ```
 
 Filter the results to only show jobs whose `name` starts with `[custom-personal-reminder]`. These are the reminders managed by this dress — ignore all other cron jobs.
@@ -29,7 +32,7 @@ Filter the results to only show jobs whose `name` starts with `[custom-personal-
 Present the filtered reminders in a clear format:
 - Reminder description (the part after the `[custom-personal-reminder]` prefix)
 - Schedule (translated to the user's local time — check `~/.openclaw/workspace/USER.md` for timezone)
-- Whether it's one-time or recurring
+- Whether it's one-time or recurring (one-time reminders have `schedule.kind: "at"`, recurring have `schedule.kind: "cron"`)
 
 If there are no reminders, let the user know and offer to help set one up.
 
@@ -37,17 +40,22 @@ If there are no reminders, let the user know and offer to help set one up.
 
 Identify which reminder the user wants to remove. If ambiguous, show the list and ask them to clarify.
 
-```
-openclaw cron rm <job-id>
+Call the `cron` tool with `action: "remove"`:
+
+```json
+{
+  "action": "remove",
+  "jobId": "<job-id>"
+}
 ```
 
 Confirm the removal to the user.
 
 ### Edit
 
-There is no edit command — to modify a reminder:
-1. Remove the existing one (`openclaw cron rm <job-id>`)
-2. Create a new one with the updated parameters (follow the set-reminder skill instructions)
+To modify a reminder:
+1. Remove the existing one using `cron` tool with `action: "remove"`
+2. Create a new one with the updated parameters using `cron` tool with `action: "add"` (follow the set-reminder skill instructions)
 
 Explain this to the user and confirm before proceeding.
 

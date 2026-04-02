@@ -1,17 +1,17 @@
 ---
 name: Set reminder
-description: Parses the user's reminder request, determines timing, and creates a cron job on OpenClaw.
+description: Parses the user's reminder request, determines timing, and creates a cron job.
 ---
 
 # Set Reminder
 
-The user wants to be reminded about something. Your job is to understand what, when, and how often — then create the appropriate cron job on OpenClaw.
+The user wants to be reminded about something. Your job is to understand what, when, and how often — then create the appropriate cron job.
 
 ## Step 1: Load user context
 
 1. Read `~/.openclaw/workspace/USER.md` for the user's profile
 2. Read today's and yesterday's daily memory for recent context
-3. Determine the user's **timezone** from their profile, location, or recent activity. If you cannot determine it, ask.
+3. Determine the user's **timezone** — check `~/.openclaw/workspace/memory/MEMORY.md` for timezone info. If you cannot determine it, ask and then store it in `~/.openclaw/workspace/memory/MEMORY.md`.
 
 ## Step 2: Parse the reminder
 
@@ -28,74 +28,38 @@ Examples:
 
 If the request is ambiguous (e.g., missing time, unclear recurrence), ask for clarification before creating the cron.
 
-## Step 3: Build the cron command
+## Step 3: Create the cron
+
+Call the `cron` tool with `action: "add"`. Use these fixed parameter values — do NOT deviate:
+
+- **`name`**: MUST start with `[custom-personal-reminder]` — this is how we identify reminder crons
+- **`sessionTarget`**: `"isolated"` — never use `"main"`
+- **`payload.kind`**: `"agentTurn"` with `thinking: "low"`
+- **`delivery`**: `mode: "announce"`, `channel: "waclaw"` — never ask the user which channel to use
 
 ### For recurring reminders
 
-Use a **5-field cron expression** with the user's IANA timezone:
-
-```
-openclaw cron add \
-  --name "[custom-personal-reminder] <short description>" \
-  --cron "<cron-expression>" \
-  --timezone "<IANA timezone>" \
-  --message "<reminder message to deliver>" \
-  --session isolated \
-  --announce \
-  --channel waclaw \
-  --thinking low \
-  --timeout-seconds 120 \
-  --exact
-```
-
-Cron expression guide:
-- `0 9 * * 1` = every Monday at 9:00
-- `0 20 * * *` = every day at 20:00
-- `30 8 * * 1-5` = weekdays at 8:30
-- `0 9 1 * *` = 1st of every month at 9:00
+- `schedule.kind`: `"cron"`
+- `schedule.expr`: 5-field cron expression in the user's local time
+- `schedule.tz`: user's IANA timezone (the `tz` field handles UTC conversion)
 
 ### For one-time reminders
 
-Use an **ISO 8601 timestamp** with `--at`:
+- `schedule.kind`: `"at"`
+- `schedule.at`: ISO 8601 timestamp with timezone offset (e.g. `2025-03-15T10:00:00+01:00`)
+- `deleteAfterRun`: `true` — the job is automatically cleaned up after it fires
+- For relative times ("in 2 hours"), calculate the absolute ISO 8601 timestamp from the current time
 
-```
-openclaw cron add \
-  --name "[custom-personal-reminder] <short description>" \
-  --at "<ISO 8601 timestamp>" \
-  --message "<reminder message — see below for self-removal instructions>" \
-  --session isolated \
-  --announce \
-  --channel waclaw \
-  --thinking low \
-  --timeout-seconds 120 \
-  --exact
-```
+## Step 4: Confirm
 
-**Critical for one-time reminders:** The `--message` must include self-removal instructions so the cron job cleans up after firing. Structure the message like this:
+Send a **short, natural confirmation**. Just acknowledge the reminder is set — one or two sentences max.
 
-```
-Deliver this reminder to the user: "<the actual reminder text>"
+Good: "Done — I'll remind you to call the dentist tomorrow at 10am."
+Good: "All set! You'll get a reminder every Monday at 9am about the weekly report."
 
-After delivering the reminder, remove this cron job by running:
-1. Run `openclaw cron list --json` to find the job with name starting with "[custom-personal-reminder]" that matches this reminder
-2. Run `openclaw cron rm <job-id>` with the matching job's ID
+**Never mention** cron expressions, tool calls, session types, delivery modes, UTC times, or any other technical details in your response. Always express times in the user's local timezone.
 
-This is a one-time reminder and must be deleted after delivery.
-```
-
-## Step 4: Execute
-
-Run the constructed `openclaw cron add` command in the shell.
-
-## Step 5: Confirm
-
-Tell the user their reminder has been set. Include:
-- What they'll be reminded about
-- When (in their local time)
-- Whether it's one-time or recurring
-- A note that they can ask you to list or remove reminders anytime
-
-## Step 6: Update daily memory
+## Step 5: Update daily memory
 
 In today's daily memory under **## {{memory.dailyMemorySection}}**, log:
 - What reminder was created
@@ -104,8 +68,8 @@ In today's daily memory under **## {{memory.dailyMemorySection}}**, log:
 
 ## Rules
 
-- The `--name` must always start with `[custom-personal-reminder]` — this prefix is how we identify reminders created by this dress
-- The `--channel` is always `waclaw` — never ask the user which channel to use
-- Always convert times to the user's timezone when building the cron expression or ISO timestamp
+- Always include the user's IANA timezone: in `schedule.tz` for recurring reminders, and as the offset in the ISO 8601 timestamp for one-time reminders
 - For relative times ("in 2 hours"), calculate the absolute time from now
-- Keep the reminder message clear and actionable — the user should immediately understand what they need to do when they receive it
+- Keep the reminder message clear and actionable
+- If the tool call fails, fix it silently and retry. Do not surface errors to the user.
+- If the error keeps persisting, after trying multiple times, let the user know but without going into technical details.
