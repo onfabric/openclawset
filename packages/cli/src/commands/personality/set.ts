@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { confirm, select } from '@inquirer/prompts';
 import { Args, Flags } from '@oclif/core';
 import chalk from 'chalk';
+import { Listr } from 'listr2';
 import { BaseCommand } from '#base.ts';
 import type { PersonalityFile, ResolvedPersonality } from '#core/index.ts';
 import { ensureDressesReference, PERSONALITY_FILES } from '#core/index.ts';
@@ -155,6 +156,23 @@ export default class PersonalitySet extends BaseCommand {
     } finally {
       await this.stateManager.unlock();
     }
+
+    // Reset waclaw session so the new personality is loaded on next message
+    const resetTask = new Listr(
+      [
+        {
+          title: 'Resetting waclaw session',
+          task: async () => {
+            const sessions = await this.openclawDriver.sessionList();
+            const waclawSession = sessions.find((s) => s.key.includes(':waclaw:'));
+            if (!waclawSession) return;
+            await this.openclawDriver.sessionReset(waclawSession.sessionId);
+          },
+        },
+      ],
+      { concurrent: false },
+    );
+    await resetTask.run();
   }
 
   /**
