@@ -49,10 +49,7 @@ export async function injectToolsSection(
 /**
  * Remove a lingerie's tools section from TOOLS.md.
  */
-export async function removeToolsSection(
-  workspaceDir: string,
-  lingerieId: string,
-): Promise<void> {
+export async function removeToolsSection(workspaceDir: string, lingerieId: string): Promise<void> {
   const toolsPath = join(workspaceDir, 'TOOLS.md');
   if (!existsSync(toolsPath)) return;
 

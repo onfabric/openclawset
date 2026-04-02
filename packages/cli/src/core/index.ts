@@ -1,7 +1,5 @@
 // AGENTS.md reference injection
 export { ensureDressesReference, INITIAL_DRESSES_MD } from '#core/agents-md.ts';
-// TOOLS.md lingerie section injection
-export { injectToolsSection, removeToolsSection } from '#core/tools-md.ts';
 // Cron utilities
 export { addHours, cronFromTime } from '#core/cron-utils.ts';
 // DRESSCODE generation
@@ -73,3 +71,5 @@ export {
   skillTriggerSchema,
   stateFileSchema,
 } from '#core/schemas/index.ts';
+// TOOLS.md lingerie section injection
+export { injectToolsSection, removeToolsSection } from '#core/tools-md.ts';
