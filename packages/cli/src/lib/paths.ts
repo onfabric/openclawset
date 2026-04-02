@@ -40,6 +40,7 @@ export function getClawtiquePaths(root?: string): ClawtiquePaths {
 export interface OpenClawPaths {
   root: string;
   config: string;
+  workspace: string;
   dresses: string;
   skills: string;
   heartbeat: string;
@@ -50,6 +51,7 @@ export function getOpenClawPaths(root: string): OpenClawPaths {
   return {
     root,
     config: join(root, 'openclaw.json'),
+    workspace: join(root, 'workspace'),
     dresses: join(root, 'workspace', 'dresses'),
     skills: join(root, 'workspace', 'skills'),
     heartbeat: join(root, 'workspace', 'HEARTBEAT.md'),

@@ -6,6 +6,7 @@ import { Command, Flags } from '@oclif/core';
 import chalk from 'chalk';
 import { Listr } from 'listr2';
 import type { ClawtiqueConfig, LingerieJson, PluginDef, StateFile } from '#core/index.ts';
+import { injectToolsSection } from '#core/index.ts';
 import { clawtiqueConfigSchema } from '#core/schemas/state.ts';
 import { GitManager } from '#lib/git.ts';
 import { LocalOpenClawDriver } from '#lib/openclaw.ts';
@@ -204,6 +205,15 @@ export abstract class BaseCommand extends Command {
       this.log(`  ${chalk.green('+')} skill: ${skillName}`);
     }
 
+    // Inject tools section into TOOLS.md
+    let toolsSectionInjected = false;
+    if (uw.toolsSection) {
+      const content = await registry.getLingerieFileContent(lingerieId, uw.toolsSection);
+      await injectToolsSection(this.openclawPaths.workspace, lingerieId, content);
+      toolsSectionInjected = true;
+      this.log(`  ${chalk.green('+')} tools section`);
+    }
+
     // Restart gateway if anything changed
     if (installedPlugins.length > 0 || configKeys.length > 0) {
       const restartTask = new Listr(
@@ -237,6 +247,7 @@ export abstract class BaseCommand extends Command {
         configKeys,
         skills: uw.skills,
         installedSkills,
+        toolsSectionInjected,
       },
     };
     await this.stateManager.save(state);

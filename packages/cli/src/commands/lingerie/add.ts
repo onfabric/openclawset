@@ -102,6 +102,9 @@ export default class LingerieAdd extends BaseCommand {
         this.log(`  ${chalk.green('+')} config: ${uw.configSetup.configPrefix}`);
       }
     }
+    if (uw.toolsSection) {
+      this.log(`  ${chalk.green('+')} tools section`);
+    }
     this.log('');
 
     if (flags['dry-run']) {

@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import { Listr } from 'listr2';
 import { BaseCommand } from '#base.ts';
 import type { LingerieJson } from '#core/index.ts';
+import { injectToolsSection, removeToolsSection } from '#core/index.ts';
 import { createRegistryProvider } from '#lib/registry.ts';
 
 export default class LingerieUpgrade extends BaseCommand {
@@ -196,6 +197,7 @@ export default class LingerieUpgrade extends BaseCommand {
       const installedSkills = [...(entry.applied.installedSkills ?? [])];
       const configKeys = [...(entry.applied.configKeys ?? [])];
       let needsRestart = false;
+      let toolsSectionInjected = false;
 
       const tasks = new Listr(
         [
@@ -292,6 +294,22 @@ export default class LingerieUpgrade extends BaseCommand {
             },
           },
           {
+            title: 'Updating tools section',
+            task: async () => {
+              // Remove old section first (if any)
+              await removeToolsSection(this.openclawPaths.workspace, lingerieId);
+              // Inject new section if present in latest version
+              if (latest.toolsSection) {
+                const content = await registry.getLingerieFileContent(
+                  lingerieId,
+                  latest.toolsSection,
+                );
+                await injectToolsSection(this.openclawPaths.workspace, lingerieId, content);
+                toolsSectionInjected = true;
+              }
+            },
+          },
+          {
             title: 'Saving state',
             task: async () => {
               state.lingerie[lingerieId] = {
@@ -304,6 +322,7 @@ export default class LingerieUpgrade extends BaseCommand {
                   configKeys,
                   skills: latest.skills,
                   installedSkills,
+                  toolsSectionInjected,
                 },
               };
               await this.stateManager.save(state);

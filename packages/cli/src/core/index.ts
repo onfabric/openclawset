@@ -71,3 +71,5 @@ export {
   skillTriggerSchema,
   stateFileSchema,
 } from '#core/schemas/index.ts';
+// TOOLS.md lingerie section injection
+export { injectToolsSection, removeToolsSection } from '#core/tools-md.ts';

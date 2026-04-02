@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import { Listr } from 'listr2';
 import { BaseCommand } from '#base.ts';
 import type { StateFile } from '#core/index.ts';
+import { removeToolsSection } from '#core/index.ts';
 
 export default class LingerieRemove extends BaseCommand {
   static override summary = 'Remove shared lingerie (uninstalls plugins if no dress depends on it)';
@@ -85,6 +86,7 @@ export default class LingerieRemove extends BaseCommand {
     const pluginsToRemove = entry.applied.plugins.filter((p) => installedPluginSet.has(p));
     const pluginsRetained = entry.applied.plugins.filter((p) => !installedPluginSet.has(p));
     const skillsToRemove = entry.applied.installedSkills ?? [];
+    const hasToolsSection = entry.applied.toolsSectionInjected ?? false;
 
     // Derive top-level config roots from the stored keys (e.g. "browser.enabled" → "browser")
     // and delete those instead of individual leaf keys, so the entire config tree is wiped.
@@ -107,6 +109,9 @@ export default class LingerieRemove extends BaseCommand {
     }
     for (const k of configKeys) {
       this.log(`  ${chalk.red('-')} config: ${k}`);
+    }
+    if (hasToolsSection) {
+      this.log(`  ${chalk.red('-')} tools section`);
     }
     this.log('');
 
@@ -178,6 +183,13 @@ export default class LingerieRemove extends BaseCommand {
                   // Config key may have been manually removed
                 }
               }
+            },
+          },
+          {
+            title: 'Removing tools section',
+            skip: () => !hasToolsSection,
+            task: async () => {
+              await removeToolsSection(this.openclawPaths.workspace, lingerieId);
             },
           },
           {

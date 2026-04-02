@@ -43,6 +43,8 @@ export const lingerieJsonSchema = z.object({
   plugins: z.array(pluginDefSchema).default([]),
   configSetup: configSetupSchema.optional(),
   skills: z.array(z.string()).default([]),
+  /** Markdown injected into TOOLS.md on install, removed on uninstall. */
+  toolsSection: z.string().optional(),
 });
 
 // ---------------------------------------------------------------------------
