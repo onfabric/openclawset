@@ -1,0 +1,11 @@
+{
+  "id": "browser-use-agent",
+  "name": "Browser Use Agent",
+  "description": "Delegate browser tasks to Browser Use's cloud AI agent",
+  "configSchema": {
+    "type": "object",
+    "required": [],
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

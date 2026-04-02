@@ -1,0 +1,32 @@
+{
+  "name": "@onfabric/browser-use-plugin",
+  "description": "Browser Use Cloud Agent for OpenClaw — delegate browser tasks to an AI agent",
+  "version": "0.0.1",
+  "license": "MIT",
+  "type": "module",
+  "openclaw": {
+    "extensions": [
+      "./dist/index.js"
+    ]
+  },
+  "files": [
+    "dist/*",
+    "package.json",
+    "openclaw.plugin.json",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "bun build ./src/index.ts --outdir dist/ --target node"
+  },
+  "peerDependencies": {
+    "openclaw": ">=2026.1.29"
+  },
+  "dependencies": {
+    "@mariozechner/pi-agent-core": "^0.62.0",
+    "@sinclair/typebox": "^0.34.48",
+    "browser-use-sdk": "^3.4.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

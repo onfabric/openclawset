@@ -1,9 +1,18 @@
 {
   "id": "browser-use",
-  "name": "Browser Use (CDP)",
-  "version": "1.0.0",
-  "description": "Cloud browser via CDP — connects OpenClaw to Browser Use for web browsing capabilities.",
-  "plugins": [],
+  "name": "Browser Use (CDP + Agent)",
+  "version": "1.1.0",
+  "description": "Cloud browser via CDP and AI browser agent — connects OpenClaw to Browser Use for web browsing capabilities.",
+  "plugins": [
+    {
+      "id": "browser-use-agent",
+      "spec": "@onfabric/browser-use-plugin",
+      "setupNotes": [
+        "Uses the same Browser Use API key as the CDP connection.",
+        "Get your key from https://cloud.browser-use.com/settings"
+      ]
+    }
+  ],
   "configSetup": {
     "configs": [
       { "key": "browser.enabled", "value": true },
@@ -13,7 +22,8 @@
       { "key": "tools.web.fetch.enabled", "value": true },
       { "key": "tools.web.search.enabled", "value": true },
       { "key": "tools.web.search.provider", "value": "duckduckgo" },
-      { "key": "plugins.entries.duckduckgo.enabled", "value": true }
+      { "key": "plugins.entries.duckduckgo.enabled", "value": true },
+      { "key": "plugins.entries.browser-use-agent.enabled", "value": true }
     ],
     "configPrefix": "browser.profiles.browser-use",
     "params": {
@@ -23,7 +33,7 @@
       },
       "profileId": {
         "description": "Browser Use profile ID (for persistent sessions)",
-        "required": false
+        "required": true
       }
     },
     "properties": {
