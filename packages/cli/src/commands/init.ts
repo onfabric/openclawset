@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { confirm, input, search } from '@inquirer/prompts';
 import { Command, Flags } from '@oclif/core';
@@ -111,11 +111,32 @@ export default class Init extends Command {
     // Ensure AGENTS.md references DRESSES.md (idempotent — skips if marker present)
     await ensureDressesReference(ocWorkspace);
 
+    // Write a clean HEARTBEAT.md (replace any noisy template)
+    await writeFile(ocPaths.heartbeat, '# Heartbeat checklist\n');
+
     // Ensure tools.profile is 'full' so all plugins/tools are available
     if (existsSync(ocPaths.config)) {
       const oc = new LocalOpenClawDriver();
       await oc.configSet('tools.profile', 'full');
       this.log(`  ${chalk.dim('Set tools.profile to "full" in openclaw.json')}`);
+
+      // Set heartbeat interval to 1 hour (default is 30m)
+      await oc.configSet('agents.defaults.heartbeat.every', '60m');
+      this.log(`  ${chalk.dim('Set heartbeat interval to 60m')}`);
+    }
+
+    // Seed MEMORY.md with timezone so the agent always knows it
+    const memoryDir = join(ocWorkspace, 'memory');
+    await mkdir(memoryDir, { recursive: true });
+    const memoryPath = join(ocWorkspace, 'MEMORY.md');
+    const tzLine = `- **Timezone:** ${timezone} (${gmtOffset(timezone)})`;
+    if (existsSync(memoryPath)) {
+      const existing = await readFile(memoryPath, 'utf-8');
+      if (!existing.includes('**Timezone:**')) {
+        await writeFile(memoryPath, `${existing.trimEnd()}\n\n${tzLine}\n`);
+      }
+    } else {
+      await writeFile(memoryPath, `# Memory\n\n${tzLine}\n`);
     }
 
     // Write config
