@@ -191,8 +191,11 @@ export abstract class BaseCommand extends Command {
           }
         }
 
-        await this.openclawDriver.configSet(configPrefix, JSON.stringify(obj));
-        configKeys.push(configPrefix);
+        for (const [k, v] of Object.entries(obj)) {
+          const fullKey = `${configPrefix}.${k}`;
+          await this.openclawDriver.configSet(fullKey, v);
+          configKeys.push(fullKey);
+        }
       }
     }
 

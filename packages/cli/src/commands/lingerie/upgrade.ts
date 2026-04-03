@@ -273,8 +273,8 @@ export default class LingerieUpgrade extends BaseCommand {
 
               // Run interactive config setup if configPrefix is new
               if (hasNewConfigPrefix && latest.configSetup) {
-                await this.runLingerieConfigSetup(latest);
-                configKeys.push(latest.configSetup.configPrefix!);
+                const newKeys = await this.runLingerieConfigSetup(latest);
+                configKeys.push(...newKeys);
               }
 
               needsRestart = true;
@@ -353,16 +353,16 @@ export default class LingerieUpgrade extends BaseCommand {
    * Run interactive configSetup prompts for new lingerie config.
    * Reuses the same prompting logic as BaseCommand.installLingerie.
    */
-  private async runLingerieConfigSetup(uw: LingerieJson): Promise<void> {
-    if (!uw.configSetup) return;
+  private async runLingerieConfigSetup(uw: LingerieJson): Promise<string[]> {
+    if (!uw.configSetup) return [];
 
     const { input } = await import('@inquirer/prompts');
     const { configPrefix, params, properties } = uw.configSetup;
-    if (!configPrefix) return;
+    if (!configPrefix) return [];
 
     const hasParams = Object.keys(params).length > 0;
     const hasProperties = Object.keys(properties).length > 0;
-    if (!hasParams && !hasProperties) return;
+    if (!hasParams && !hasProperties) return [];
 
     this.log(`\n${chalk.bold(`Configuring ${uw.name}...`)}\n`);
 
@@ -407,6 +407,12 @@ export default class LingerieUpgrade extends BaseCommand {
       }
     }
 
-    await this.openclawDriver.configSet(configPrefix, JSON.stringify(obj));
+    const keys: string[] = [];
+    for (const [k, v] of Object.entries(obj)) {
+      const fullKey = `${configPrefix}.${k}`;
+      await this.openclawDriver.configSet(fullKey, v);
+      keys.push(fullKey);
+    }
+    return keys;
   }
 }

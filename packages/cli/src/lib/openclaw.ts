@@ -177,9 +177,12 @@ export class LocalOpenClawDriver implements OpenClawDriver {
   }
 
   async pluginInstall(spec: string): Promise<void> {
-    const { exitCode, stderr } = await this.exec(['plugins', 'install', spec], {
-      timeout: 120_000,
-    });
+    const { exitCode, stderr } = await this.exec(
+      ['plugins', 'install', '--dangerously-force-unsafe-install', spec],
+      {
+        timeout: 120_000,
+      },
+    );
     if (exitCode !== 0) {
       throw new Error(`Failed to install plugin "${spec}": ${stderr}`);
     }

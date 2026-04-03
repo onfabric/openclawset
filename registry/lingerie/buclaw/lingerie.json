@@ -16,7 +16,8 @@
     "configs": [
       { "key": "tools.web.fetch.enabled", "value": true },
       { "key": "tools.web.search.enabled", "value": true },
-      { "key": "tools.web.search.provider", "value": "exa" }
+      { "key": "tools.web.search.provider", "value": "exa" },
+      { "key": "plugins.entries.exa.enabled", "value": true }
     ]
   },
   "configPrefix": "plugins.entries.exa.config.webSearch",

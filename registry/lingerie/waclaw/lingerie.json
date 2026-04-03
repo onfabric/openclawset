@@ -32,7 +32,8 @@
       {
         "key": "messages.tts.providers.elevenlabs.voiceSettings.speed",
         "value": 2.0
-      }
+      },
+      { "key": "plugins.entries.elevenlabs.enabled", "value": true }
     ],
     "configPrefix": "messages.tts.providers.elevenlabs",
     "properties": {
