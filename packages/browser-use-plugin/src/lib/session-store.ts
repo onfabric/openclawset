@@ -5,9 +5,7 @@
 
 export type ActiveSession = {
   sessionId: string;
-  liveUrl: string;
   createdAt: string;
-  lastTaskOutput: string | null;
 };
 
 const sessions = new Map<string, ActiveSession>();

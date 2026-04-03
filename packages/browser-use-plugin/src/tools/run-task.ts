@@ -5,27 +5,18 @@ import type { CountryCode } from '../lib/browser-use';
 import { registerTool } from '../lib/register-tool';
 import { getSession, setSession } from '../lib/session-store';
 
+const SECONDS_TO_MILLISECONDS = 1000;
+const MINUTES_TO_SECONDS = 60;
+const DEFAULT_TASK_TIMEOUT_MINUTES = 5;
+const DEFAULT_TIMEOUT_MS =
+  DEFAULT_TASK_TIMEOUT_MINUTES * MINUTES_TO_SECONDS * SECONDS_TO_MILLISECONDS;
+
 const RunTaskParametersSchema = Type.Object({
   task: Type.String({
     description:
       'A detailed description of the browser task for the AI agent to perform. ' +
       'Be specific: include URLs, what to click, what data to extract, etc.',
   }),
-  session_id: Type.Optional(
-    Type.String({
-      description:
-        'Reuse an existing session for follow-up tasks. ' +
-        'The browser state (page, cookies, tabs) persists from the previous task.',
-    }),
-  ),
-  timeout_minutes: Type.Optional(
-    Type.Number({
-      description: 'Maximum time to wait for the task to complete, in minutes.',
-      minimum: 1,
-      maximum: 30,
-      default: 10,
-    }),
-  ),
 });
 
 export function registerRunTaskTool(
@@ -38,67 +29,53 @@ export function registerRunTaskTool(
     name: 'browser_agent_run',
     label: 'Browser Agent — Run Task',
     description:
-      'Delegate a browser task to the Browser Use cloud AI agent. ' +
+      'Delegate a browser task to the Browser Use Agent. ' +
       'The agent operates a real browser: it can navigate, click, fill forms, extract data, and handle CAPTCHAs. ' +
       'This call blocks until the task completes (may take several minutes). ' +
-      'Returns the agent output. Pass a session_id to run follow-up tasks in the same browser session.',
+      'Returns the agent output.',
     parameters: RunTaskParametersSchema,
     async execute(_id, params) {
-      const isFollowUp = !!params.session_id;
-      const timeoutMs = (params.timeout_minutes || 10) * 60 * 1000;
-
-      api.logger.info(
-        isFollowUp
-          ? `browser-use-agent: follow-up task on session ${params.session_id}`
-          : 'browser-use-agent: starting new browser agent task...',
-      );
+      api.logger.info('browser-use-agent: starting new browser agent task...');
 
       try {
-        let sessionId = params.session_id;
-        if (!sessionId) {
-          const sessionResult = await client.sessions.create({
-            profileId,
-            proxyCountryCode,
-          });
-          sessionId = sessionResult.id;
-        }
-        const result = await client.run(params.task, {
-          sessionId,
-          timeout: timeoutMs,
+        const { id: sessionId } = await client.sessions.create({
+          profileId,
+          proxyCountryCode,
         });
 
-        const output =
-          typeof result.output === 'string'
-            ? result.output
-            : (JSON.stringify(result.output) ?? '(no output)');
-        const status = result.status ?? 'unknown';
+        const {
+          id: taskId,
+          output: taskOutput,
+          status: taskStatus,
+          isSuccess: taskIsSuccess,
+          createdAt: taskCreatedAt,
+        } = await client.run(params.task, {
+          sessionId,
+          timeout: DEFAULT_TIMEOUT_MS,
+        });
 
-        // Track the session for cleanup
-        if (!getSession(sessionId)) {
+        const existingSession = getSession(sessionId);
+        if (!existingSession) {
           setSession({
             sessionId,
-            liveUrl: '',
-            createdAt: new Date().toISOString(),
-            lastTaskOutput: null,
+            createdAt: taskCreatedAt,
           });
         }
-        const stored = getSession(sessionId);
-        if (stored) stored.lastTaskOutput = output;
 
-        api.logger.info(`browser-use-agent: task ${status} (session: ${sessionId})`);
+        api.logger.info(`browser-use-agent: task ${taskStatus} (session: ${sessionId})`);
 
         return {
           content: [
             {
               type: 'text' as const,
               text: [
-                `Browser agent task ${status}.`,
+                `Browser agent task ${taskStatus}.`,
                 `Session ID: ${sessionId}`,
-                result.isSuccess === false
+                taskIsSuccess === false
                   ? 'Note: the agent reported the task was NOT successful.'
                   : '',
                 '',
-                output,
+                taskOutput,
               ]
                 .filter(Boolean)
                 .join('\n'),
@@ -106,10 +83,10 @@ export function registerRunTaskTool(
           ],
           details: {
             sessionId,
-            taskId: result.id,
-            status,
-            output,
-            isSuccess: result.isSuccess,
+            taskId,
+            status: taskStatus,
+            output: taskOutput,
+            isSuccess: taskIsSuccess,
           },
         };
       } catch (err) {
@@ -123,7 +100,7 @@ export function registerRunTaskTool(
             {
               type: 'text' as const,
               text: isTimeout
-                ? `Browser agent task timed out after ${params.timeout_minutes || 10} minutes. ` +
+                ? `Browser agent task timed out after ${DEFAULT_TASK_TIMEOUT_MINUTES} minutes. ` +
                   'The session may still be active — use browser_agent_stop to clean up.'
                 : `Browser agent error: ${errMsg}`,
             },
