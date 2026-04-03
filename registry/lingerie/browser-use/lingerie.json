@@ -1,45 +1,24 @@
 {
   "id": "browser-use",
-  "name": "Browser Use (CDP)",
-  "version": "1.0.0",
-  "description": "Cloud browser via CDP — connects OpenClaw to Browser Use for web browsing capabilities.",
-  "plugins": [],
+  "name": "Browser Use Agent",
+  "version": "1.1.0",
+  "description": "Cloud browser via AI browser agent — connects OpenClaw to Browser Use for web browsing capabilities.",
+  "plugins": [
+    {
+      "id": "browser-use-agent",
+      "spec": "@onfabric/browser-use-plugin",
+      "setupNotes": [
+        "Get your API key from https://cloud.browser-use.com/settings"
+      ]
+    }
+  ],
   "configSetup": {
     "configs": [
-      { "key": "browser.enabled", "value": true },
-      { "key": "browser.defaultProfile", "value": "browser-use" },
-      { "key": "browser.remoteCdpTimeoutMs", "value": 30000 },
-      { "key": "browser.remoteCdpHandshakeTimeoutMs", "value": 45000 },
       { "key": "tools.web.fetch.enabled", "value": true },
       { "key": "tools.web.search.enabled", "value": true },
       { "key": "tools.web.search.provider", "value": "duckduckgo" },
       { "key": "plugins.entries.duckduckgo.enabled", "value": true }
-    ],
-    "configPrefix": "browser.profiles.browser-use",
-    "params": {
-      "apiKey": {
-        "description": "Browser Use API key",
-        "required": true
-      },
-      "profileId": {
-        "description": "Browser Use profile ID (for persistent sessions)",
-        "required": false
-      }
-    },
-    "properties": {
-      "cdpUrl": {
-        "description": "Browser Use CDP URL",
-        "required": true,
-        "default": "wss://connect.browser-use.com",
-        "params": ["apiKey", "profileId"],
-        "build": "{value}?apiKey={apiKey}&profileId={profileId}&proxyCountryCode=uk&timeout=30"
-      },
-      "color": {
-        "description": "Profile display color",
-        "required": true,
-        "default": "#ff750e"
-      }
-    }
+    ]
   },
   "toolsSection": "TOOLS.md"
 }

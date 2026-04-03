@@ -1,0 +1,24 @@
+{
+  "id": "browser-use-agent",
+  "name": "Browser Use Agent",
+  "description": "Delegate browser tasks to Browser Use's cloud AI agent",
+  "configSchema": {
+    "type": "object",
+    "required": [],
+    "additionalProperties": false,
+    "properties": {
+      "apiKey": {
+        "type": "string",
+        "description": "Browser Use Cloud API key (bu_...)"
+      },
+      "profileId": {
+        "type": "string",
+        "description": "Browser profile to use"
+      },
+      "proxyCountryCode": {
+        "type": "string",
+        "description": "From which country to run the browser"
+      }
+    }
+  }
+}
