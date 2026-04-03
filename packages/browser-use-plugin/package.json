@@ -16,7 +16,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "bun build ./src/index.ts --outdir dist/ --target node"
+    "build": "bun build ./src/index.ts --outdir dist/ --external openclaw  --target node"
   },
   "peerDependencies": {
     "openclaw": ">=2026.1.29"
@@ -24,7 +24,7 @@
   "dependencies": {
     "@mariozechner/pi-agent-core": "^0.62.0",
     "@sinclair/typebox": "^0.34.48",
-    "browser-use-sdk": "^3.4.0"
+    "browser-use-sdk": "==3.4.0"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

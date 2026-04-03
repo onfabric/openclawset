@@ -56,7 +56,7 @@ export function registerRunTaskTool(
         const result = await client.run(params.task, {
           sessionId: params.session_id ?? undefined,
           sessionSettings: !params.session_id
-            ? { profileId, proxyCountryCode }
+            ? { profileId, proxyCountryCode: proxyCountryCode as 'uk', enableRecording: false }
             : undefined,
           timeout: timeoutMs,
         });
@@ -109,12 +109,9 @@ export function registerRunTaskTool(
         };
       } catch (err) {
         const errMsg = String(err);
-        const isTimeout =
-          errMsg.includes('timeout') || errMsg.includes('Timeout');
+        const isTimeout = errMsg.includes('timeout') || errMsg.includes('Timeout');
 
-        api.logger.error(
-          `browser-use-agent: ${isTimeout ? 'timed out' : 'error'}: ${errMsg}`,
-        );
+        api.logger.error(`browser-use-agent: ${isTimeout ? 'timed out' : 'error'}: ${errMsg}`);
 
         return {
           content: [

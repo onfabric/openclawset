@@ -6,6 +6,19 @@
     "type": "object",
     "required": [],
     "additionalProperties": false,
-    "properties": {}
+    "properties": {
+      "apiKey": {
+        "type": "string",
+        "description": "Browser Use Cloud API key (bu_...)"
+      },
+      "profileId": {
+        "type": "string",
+        "description": "Browser profile to use"
+      },
+      "proxyCountryCode": {
+        "type": "string",
+        "description": "From which country to run the browser"
+      }
+    }
   }
 }
