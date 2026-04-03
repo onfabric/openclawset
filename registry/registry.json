@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-04-01T22:32:57.586Z",
+  "generatedAt": "2026-04-03T10:24:37.389Z",
   "dresses": {
     "journaling-companion": {
       "name": "Journaling Companion",
@@ -57,6 +57,17 @@
       },
       "path": "dresses/tech-bro-digest"
     },
+    "personal-reminder": {
+      "name": "Personal Reminder",
+      "version": "1.0.0",
+      "description": "Schedule one-time or recurring reminders delivered via message.",
+      "requires": {
+        "lingerie": [
+          "waclaw"
+        ]
+      },
+      "path": "dresses/personal-reminder"
+    },
     "notetaker": {
       "name": "Notetaker",
       "version": "1.0.0",
@@ -78,17 +89,6 @@
         ]
       },
       "path": "dresses/fabric"
-    },
-    "personal-reminder": {
-      "name": "Personal Reminder",
-      "version": "1.0.0",
-      "description": "Schedule one-time or recurring reminders delivered via message.",
-      "requires": {
-        "lingerie": [
-          "waclaw"
-        ]
-      },
-      "path": "dresses/personal-reminder"
     }
   },
   "lingerie": {
@@ -98,17 +98,17 @@
       "description": "WhatsApp channel plugin via waclaw proxy — shared across dresses that need WhatsApp messaging.",
       "path": "lingerie/waclaw"
     },
+    "buclaw": {
+      "name": "Browser (buclaw)",
+      "version": "1.1.0",
+      "description": "Cloud browser via AI browser agent — connects OpenClaw to Browser Use for web browsing capabilities.",
+      "path": "lingerie/buclaw"
+    },
     "agentmail": {
       "name": "Email (AgentMail)",
       "version": "1.0.0",
       "description": "Email send/receive via AgentMail — gives OpenClaw its own email address.",
       "path": "lingerie/agentmail"
-    },
-    "browser-use": {
-      "name": "Browser Use (CDP)",
-      "version": "1.0.0",
-      "description": "Cloud browser via CDP — connects OpenClaw to Browser Use for web browsing capabilities.",
-      "path": "lingerie/browser-use"
     }
   },
   "personalities": {
