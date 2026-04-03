@@ -19,23 +19,21 @@
         "key": "tools.media.audio.models",
         "value": "[{\"provider\":\"openai\",\"model\":\"gpt-4o-mini-transcribe\"}]"
       },
-      { "key": "messages.tts.auto", "value": "tagged" },
-      { "key": "messages.tts.provider", "value": "openai" }
+      { "key": "messages.tts.auto", "value": "inbound" },
+      { "key": "messages.tts.provider", "value": "elevenlabs" },
+      { "key": "messages.tts.providers.elevenlabs.baseUrl", "value": "https://api.elevenlabs.io" },
+      { "key": "messages.tts.providers.elevenlabs.modelId", "value": "eleven_v3" },
+      { "key": "messages.tts.providers.elevenlabs.voiceSettings.speed", "value": 2.0 }
     ],
-    "configPrefix": "messages.tts.providers.openai",
+    "configPrefix": "messages.tts.providers.elevenlabs",
     "properties": {
-      "model": {
-        "description": "OpenAI TTS model",
+      "voiceId": {
+        "description": "ElevenLabs Voice Id (default: Jessica)",
         "required": true,
-        "default": "tts-1"
-      },
-      "voice": {
-        "description": "OpenAI TTS voice",
-        "required": true,
-        "default": "nova"
+        "default": "flHkNRp1BlvT73UL6gyz"
       },
       "apiKey": {
-        "description": "OpenAI API key for TTS",
+        "description": "ElevenLabs API key",
         "required": true
       }
     }
