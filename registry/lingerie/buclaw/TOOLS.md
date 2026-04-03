@@ -4,11 +4,26 @@ You have three tiers of web capability. Pick the lightest one that gets the job 
 
 1. **`web_fetch`** — Use directly in the main session. Best for fetching a known URL: reading an article, pulling a page's content, checking a status page. Fast and lightweight.
 2. **`web_search`** — Use directly in the main session. Best for quick lookups when you don't have a specific URL: finding facts, looking up current information, answering questions that need a search engine.
-3. **`browser_agent_run`** — **Never use directly in the main session.** Delegates an entire browser task to the Browser Use Agent. The agent autonomously navigates, clicks, fills forms, solves CAPTCHAs, and extracts data. Best for complex multi-step browser workflows where you can describe the goal and let the agent figure out the steps. **This blocks until the task completes** (may take several minutes), so it must be run from a sub-agent.
+3. **`browser_agent_run`** — **Never use directly in the main session.** Delegates an entire browser task to the Browser Use Agent. The agent autonomously navigates, clicks, fills forms, solves CAPTCHAs, and extracts data. **This blocks until the task completes** (may take several minutes), so it must be run from a sub-agent.
 
-### Authentication
+### When to use the browser agent
 
-The browser agent uses a saved browser profile and is **already authenticated** on configured sites. Do **not** attempt to log in, enter credentials, or handle login flows. If the agent reports that it is not logged in or encounters a login wall, immediately call `browser_agent_stop` and tell the user that the browser profile is not authenticated for that site.
+The browser agent is **slow and expensive**. It must only be used to **execute a specific, well-defined action** — never for exploration or research.
+
+**Do NOT** spawn the browser agent to:
+- Browse or explore products, restaurants, hotels, or any other category
+- Compare options or gather information
+- Search for something the user hasn't specifically identified yet
+
+**DO** spawn the browser agent to:
+- Purchase a specific product the user has already chosen (known item, size, quantity)
+- Book a reservation at a specific restaurant (known name, date, time, party size)
+- Complete a specific transaction or form submission where all details are decided
+
+**The correct workflow:**
+1. **If the user already provides a specific, actionable request** (e.g. "buy this book", "reserve a table at X for Friday at 8pm for 2") and all required details are present or can be trivially looked up — go straight to step 3.
+2. **Otherwise, explore first (main session)** — Use `web_search` and `web_fetch` to research, compare options, and understand what the user is looking for. Present findings to the user and narrow down to a specific choice.
+3. **Execute via browser agent (sub-agent)** — Once you have a specific, actionable task with all required details, spawn the browser sub-agent to carry it out.
 
 ### Delegating browser tasks to a sub-agent
 
@@ -34,9 +49,9 @@ When spawning a sub-agent for `browser_agent_run`, **always** include the follow
   - If all required fields are present, call `browser_agent_run` with the task description
     enriched with the guide's step-by-step instructions.
 - If no platform guide matches, proceed with `browser_agent_run` using your best judgment.
-- The browser is already authenticated — do NOT attempt to log in or enter credentials.
+- **Authentication:** The browser uses a saved profile and is already authenticated on configured
+  sites. Do NOT attempt to log in, enter credentials, or handle login flows. If the agent reports
+  it is not logged in or encounters a login wall, immediately call `browser_agent_stop` and report
+  that the browser profile is not authenticated for that site.
 - Always call `browser_agent_stop` when done with all tasks to free cloud resources.
-- If the agent reports it is not logged in or hits a login wall, immediately call
-  `browser_agent_stop` and report that the browser profile is not authenticated for that site.
-  Do NOT try to log in.
 ```
