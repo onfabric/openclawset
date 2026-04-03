@@ -13,10 +13,7 @@ const StopSessionParametersSchema = Type.Object({
   ),
 });
 
-export function registerStopSessionTool(
-  api: OpenClawPluginApi,
-  client: BrowserUse,
-): void {
+export function registerStopSessionTool(api: OpenClawPluginApi, client: BrowserUse): void {
   registerTool(api, {
     name: 'browser_agent_stop',
     label: 'Browser Agent — Stop Session',
@@ -48,9 +45,7 @@ export function registerStopSessionTool(
         } catch (err) {
           removeSession(sessionId);
           results.push({ sessionId, success: false, error: String(err) });
-          api.logger.warn(
-            `browser-use-agent: error stopping session ${sessionId}: ${String(err)}`,
-          );
+          api.logger.warn(`browser-use-agent: error stopping session ${sessionId}: ${String(err)}`);
         }
       }
 
