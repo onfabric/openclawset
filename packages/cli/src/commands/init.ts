@@ -114,7 +114,17 @@ export default class Init extends Command {
     // Write a clean HEARTBEAT.md only on first init (replace the noisy template).
     // On re-init, preserve the existing heartbeat so dress-contributed items aren't lost.
     if (!existsSync(paths.config)) {
-      await writeFile(ocPaths.heartbeat, '# Heartbeat checklist\n');
+      await writeFile(
+        ocPaths.heartbeat,
+        [
+          '# Heartbeat checklist',
+          '',
+          '- Occasionally (not every heartbeat), check what the user has been up to recently.',
+          '  If you spot something interesting or relevant, check in with the user to remind',
+          '  them that you are there to help.',
+          '',
+        ].join('\n'),
+      );
     }
 
     // Ensure tools.profile is 'full' so all plugins/tools are available
