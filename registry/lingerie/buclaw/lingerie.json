@@ -18,13 +18,13 @@
       { "key": "tools.web.search.enabled", "value": true },
       { "key": "tools.web.search.provider", "value": "exa" },
       { "key": "plugins.entries.exa.enabled", "value": true }
-    ]
-  },
-  "configPrefix": "plugins.entries.exa.config.webSearch",
-  "properties": {
-    "apiKey": {
-      "description": "Exa AI API key",
-      "required": true
+    ],
+    "configPrefix": "plugins.entries.exa.config.webSearch",
+    "properties": {
+      "apiKey": {
+        "description": "Exa AI API key",
+        "required": true
+      }
     }
   },
   "toolsSection": "TOOLS.md"
