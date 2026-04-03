@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 import { confirm, input } from '@inquirer/prompts';
 import { Command, Flags } from '@oclif/core';
 import chalk from 'chalk';
@@ -208,6 +209,20 @@ export abstract class BaseCommand extends Command {
       this.log(`  ${chalk.green('+')} skill: ${skillName}`);
     }
 
+    // Copy resource files
+    const installedResources: string[] = [];
+    if (uw.resources.length > 0) {
+      const resourceDir = join(this.openclawPaths.dresses, lingerieId);
+      for (const resourcePath of uw.resources) {
+        const content = await registry.getLingerieFileContent(lingerieId, resourcePath);
+        const dest = join(resourceDir, resourcePath);
+        await mkdir(dirname(dest), { recursive: true });
+        await writeFile(dest, content);
+        installedResources.push(resourcePath);
+      }
+      this.log(`  ${chalk.green('+')} resources: ${installedResources.length} file(s)`);
+    }
+
     // Inject tools section into TOOLS.md
     let toolsSectionInjected = false;
     if (uw.toolsSection) {
@@ -251,6 +266,7 @@ export abstract class BaseCommand extends Command {
         skills: uw.skills,
         installedSkills,
         toolsSectionInjected,
+        installedResources,
       },
     };
     await this.stateManager.save(state);

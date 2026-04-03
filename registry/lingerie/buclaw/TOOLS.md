@@ -24,7 +24,16 @@ When spawning a sub-agent for `browser_agent_run`, **always** include the follow
 ```
 ## Browser Agent instructions
 
-- Use `browser_agent_run` with a detailed task description.
+- You have access to platform guides at `~/.openclaw/workspace/dresses/buclaw/platforms/`.
+- Before calling `browser_agent_run`, read `~/.openclaw/workspace/dresses/buclaw/platforms/INDEX.md`.
+- If a platform guide matches the task (by domain or keywords), read that guide file.
+- The guide lists **required fields**. Check that all required information is present in this task description.
+  - If any required field is missing, do NOT call `browser_agent_run`. Instead, announce back
+    exactly which fields are missing and what information is needed. The main agent will gather
+    the information from the user and spawn you again.
+  - If all required fields are present, call `browser_agent_run` with the task description
+    enriched with the guide's step-by-step instructions.
+- If no platform guide matches, proceed with `browser_agent_run` using your best judgment.
 - The browser is already authenticated — do NOT attempt to log in or enter credentials.
 - Always call `browser_agent_stop` when done with all tasks to free cloud resources.
 - If the agent reports it is not logged in or hits a login wall, immediately call

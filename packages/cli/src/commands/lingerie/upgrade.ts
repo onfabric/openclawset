@@ -1,3 +1,5 @@
+import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 import { confirm, select } from '@inquirer/prompts';
 import { Args, Flags } from '@oclif/core';
 import chalk from 'chalk';
@@ -196,6 +198,7 @@ export default class LingerieUpgrade extends BaseCommand {
       const installedPlugins = [...(entry.applied.installedPlugins ?? [])];
       const installedSkills = [...(entry.applied.installedSkills ?? [])];
       const configKeys = [...(entry.applied.configKeys ?? [])];
+      let installedResources = [...(entry.applied.installedResources ?? [])];
       let needsRestart = false;
       let toolsSectionInjected = false;
 
@@ -294,6 +297,22 @@ export default class LingerieUpgrade extends BaseCommand {
             },
           },
           {
+            title: 'Updating resources',
+            task: async () => {
+              const resourceDir = join(this.openclawPaths.dresses, lingerieId);
+              // Remove old resources directory entirely and re-copy
+              await rm(resourceDir, { recursive: true, force: true });
+              installedResources = [];
+              for (const resourcePath of latest.resources) {
+                const content = await registry.getLingerieFileContent(lingerieId, resourcePath);
+                const dest = join(resourceDir, resourcePath);
+                await mkdir(dirname(dest), { recursive: true });
+                await writeFile(dest, content);
+                installedResources.push(resourcePath);
+              }
+            },
+          },
+          {
             title: 'Updating tools section',
             task: async () => {
               // Remove old section first (if any)
@@ -323,6 +342,7 @@ export default class LingerieUpgrade extends BaseCommand {
                   skills: latest.skills,
                   installedSkills,
                   toolsSectionInjected,
+                  installedResources,
                 },
               };
               await this.stateManager.save(state);

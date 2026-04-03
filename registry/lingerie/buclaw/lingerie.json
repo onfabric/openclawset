@@ -27,5 +27,9 @@
       "required": true
     }
   },
-  "toolsSection": "TOOLS.md"
+  "toolsSection": "TOOLS.md",
+  "resources": [
+    "platforms/INDEX.md",
+    "platforms/opentable.md"
+  ]
 }

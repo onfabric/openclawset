@@ -45,6 +45,8 @@ export const lingerieJsonSchema = z.object({
   skills: z.array(z.string()).default([]),
   /** Markdown injected into TOOLS.md on install, removed on uninstall. */
   toolsSection: z.string().optional(),
+  /** Files copied to ~/.openclaw/workspace/resources/<lingerieId>/ on install. */
+  resources: z.array(z.string()).default([]),
 });
 
 // ---------------------------------------------------------------------------

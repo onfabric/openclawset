@@ -1,3 +1,5 @@
+import { rm } from 'node:fs/promises';
+import { join } from 'node:path';
 import { confirm, select } from '@inquirer/prompts';
 import { Args, Flags } from '@oclif/core';
 import chalk from 'chalk';
@@ -86,6 +88,7 @@ export default class LingerieRemove extends BaseCommand {
     const pluginsToRemove = entry.applied.plugins.filter((p) => installedPluginSet.has(p));
     const pluginsRetained = entry.applied.plugins.filter((p) => !installedPluginSet.has(p));
     const skillsToRemove = entry.applied.installedSkills ?? [];
+    const resourcesToRemove = entry.applied.installedResources ?? [];
     const hasToolsSection = entry.applied.toolsSectionInjected ?? false;
 
     // Derive top-level config roots from the stored keys (e.g. "browser.enabled" → "browser")
@@ -106,6 +109,9 @@ export default class LingerieRemove extends BaseCommand {
     }
     for (const s of skillsToRemove) {
       this.log(`  ${chalk.red('-')} skill: ${s}`);
+    }
+    if (resourcesToRemove.length > 0) {
+      this.log(`  ${chalk.red('-')} resources: ${resourcesToRemove.length} file(s)`);
     }
     for (const k of configKeys) {
       this.log(`  ${chalk.red('-')} config: ${k}`);
@@ -168,6 +174,14 @@ export default class LingerieRemove extends BaseCommand {
                   // Skill may have been manually removed
                 }
               }
+            },
+          },
+          {
+            title: 'Removing resources',
+            skip: () => resourcesToRemove.length === 0,
+            task: async () => {
+              const resourceDir = join(this.openclawPaths.dresses, lingerieId);
+              await rm(resourceDir, { recursive: true, force: true });
             },
           },
           {

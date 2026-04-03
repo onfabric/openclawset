@@ -70,6 +70,7 @@ export const lingerieAppliedSchema = z.object({
   skills: z.array(z.string()).default([]),
   installedSkills: z.array(z.string()).default([]),
   toolsSectionInjected: z.boolean().default(false),
+  installedResources: z.array(z.string()).default([]),
 });
 
 export const lingerieEntrySchema = z.object({
