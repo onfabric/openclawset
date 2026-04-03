@@ -54,11 +54,16 @@ export function registerRunTaskTool(
       );
 
       try {
+        let sessionId = params.session_id;
+        if (!sessionId) {
+          const sessionResult = await client.sessions.create({
+            profileId,
+            proxyCountryCode,
+          });
+          sessionId = sessionResult.id;
+        }
         const result = await client.run(params.task, {
-          sessionId: params.session_id,
-          sessionSettings: !params.session_id
-            ? { profileId, proxyCountryCode, enableRecording: false }
-            : undefined,
+          sessionId,
           timeout: timeoutMs,
         });
 
@@ -67,7 +72,6 @@ export function registerRunTaskTool(
             ? result.output
             : (JSON.stringify(result.output) ?? '(no output)');
         const status = result.status ?? 'unknown';
-        const sessionId = result.sessionId;
 
         // Track the session for cleanup
         if (!getSession(sessionId)) {
