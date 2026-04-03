@@ -747,5 +747,4 @@ export default class DressUpgrade extends BaseCommand {
       this.log(`\n${chalk.green('✓')} Upgraded ${chalk.bold(dress.name)} to v${dress.version}!`);
     });
   }
-
 }

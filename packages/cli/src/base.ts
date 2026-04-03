@@ -221,7 +221,10 @@ export abstract class BaseCommand extends Command {
    * excluding the specified dress. Used to avoid removing shared resources.
    */
   protected collectOthersNeeds(
-    state: { dresses: Record<string, { applied: { plugins: string[]; skills: string[] } }>; lingerie: Record<string, { applied: { plugins: string[] } }> },
+    state: {
+      dresses: Record<string, { applied: { plugins: string[]; skills: string[] } }>;
+      lingerie: Record<string, { applied: { plugins: string[] } }>;
+    },
     excludeId: string,
   ): { plugins: Set<string>; skills: Set<string> } {
     const plugins = new Set<string>();
