@@ -3,9 +3,17 @@ name: Deep user profile
 description: Analyses recent interactions across platforms to build and update a detailed user profile.
 ---
 
-Build a rich profile of the user by processing each topic below one at a time. For each topic, run the following three-step pipeline before moving on to the next.
+## Step 1 — Discover interaction types with new data
 
-## Topics
+Call `fabric_list_interaction_types` to get the full list of available types. Then, for each type, call `fabric_list_interactions` filtered to that type for the period since the last profile update (check the bottom of USER.md for the `last-updated` date; if missing, use the last 7 days). Keep a running list of which types returned new interactions and which came back empty.
+
+If **no type** returned new interactions, stop here — the profile is already up to date.
+
+## Step 2 — Process new interactions by type
+
+For each interaction type that had new data, go through the interactions and extract any facts relevant to the profile topics below. Paginate if results look partial. Build up a single set of new findings across all types before moving to Step 3.
+
+### Profile topics
 
 - Relationships — family, romantic partner, close friends, recurring names or people mentioned across platforms
 - Work & career — job, company, industry, professional interests, side projects, tools used
@@ -18,28 +26,16 @@ Build a rich profile of the user by processing each topic below one at a time. F
 - Shopping & brands — products researched or bought, recurring brands, style preferences
 - Values & beliefs — political or social interests, causes, recurring themes in content consumed
 
----
+## Step 3 — Distil and update the profile
 
-## Three-step pipeline (repeat for each topic)
-
-### Step 1 — Review existing profile
-
-Read the current USER.md and extract what is already known about this topic. Hold that context in mind throughout the rest of the pipeline so that new findings are interpreted against it, not in isolation.
-
-### Step 2 — Gather interactions
-
-Call `fabric_list_interaction_types` to see what platforms are available. Then call `fabric_list_interactions` across a broad date range, filtering by interaction types most likely to contain signal for this topic. Paginate iteratively if any response looks partial. For topics with rich results, narrow the date window and try different interaction types to get a fuller picture.
-
-### Step 3 — Distil and update
-
-Think critically about what the gathered interactions actually reveal. The goal is not to record everything — it is to extract a genuine understanding of the user. Apply these filters:
+Read USER.md and compare with the new findings. Think critically about what the new interactions actually reveal. Apply these filters:
 
 - **Prefer patterns over isolated instances.** Only include something if it recurs across time or across multiple sources.
 - **Keep specifics that matter.** Key people (by name), specific places, recurring destinations, and meaningful activities are worth recording precisely — they make future searches more effective.
 - **Signal vs. noise.** A one-off search is noise. A name that appears repeatedly across months, or a place the user has visited multiple times, is signal.
 - **The profile is an entry point.** Write it so that reading it immediately suggests where to look next — not so that it replaces looking.
 
-Merge what you found with what was already in the profile. Update USER.md: add new facts, strengthen existing ones with new evidence, and remove or flag anything the new information contradicts. Note uncertainty where evidence is thin (e.g. "appears to follow football, based on a few searches").
+Merge new findings into the profile. Update USER.md: add new facts, strengthen existing ones with new evidence, and remove or flag anything the new information contradicts. Note uncertainty where evidence is thin (e.g. "appears to follow football, based on a few searches"). Update the `last-updated` date at the bottom of USER.md.
 
 ---
 
