@@ -17,6 +17,14 @@ const RunTaskParametersSchema = Type.Object({
       'A detailed description of the browser task for the AI agent to perform. ' +
       'Be specific: include URLs, what to click, what data to extract, etc.',
   }),
+  session_id: Type.Optional(
+    Type.String({
+      description:
+        'An existing session ID to continue a previous browser session (follow-up task). ' +
+        'The browser state (page, cookies, tabs) is preserved from the prior task. ' +
+        'If omitted, a new session is created.',
+    }),
+  ),
 });
 
 export function registerRunTaskTool(
@@ -35,13 +43,15 @@ export function registerRunTaskTool(
       'Returns the agent output.',
     parameters: RunTaskParametersSchema,
     async execute(_id, params) {
-      api.logger.info('buclaw: starting new browser agent task...');
+      api.logger.info(
+        params.session_id
+          ? `buclaw: continuing browser task on session ${params.session_id}...`
+          : 'buclaw: starting new browser agent task...',
+      );
 
       try {
-        const { id: sessionId } = await client.sessions.create({
-          profileId,
-          proxyCountryCode,
-        });
+        const sessionId =
+          params.session_id ?? (await client.sessions.create({ profileId, proxyCountryCode })).id;
 
         const {
           id: taskId,
