@@ -3,6 +3,7 @@ import { execute } from '@oclif/core';
 import DiffCommand from '#commands/diff.ts';
 import DoctorCommand from '#commands/doctor.ts';
 import DressAddCommand from '#commands/dress/add.ts';
+import DressInfoCommand from '#commands/dress/info.ts';
 import DressListCommand from '#commands/dress/index.ts';
 import DressParamsCommand from '#commands/dress/params.ts';
 import DressRemoveCommand from '#commands/dress/remove.ts';
@@ -10,6 +11,7 @@ import DressUpdateCommand from '#commands/dress/update.ts';
 import DressUpgradeCommand from '#commands/dress/upgrade.ts';
 import InitCommand from '#commands/init.ts';
 import LingerieAddCommand from '#commands/lingerie/add.ts';
+import LingerieInfoCommand from '#commands/lingerie/info.ts';
 import LingerieListCommand from '#commands/lingerie/index.ts';
 import LingerieRemoveCommand from '#commands/lingerie/remove.ts';
 import LingerieUpdateCommand from '#commands/lingerie/update.ts';
@@ -29,6 +31,7 @@ export const COMMANDS = {
   doctor: DoctorCommand,
   dress: DressListCommand,
   'dress:add': DressAddCommand,
+  'dress:info': DressInfoCommand,
   'dress:params': DressParamsCommand,
   'dress:remove': DressRemoveCommand,
   'dress:update': DressUpdateCommand,
@@ -36,6 +39,7 @@ export const COMMANDS = {
   init: InitCommand,
   lingerie: LingerieListCommand,
   'lingerie:add': LingerieAddCommand,
+  'lingerie:info': LingerieInfoCommand,
   'lingerie:remove': LingerieRemoveCommand,
   'lingerie:update': LingerieUpdateCommand,
   'lingerie:upgrade': LingerieUpgradeCommand,

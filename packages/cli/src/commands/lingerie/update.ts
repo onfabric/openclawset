@@ -1,9 +1,10 @@
-import { confirm, input, select } from '@inquirer/prompts';
+import { confirm, select } from '#lib/prompt.ts';
 import { Args, Flags } from '@oclif/core';
 import chalk from 'chalk';
 import { Listr } from 'listr2';
 import { BaseCommand } from '#base.ts';
 import type { LingerieJson } from '#core/index.ts';
+import { collectLingerieConfig } from '#lib/lingerie-config.ts';
 import { createRegistryProvider } from '#lib/registry.ts';
 
 export default class LingerieUpdate extends BaseCommand {
@@ -11,12 +12,12 @@ export default class LingerieUpdate extends BaseCommand {
 
   static override description =
     'Re-configure an installed lingerie without removing it. ' +
-    'Prompts for new values for each config property, showing current values as defaults. ' +
+    'Prompts for new values for each config property (with -i), showing current values as defaults. ' +
     'Restarts the gateway after applying changes.';
 
   static override examples = [
-    '<%= config.bin %> lingerie update waclaw',
-    '<%= config.bin %> lingerie update',
+    '<%= config.bin %> lingerie update waclaw --config \'{"api_key":"sk-new"}\'',
+    '<%= config.bin %> lingerie update waclaw -i',
     '<%= config.bin %> lingerie update waclaw --dry-run',
   ];
 
@@ -37,6 +38,9 @@ export default class LingerieUpdate extends BaseCommand {
       char: 'y',
       description: 'Skip confirmation prompts',
       default: false,
+    }),
+    config: Flags.string({
+      description: 'Config values as JSON: {"paramOrPropertyId": "value"}',
     }),
   };
 
@@ -103,48 +107,15 @@ export default class LingerieUpdate extends BaseCommand {
 
     this.log(`\n${chalk.bold(`Updating ${uw.name} config...`)}\n`);
 
-    // Collect param answers (prompt-only inputs used in build templates)
-    const answers: Record<string, string> = {};
-    for (const [id, param] of Object.entries(params)) {
-      const suffix = param.required ? '' : ' (optional)';
-      const value = await input({
-        message: `  ${param.description}${suffix}:`,
-        default: param.default,
-      });
-      if (!value && param.required) {
-        this.error(`Required param "${id}" was not provided.`);
-      }
-      if (value) answers[id] = value;
-    }
+    const presetConfig = flags.config
+      ? (JSON.parse(flags.config) as Record<string, string>)
+      : undefined;
 
-    // Collect new property values
-    const newValues: Record<string, string> = {};
-    for (const [key, prop] of Object.entries(properties)) {
-      const suffix = prop.required ? '' : ' (optional)';
-      const currentDefault = currentValues[key] ?? prop.default;
-      const value = await input({
-        message: `  ${prop.description}${suffix}:`,
-        default: currentDefault,
-      });
-      if (!value && prop.required) {
-        this.error(`Required config "${key}" was not provided.`);
-      }
-      if (!value) continue;
-
-      if (prop.build) {
-        let built = prop.build.replace('{value}', value);
-        for (const paramId of prop.params) {
-          built = built.replace(`{${paramId}}`, answers[paramId] ?? '');
-        }
-        // Clean up empty query params
-        built = built.replaceAll(/[&?]\w+=(?=&)/g, '');
-        built = built.replaceAll(/[&?]\w+=$/g, '');
-        built = built.replace('?&', '?');
-        newValues[key] = built;
-      } else {
-        newValues[key] = value;
-      }
-    }
+    const { configValues: newValues } = await collectLingerieConfig(params, properties, {
+      preset: presetConfig,
+      currentValues,
+      onError: (msg) => this.error(msg),
+    });
 
     // Compute changes
     const changes: string[] = [];

@@ -1,4 +1,4 @@
-import { select } from '@inquirer/prompts';
+import { select } from '#lib/prompt.ts';
 import { Args, Flags } from '@oclif/core';
 import chalk from 'chalk';
 import { BaseCommand } from '#base.ts';
@@ -31,6 +31,9 @@ export default class LingerieAdd extends BaseCommand {
       char: 'y',
       description: 'Skip confirmation prompts',
       default: false,
+    }),
+    config: Flags.string({
+      description: 'Config values as JSON: {"paramOrPropertyId": "value"}',
     }),
   };
 
@@ -112,7 +115,10 @@ export default class LingerieAdd extends BaseCommand {
     if (await this.confirmOrAbort(flags, 'Proceed?')) return;
 
     await this.withAtomicOp(async () => {
-      await this.installLingerie(registry, lingerieId!, uw, state);
+      const presetConfig = flags.config
+        ? (JSON.parse(flags.config) as Record<string, string>)
+        : undefined;
+      await this.installLingerie(registry, lingerieId!, uw, state, presetConfig);
 
       const commitParts: string[] = [];
       if (uw.plugins.length > 0) {

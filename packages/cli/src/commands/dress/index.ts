@@ -1,4 +1,4 @@
-import { select } from '@inquirer/prompts';
+import { select } from '#lib/prompt.ts';
 import { Flags } from '@oclif/core';
 import chalk from 'chalk';
 import { BaseCommand } from '#base.ts';
