@@ -17,4 +17,5 @@ If no platform matches, proceed with `browser_agent_run` using your best judgmen
 
 | Platform | File | Domains | Keywords |
 |----------|------|---------|----------|
+| Amazon | amazon.md | amazon.co.uk | buy, purchase, order, amazon, basket, checkout |
 | OpenTable | opentable.md | opentable.co.uk | book, reserve, reservation, restaurant, table, opentable, dinner |

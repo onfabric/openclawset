@@ -1,13 +1,7 @@
 ---
 
-name: OpenTable Booking description: Book restaurant tables in London on OpenTable. domains: \[opentable.co.uk\] keywords: \[book, reserve, reservation, restaurant, table, opentable, dinner\] required_fields:
-
-- name: restaurant description: Restaurant name
-- name: date description: Date of the reservation
-- name: time description: Preferred time
-- name: party_size description: Number of guests optional_fields:
-- name: seating_preference description: "Seating preference (default: standard)"
-- name: special_request description: "Special request text (default: none)"
+name: OpenTable Booking
+description: Book restaurant tables in London on OpenTable.
 
 ---
 
