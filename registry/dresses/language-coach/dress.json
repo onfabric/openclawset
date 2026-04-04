@@ -1,0 +1,59 @@
+{
+  "id": "language-coach",
+  "name": "Language Coach",
+  "version": "1.0.0",
+  "description": "Daily language learning with personalized sentences and surprise insights.",
+
+  "requires": {
+    "lingerie": ["waclaw"]
+  },
+
+  "crons": [
+    {
+      "id": "daily-sentence",
+      "name": "Daily sentence",
+      "defaults": {
+        "time": "09:00"
+      }
+    }
+  ],
+
+  "skills": {
+    "daily-sentence": {
+      "trigger": { "type": "cron", "cronId": "daily-sentence" },
+      "params": {
+        "language": {
+          "description": "Target language to learn (e.g., Spanish, Japanese, French)",
+          "type": "string",
+          "default": "Italian"
+        },
+        "level": {
+          "description": "Proficiency level (beginner, intermediate, advanced)",
+          "type": "string",
+          "default": "beginner"
+        }
+      }
+    },
+    "language-surprise": {
+      "trigger": {
+        "type": "heartbeat",
+        "description": "At a random moment during the day, surprise the user with a language insight — a useful phrase, cultural note, or grammar tip in the target language"
+      },
+      "params": {
+        "language": {
+          "description": "Target language to learn (e.g., Spanish, Japanese, French)",
+          "type": "string",
+          "default": "Italian"
+        },
+        "level": {
+          "description": "Proficiency level (beginner, intermediate, advanced)",
+          "type": "string",
+          "default": "beginner"
+        }
+      }
+    }
+  },
+
+  "dailyMemorySection": "Language",
+  "workspace": ["sentences-log.md"]
+}
