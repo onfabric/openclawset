@@ -57,6 +57,17 @@
       },
       "path": "dresses/notetaker"
     },
+    "language-coach": {
+      "name": "Language Coach",
+      "version": "1.0.0",
+      "description": "Daily language learning with personalized sentences and surprise insights.",
+      "requires": {
+        "lingerie": [
+          "waclaw"
+        ]
+      },
+      "path": "dresses/language-coach"
+    },
     "fabric": {
       "name": "Fabric Sync",
       "version": "2.0.0",
