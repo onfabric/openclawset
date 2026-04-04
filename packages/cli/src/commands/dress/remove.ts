@@ -12,8 +12,8 @@ export default class DressRemove extends BaseCommand {
   static override summary = 'Deactivate a dress and remove its config (data persists)';
 
   static override examples = [
-    '<%= config.bin %> dress remove fitness-coach',
-    '<%= config.bin %> dress remove fitness-coach --dry-run',
+    '<%= config.bin %> dress remove journaling-companion',
+    '<%= config.bin %> dress remove journaling-companion --dry-run',
   ];
 
   static override args = {

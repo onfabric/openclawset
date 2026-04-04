@@ -35,7 +35,7 @@ export default class DressAdd extends BaseCommand {
   static override summary = 'Install and activate a dress';
 
   static override examples = [
-    '<%= config.bin %> dress add fitness-coach',
+    '<%= config.bin %> dress add journaling-companion',
     '<%= config.bin %> dress add tech-bro-digest --dry-run',
   ];
 

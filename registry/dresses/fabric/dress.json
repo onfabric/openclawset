@@ -1,8 +1,8 @@
 {
   "id": "fabric",
-  "name": "Fabric Memory",
-  "version": "1.0.0",
-  "description": "Portable AI memory powered by Fabric — proactive check-ins, memory retrieval, and user profiling.",
+  "name": "Fabric Sync",
+  "version": "2.0.0",
+  "description": "Sync interactions from various platforms via Fabric — proactive check-ins and user profiling.",
 
   "requires": {
     "lingerie": ["waclaw"],
@@ -36,10 +36,10 @@
         "description": "Proactively check in with the user when there is something worth discussing"
       }
     },
-    "retrieve-memories": {
+    "retrieve-interactions": {
       "trigger": {
         "type": "user",
-        "description": "User discusses a topic that could benefit from personalised context from their history"
+        "description": "User discusses a topic that could benefit from context from their recent activity across platforms"
       }
     }
   },

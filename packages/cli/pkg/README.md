@@ -8,9 +8,9 @@ A **dress** bundles everything OpenClaw needs for a specific job — skills, cro
 
 ```bash
 clawtique init
-clawtique dress add fitness-coach
+clawtique dress add journaling-companion
 clawtique status
-clawtique dress remove fitness-coach
+clawtique dress remove journaling-companion
 ```
 
 ## How it works

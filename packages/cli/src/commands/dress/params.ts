@@ -10,7 +10,7 @@ export default class DressParams extends BaseCommand {
   static override summary = 'View or update params for an active dress';
 
   static override examples = [
-    '<%= config.bin %> dress params fitness-coach',
+    '<%= config.bin %> dress params journaling-companion',
     '<%= config.bin %> dress params tech-bro-digest --set tech-bro-digest.sources="Hacker News, Reddit"',
   ];
 

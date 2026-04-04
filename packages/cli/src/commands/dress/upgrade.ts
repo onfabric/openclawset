@@ -36,9 +36,9 @@ export default class DressUpgrade extends BaseCommand {
     'added/removed skills, plugins, and crons.';
 
   static override examples = [
-    '<%= config.bin %> dress upgrade fitness-coach',
+    '<%= config.bin %> dress upgrade journaling-companion',
     '<%= config.bin %> dress upgrade --check',
-    '<%= config.bin %> dress upgrade fitness-coach --dry-run',
+    '<%= config.bin %> dress upgrade journaling-companion --dry-run',
   ];
 
   static override args = {

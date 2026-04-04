@@ -24,28 +24,6 @@
       },
       "path": "dresses/sleeping-coach"
     },
-    "fitness-coach": {
-      "name": "Fitness Coach",
-      "version": "2.0.0",
-      "description": "Sends workout schedule and collects post-training feedback.",
-      "requires": {
-        "lingerie": [
-          "waclaw"
-        ]
-      },
-      "path": "dresses/fitness-coach"
-    },
-    "daily-reflection": {
-      "name": "Daily Reflection",
-      "version": "1.0.0",
-      "description": "End-of-day reflection — capture what mattered and set tomorrow's intentions.",
-      "requires": {
-        "lingerie": [
-          "waclaw"
-        ]
-      },
-      "path": "dresses/daily-reflection"
-    },
     "tech-bro-digest": {
       "name": "Tech Bro Digest",
       "version": "1.0.0",
@@ -79,10 +57,21 @@
       },
       "path": "dresses/notetaker"
     },
-    "fabric": {
-      "name": "Fabric Memory",
+    "language-coach": {
+      "name": "Language Coach",
       "version": "1.0.0",
-      "description": "Portable AI memory powered by Fabric — proactive check-ins, memory retrieval, and user profiling.",
+      "description": "Daily language learning with personalized sentences and surprise insights.",
+      "requires": {
+        "lingerie": [
+          "waclaw"
+        ]
+      },
+      "path": "dresses/language-coach"
+    },
+    "fabric": {
+      "name": "Fabric Sync",
+      "version": "2.0.0",
+      "description": "Sync interactions from various platforms via Fabric — proactive check-ins and user profiling.",
       "requires": {
         "lingerie": [
           "waclaw"

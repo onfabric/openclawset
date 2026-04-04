@@ -34,9 +34,8 @@ export default class DressUpdate extends BaseCommand {
     'and updates crons in OpenClaw atomically.';
 
   static override examples = [
-    '<%= config.bin %> dress update fitness-coach',
-    '<%= config.bin %> dress update fitness-coach --schedules \'{"workout-schedule":{"time":"07:00","days":["mon","wed","fri"]}}\'',
-    '<%= config.bin %> dress update fitness-coach --params \'{"workout-schedule":{"muscleGroup":"legs"}}\'',
+    '<%= config.bin %> dress update journaling-companion',
+    '<%= config.bin %> dress update journaling-companion --schedules \'{"journaling-prompt":{"time":"10:00","days":["mon","wed","fri"]}}\'',
   ];
 
   static override args = {

@@ -1123,13 +1123,13 @@
     // ═══ DRESSES ═══
     const DRESSES = [
       {
-        id: 'fitness-coach', name: 'Fitness Coach', version: '1.0.0',
-        previewClothes: ['headband', 'sneakers', 'watch'],
+        id: 'journaling-companion', name: 'Journaling Companion', version: '1.0.0',
+        previewClothes: ['glasses', 'scarf', 'watch'],
         installLines: [
-          { text: '  + skill: workout-planner', cloth: 'headband', color: '#a78bfa' },
-          { text: '  + cron: Daily workout (0 8 * * 1-5 UTC)', cloth: 'sneakers', color: '#60a5fa' },
-          { text: '  + memory: ## Fitness', cloth: 'watch', color: '#fbbf24' },
-          { text: '  + guide: dresses/fitness-coach/GUIDE.md', cloth: null, color: '#34d399' },
+          { text: '  + skill: journaling-prompt', cloth: 'glasses', color: '#a78bfa' },
+          { text: '  + cron: Photo prompt (random)', cloth: 'scarf', color: '#60a5fa' },
+          { text: '  + memory: ## Journal', cloth: 'watch', color: '#fbbf24' },
+          { text: '  + guide: dresses/journaling-companion/GUIDE.md', cloth: null, color: '#34d399' },
         ],
       },
       {
@@ -1423,12 +1423,11 @@
         command: (slug) => `clawtique dress add ${slug}`,
         items: {
           "sleeping-coach": { name: "Sleeping Coach", version: "1.0.0", description: "Sleep coaching powered by Oura Ring — morning reports and evening wind-down advice.", path: "dresses/sleeping-coach" },
-          "fitness-coach": { name: "Fitness Coach", version: "2.0.0", description: "Sends workout schedule and collects post-training feedback.", path: "dresses/fitness-coach" },
           "journaling-companion": { name: "Journaling Companion", version: "1.0.0", description: "Surprise photo prompts at random times — helps you stay mindful and lets the agent get to know you better.", path: "dresses/journaling-companion" },
-          "daily-reflection": { name: "Daily Reflection", version: "1.0.0", description: "End-of-day reflection — capture what mattered and set tomorrow's intentions.", path: "dresses/daily-reflection" },
           "tech-bro-digest": { name: "Tech Bro Digest", version: "1.0.0", description: "Daily digest of tech news from configurable sources and topics.", path: "dresses/tech-bro-digest" },
           "notetaker": { name: "Notetaker", version: "1.0.0", description: "Capture thoughts, links, and ideas — get the most relevant one surfaced daily.", path: "dresses/notetaker" },
-          "fabric": { name: "Fabric Memory", version: "1.0.0", description: "Portable AI memory powered by Fabric — proactive check-ins, memory retrieval, and user profiling.", path: "dresses/fabric" },
+          "language-coach": { name: "Language Coach", version: "1.0.0", description: "Daily language learning with personalized sentences and surprise insights.", path: "dresses/language-coach" },
+          "fabric": { name: "Fabric Sync", version: "2.0.0", description: "Sync interactions from various platforms via Fabric — proactive check-ins and user profiling.", path: "dresses/fabric" },
           "personal-reminder": { name: "Personal Reminder", version: "1.0.0", description: "Schedule one-time or recurring reminders delivered via message.", path: "dresses/personal-reminder" }
         }
       },
