@@ -1,12 +1,12 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
-import { select } from '@inquirer/prompts';
 import { Args, Flags } from '@oclif/core';
 import chalk from 'chalk';
 import { Listr } from 'listr2';
 import { BaseCommand } from '#base.ts';
 import type { LingerieJson } from '#core/index.ts';
 import { injectToolsSection, removeToolsSection } from '#core/index.ts';
+import { select } from '#lib/prompt.ts';
 import { createRegistryProvider } from '#lib/registry.ts';
 
 export default class LingerieUpgrade extends BaseCommand {

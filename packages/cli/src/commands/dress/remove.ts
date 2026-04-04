@@ -1,12 +1,12 @@
 import { existsSync } from 'node:fs';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { confirm, select } from '@inquirer/prompts';
 import { Args, Flags } from '@oclif/core';
 import chalk from 'chalk';
 import { Listr } from 'listr2';
 import { BaseCommand } from '#base.ts';
 import { INITIAL_DRESSES_MD, removeSection, type StateFile } from '#core/index.ts';
+import { confirm, select } from '#lib/prompt.ts';
 
 export default class DressRemove extends BaseCommand {
   static override summary = 'Deactivate a dress and remove its config (data persists)';

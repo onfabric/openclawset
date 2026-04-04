@@ -2,7 +2,6 @@ import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
-import { confirm as confirmPrompt, input } from '@inquirer/prompts';
 import { Command, Flags } from '@oclif/core';
 import chalk from 'chalk';
 import { Listr } from 'listr2';
@@ -10,6 +9,7 @@ import type { ClawtiqueConfig, LingerieJson, PluginDef, StateFile } from '#core/
 import { injectToolsSection } from '#core/index.ts';
 import { clawtiqueConfigSchema } from '#core/schemas/state.ts';
 import { GitManager } from '#lib/git.ts';
+import { collectLingerieConfig } from '#lib/lingerie-config.ts';
 import { LocalOpenClawDriver } from '#lib/openclaw.ts';
 import {
   type ClawtiquePaths,
@@ -17,6 +17,7 @@ import {
   getOpenClawPaths,
   type OpenClawPaths,
 } from '#lib/paths.ts';
+import { confirm as confirmPrompt, input, setInteractive } from '#lib/prompt.ts';
 import type { RegistryProvider } from '#lib/registry.ts';
 import { StateManager } from '#lib/state.ts';
 
@@ -25,6 +26,11 @@ export abstract class BaseCommand extends Command {
     'clawtique-dir': Flags.string({
       description: 'Path to clawtique directory',
       env: 'CLAWTIQUE_DIR',
+    }),
+    interactive: Flags.boolean({
+      char: 'i',
+      description: 'Enable interactive prompts (required for pickers and config wizards)',
+      default: false,
     }),
   };
 
@@ -36,6 +42,7 @@ export abstract class BaseCommand extends Command {
 
   protected async loadConfig(): Promise<ClawtiqueConfig> {
     const { flags } = await this.parse(this.constructor as typeof BaseCommand);
+    setInteractive(flags.interactive);
     this.clawtiquePaths = getClawtiquePaths(flags['clawtique-dir']);
 
     if (!existsSync(this.clawtiquePaths.config)) {
@@ -62,7 +69,11 @@ export abstract class BaseCommand extends Command {
    * @param failOnSetupError — if true, `this.error()` on non-zero exit;
    *   if false, prompt user to confirm whether setup succeeded.
    */
-  protected async setupPlugin(plugin: PluginDef, failOnSetupError = false): Promise<void> {
+  protected async setupPlugin(
+    plugin: PluginDef,
+    failOnSetupError = false,
+    presetConfig?: Record<string, string>,
+  ): Promise<void> {
     if (plugin.setupNotes.length > 0) {
       this.log('');
       for (const note of plugin.setupNotes) {
@@ -98,7 +109,14 @@ export abstract class BaseCommand extends Command {
           const isRequired = schema.required.includes(key);
           const label = prop.description || key;
           const suffix = isRequired ? '' : ' (optional)';
-          const value = await input({ message: `${label}${suffix}:` });
+
+          let value: string;
+          if (presetConfig && key in presetConfig) {
+            value = presetConfig[key]!;
+          } else {
+            value = await input({ message: `${label}${suffix}:` });
+          }
+
           if (value) {
             await this.openclawDriver.configSet(`${schema.configPrefix}.${key}`, value);
           } else if (isRequired) {
@@ -273,6 +291,7 @@ export abstract class BaseCommand extends Command {
     lingerieId: string,
     uw: LingerieJson,
     state: StateFile,
+    presetConfig?: Record<string, string>,
   ): Promise<void> {
     const installedPlugins: string[] = [];
 
@@ -286,10 +305,10 @@ export abstract class BaseCommand extends Command {
       await this.openclawDriver.pluginInstall(plugin.spec);
       installedPlugins.push(plugin.id);
 
-      await this.setupPlugin(plugin, true);
+      await this.setupPlugin(plugin, true, presetConfig);
     }
 
-    // Process configSetup — set static configs and prompt for properties
+    // Process configSetup — set static configs and collect param/property values
     const configKeys: string[] = [];
     if (uw.configSetup) {
       for (const cfg of uw.configSetup.configs) {
@@ -302,56 +321,16 @@ export abstract class BaseCommand extends Command {
       const hasProperties = Object.keys(properties).length > 0;
 
       if (configPrefix && (hasParams || hasProperties)) {
-        this.log(`\n${chalk.bold(`Configuring ${uw.name}...`)}\n`);
-
-        // Collect param answers (prompt-only inputs, not stored in config)
-        const answers: Record<string, string> = {};
-        for (const [id, param] of Object.entries(params)) {
-          const suffix = param.required ? '' : ' (optional)';
-          const value = await input({
-            message: `  ${param.description}${suffix}:`,
-            default: param.default,
-          });
-
-          if (!value && param.required) {
-            this.error(`Required param "${id}" was not provided.`);
-          }
-
-          if (value) answers[id] = value;
+        if (!presetConfig) {
+          this.log(`\n${chalk.bold(`Configuring ${uw.name}...`)}\n`);
         }
 
-        // Collect property values (these become config keys)
-        const obj: Record<string, string> = {};
-        for (const [key, prop] of Object.entries(properties)) {
-          const suffix = prop.required ? '' : ' (optional)';
-          const value = await input({
-            message: `  ${prop.description}${suffix}:`,
-            default: prop.default,
-          });
+        const { configValues } = await collectLingerieConfig(params, properties, {
+          preset: presetConfig,
+          onError: (msg) => this.error(msg),
+        });
 
-          if (!value && prop.required) {
-            this.error(`Required config "${key}" was not provided.`);
-          }
-
-          if (!value) continue;
-
-          if (prop.build) {
-            // Build the final value by substituting {value} and {paramId}
-            let built = prop.build.replace('{value}', value);
-            for (const paramId of prop.params) {
-              built = built.replace(`{${paramId}}`, answers[paramId] ?? '');
-            }
-            // Clean up empty query params
-            built = built.replaceAll(/[&?]\w+=(?=&)/g, '');
-            built = built.replaceAll(/[&?]\w+=$/g, '');
-            built = built.replace('?&', '?');
-            obj[key] = built;
-          } else {
-            obj[key] = value;
-          }
-        }
-
-        for (const [k, v] of Object.entries(obj)) {
+        for (const [k, v] of Object.entries(configValues)) {
           const fullKey = `${configPrefix}.${k}`;
           await this.openclawDriver.configSet(fullKey, v);
           configKeys.push(fullKey);

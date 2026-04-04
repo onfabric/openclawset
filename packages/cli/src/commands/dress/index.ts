@@ -1,7 +1,7 @@
-import { select } from '@inquirer/prompts';
 import { Flags } from '@oclif/core';
 import chalk from 'chalk';
 import { BaseCommand } from '#base.ts';
+import { select } from '#lib/prompt.ts';
 import { createRegistryProvider } from '#lib/registry.ts';
 
 export default class DressList extends BaseCommand {

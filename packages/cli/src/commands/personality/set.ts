@@ -1,13 +1,13 @@
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { select } from '@inquirer/prompts';
 import { Args, Flags } from '@oclif/core';
 import chalk from 'chalk';
 import { BaseCommand } from '#base.ts';
 import type { PersonalityFile, ResolvedPersonality } from '#core/index.ts';
 import { ensureDressesReference, PERSONALITY_FILES } from '#core/index.ts';
 import { compilePersonality } from '#lib/compile.ts';
+import { select } from '#lib/prompt.ts';
 import { createRegistryProvider } from '#lib/registry.ts';
 
 const DEFAULT_PERSONALITY_ID = 'default';
